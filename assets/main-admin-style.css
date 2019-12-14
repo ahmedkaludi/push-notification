@@ -1,0 +1,49 @@
+.push_notification-settings-wrap h1.page-title{
+	padding-left: 20px;
+	padding-right: 20px;
+}
+.push_notification-settings-wrap .push_notification-settings-form{
+	padding-left: 20px;
+	padding-right: 20px;
+}
+ section.pn_general_wrapper{
+	background-color: #fff;
+	height:100%;	
+}
+.pn_general_wrapper{position: relative;padding: 20px;}
+.pn_general_wrapper button i{
+	line-height: 26px;
+    padding-right: 3px;
+}
+.pn_general_wrapper .action-wrapper{
+	position: absolute;
+	right: 20px;
+}
+.pn-card-wrapper{
+
+}
+.pn-card-wrapper .pn-card{
+	background: #f1f1f1;
+	width: 20%;
+	display: inline-block;
+	text-align: center;
+	padding:10px;
+}
+.pn-card-wrapper .pn-card .title-name{
+	font-size: 20px;
+	padding-bottom: 10px;
+	font-weight: 600;
+	border-bottom: 1px solid #33333357;
+}
+.pn-card-wrapper .pn-card .desc{
+	font-size: 18px;
+	padding-bottom: 5px;
+	padding-top: 10px;
+	font-weight: 600;
+}
+.pn-other-settings-options .postbox h2{
+font-size: 16px; 
+     padding: 8px 12px; 
+     margin: 0; 
+     line-height: 1.4;
+ }
