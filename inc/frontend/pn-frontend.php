@@ -1,5 +1,8 @@
 <?php
-class PushNotificationFrontend{
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+class Push_Notification_Frontend{
 	public function __construct(){
 		$this->init();
 	}
@@ -29,14 +32,14 @@ class PushNotificationFrontend{
 			//header("Service-Worker-Allowed: /");
 			header("Content-Type: application/javascript");
 			header('Accept-Ranges: bytes');
-			$messageSw = $this->pwaforwp_getlayoutfiles('firebase-messaging-sw.js');
+			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
 			echo $messageSw;
                 exit;
 		}
 
 	}
 
-	public function pwaforwp_getlayoutfiles($filePath){
+	public function pn_get_layout_files($filePath){
 	    $fileContentResponse = @wp_remote_get(PUSH_NOTIFICATION_PLUGIN_URL.'/assets/'.$filePath);
 	    if(wp_remote_retrieve_response_code($fileContentResponse)!=200){
 	      if(!function_exists('get_filesystem_method')){
@@ -81,9 +84,9 @@ class PushNotificationFrontend{
 							  "messagingSenderId"=> "1231518440",
 							  "appId"=> "1:1231518440:web:9efeed716a5da8341aa75d"
 							),
-					"swsource" =>trailingslashit($link)."?push_notification_sw=1",//$link."/firebase-messaging-sw.js", // trailingslashit(PUSH_NOTIFICATION_PLUGIN_URL).'assets/firebase-messaging-sw.js' ,
-					"scope" => trailingslashit($link),
-					"ajax_url"=> admin_url('admin-ajax.php')
+					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
+					"scope" => esc_url_raw(trailingslashit($link)),
+					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php'))
 					);
 		wp_localize_script('pn-script-frontend', 'pnScriptSetting', $settings);
 	}
@@ -107,7 +110,7 @@ class PushNotificationFrontend{
     }
     public function rest_permission( WP_REST_Request $request ) {
         if ( 'edit' === $request['context'] ) {
-            return new WP_Error( 'rest_forbidden_context', __( 'Sorry, you are not allowed to edit the manifest.', 'default' ), array( 'status' => rest_authorization_required_code() ) );
+            return new WP_Error( 'rest_forbidden_context', esc_html__( 'Sorry, you are not allowed to edit the manifest.', 'push-notification' ), array( 'status' => rest_authorization_required_code() ) );
         }
         return true;
     }
@@ -140,7 +143,7 @@ class PushNotificationFrontend{
 	}
 
 
-	function get_the_user_ip() {
+	public function get_the_user_ip() {
 		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 			//check ip from share internet
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -154,10 +157,10 @@ class PushNotificationFrontend{
 	} 
 
 }
-add_action("plugins_loaded", 'pushnotification_frontend_class');
-function pushnotification_frontend_class(){
+add_action("plugins_loaded", 'push_notification_frontend_class');
+function push_notification_frontend_class(){
 	if(!is_admin() || wp_doing_ajax()){
-		$notificationFrontEnd = new PushNotificationFrontend(); 
+		$notificationFrontEnd = new Push_Notification_Frontend(); 
 	}
 
 }

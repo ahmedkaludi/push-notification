@@ -1,4 +1,6 @@
 <?php
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 class PN_Server_Request{
 	public static $notificationServerUrl = 'http://109.199.122.201/~pushnotification/public/api/'; //slash necessary at last 

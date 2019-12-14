@@ -1,10 +1,11 @@
 <?php
-require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/class-function.php";
-class PushNotificationAdmin{
-	
-	public function __construct(){
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
 
-	}
+require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/class-function.php";
+class Push_Notification_Admin{
+	
+	public function __construct(){}
 
 	public function init(){
 		add_action( 'admin_menu', array( $this, 'add_menu_links') );
@@ -43,8 +44,8 @@ class PushNotificationAdmin{
 
 	public function add_menu_links(){
 		// Main menu page
-		add_menu_page( esc_html__( 'Push Notification-Admin', 'pwa-for-wp' ), 
-	                esc_html__( 'Push Notification', 'pwa-for-wp' ), 
+		add_menu_page( esc_html__( 'Push Notification-Admin', 'push-notification' ), 
+	                esc_html__( 'Push Notification', 'push-notification' ), 
 	                'manage_options',
 	                'push-notification',
 	                array($this, 'admin_interface_render'),
@@ -52,8 +53,8 @@ class PushNotificationAdmin{
 		
 		// Settings page - Same as main menu page
 		add_submenu_page( 'push-notification',
-	                esc_html__( 'Push Notification-Admin', 'pwa-for-wp' ),
-	                esc_html__( 'Settings', 'pwa-for-wp' ),
+	                esc_html__( 'Push Notification-Admin', 'push-notification' ),
+	                esc_html__( 'Settings', 'push-notification' ),
 	                'manage_options',
 	                'push-notification',
 	                array($this, 'admin_interface_render')
@@ -65,14 +66,13 @@ class PushNotificationAdmin{
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$tab = 'dashboard';
 		?><div class="wrap push_notification-settings-wrap">
-			<h1 class="page-title"><?php echo esc_html__('Push notification', 'pwa-for-wp'); ?></h1>
+			<h1 class="page-title"><?php echo esc_html__('Push notification', 'push-notification'); ?></h1>
 			<form action="options.php" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
 				<div class="form-wrap">
 					<?php
 					settings_fields( 'push_notification_setting_dashboard_group' );
-					echo "<div class='push_notification-dashboard' ".( $tab != 'dashboard' ? 'style="display:none;"' : '').">";
+					echo "<div class='push_notification-dashboard'>";
 						// Status
 						do_settings_sections( 'push_notification_dashboard_section' );	// Page slug
 						$authData = push_notification_auth_settings();
@@ -90,33 +90,33 @@ class PushNotificationAdmin{
 		register_setting( 'push_notification_setting_dashboard_group', 'push_notification_settings' );
 
 		add_settings_section('push_notification_dashboard_section',
-					 esc_html__('','pwa-for-wp'), 
+					 esc_html__('','push-notification'), 
 					 '__return_false', 
 					 'push_notification_dashboard_section');
 		
 			add_settings_field(
 				'pn_key_validate_status',	// ID
-				'API',			// Title
+				esc_html__('API', 'push-notification'),			// Title
 				array( $this, 'pn_key_validate_status_callback'),// Callback
 				'push_notification_dashboard_section',	// Page slug
 				'push_notification_dashboard_section'	// Settings Section ID
 			);
 
 		add_settings_section('push_notification_user_settings_section',
-					 esc_html__('','pwa-for-wp'), 
+					 esc_html__('','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
 		
 			add_settings_field(
 				'pn_key_sendpush_edit',					// ID
-				'Send notification on editing',			// Title
+				esc_html__('Send notification on editing', 'push-notification'),// Title
 				array( $this, 'user_settings_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_sendpush_publish',								// ID
-				'Send notification on publish',			// Title
+				esc_html__('Send notification on publish', 'push-notification'),// Title
 				array( $this, 'user_settings_onpublish_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
@@ -142,47 +142,48 @@ class PushNotificationAdmin{
 
 
 		}
+		$subscriber_count = 0;
+		if(isset($detail_settings['subscriber_count'])){ $subscriber_count = $detail_settings['subscriber_count']; }
 		echo '<section class="pn_general_wrapper">
-				<div class="action-wrapper"> '.$updated_at.' <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update">Refresh data</button>
+				<div class="action-wrapper"> '.esc_html__($updated_at, 'push-notification').' <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update">'.esc_html__('Refresh data', 'push-notification').'</button>
 				</div>
 				<div class="pn-content">
 					<div class="pn-card-wrapper">
 						<div class="pn-card">
-							<div class="title-name">Total Subscribers:</div>
+							<div class="title-name">'.esc_html__('Total Subscribers', 'push-notification').':</div>
 							<div class="desc column-description">
-								'.isset($detail_settings['subscriber_count']).'
+								'.$subscriber_count.'
 							</div>
 						</div>
 					</div>
 				</div>
 				';
 				do_settings_sections( 'push_notification_user_settings_section' );
-		echo   '
-				<input type="submit" value="Save Settings" class="button">
+		echo   '<input type="submit" value="Save Settings" class="button">
 			</section>
 			';
 		echo '<br/><br/><div class="pn-other-settings-options">
 					<div id="dashboard_right_now" class="postbox " >
-						<h2 class="hndle">Send Custom Notification</h2>
+						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
 						<div class="inside">
 							<div class="main">
 								<div class="form-group">
-									<label for="notification-title">Title</label>
+									<label for="notification-title">'.esc_html__('Title','push-notification').'</label>
 									<input type="text" id="notification-title" class="regular-text">
 								</div>
 								<div class="form-group">
-									<label for="notification-link">Link</label>
+									<label for="notification-link">'.esc_html__('Link', 'push-notification').'</label>
 									<input type="text" id="notification-link" class="regular-text">
 								</div>
 								<div class="form-group">
-									<label for="notification-imageurl">Image url</label>
+									<label for="notification-imageurl">'.esc_html__('Image url', 'push-notification').'</label>
 									<input type="text" id="notification-imageurl" class="regular-text">
 								</div>
 								<div class="form-group">
-									<label for="notification-message">Message</label>
+									<label for="notification-message">'.esc_html__('Message', 'push-notification').'</label>
 									<textarea type="text" id="notification-message" class="regular-text"></textarea>
 								</div>
-								<input type="button" class="button" id="pn-send-custom-notification" value="Send Notification">
+								<input type="button" class="button" id="pn-send-custom-notification" value="'.esc_html__('Send Notification', 'push-notification').'">
 								<div class="pn-send-messageDiv"></div>
 							</div>
 						</div>
@@ -195,26 +196,26 @@ class PushNotificationAdmin{
 		if( !isset($authData['token_details']['validated']) 
 			|| (isset($authData['token_details']) && $authData['token_details']['validated']!=1) ){
 			echo "<fieldset>";
-			pn_field_generator::get_input_password('user_token', 'user_auth_token_key');
-			pn_field_generator::get_button('Validate', 'user_auth_vadation');
+			PN_Field_Generator::get_input_password('user_token', 'user_auth_token_key');
+			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
 			echo '<span class="resp_message"></span></fieldset>
-			<p>Get the API <a target="_blank" href="'.PN_Server_Request::$notificationlanding.'">click here</a></p>';
+			<p>'.esc_html__('Get the API', 'push-notification').' <a target="_blank" href="'.PN_Server_Request::$notificationlanding.'">'.esc_html__('click here', 'push-notification').'</a></p>';
 		}else{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>
-				<span class='text-success resp_message' style='color:green;'>User Verified</span>
-				<button type='button' class='button dashicons-before dashicons-no-alt' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>Revoke key</button>";
+				<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>
+				<button type='button' class='button dashicons-before dashicons-no-alt' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
 
 	}//function closed
 	
 	public function user_settings_callback(){
 		$notification = push_notification_settings();
-		pn_field_generator::get_input_checkbox('on_edit', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
+		PN_Field_Generator::get_input_checkbox('on_edit', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
 
 	}
 	public function user_settings_onpublish_callback(){
 		$notification = push_notification_settings();
-		pn_field_generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
+		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
 
 	}
 
@@ -265,7 +266,7 @@ class PushNotificationAdmin{
 		}else{
 			$auth_settings = push_notification_auth_settings();
 			$title = sanitize_text_field($_POST['title']);
-			$message = sanitize_text_field($_POST['message']);
+			$message = sanitize_textarea_field($_POST['message']);
 			$link_url = sanitize_text_field($_POST['link_url']);
 			$image_url = sanitize_text_field($_POST['image_url']);
 			if( isset( $auth_settings['user_token'] ) ){
@@ -291,11 +292,11 @@ class PushNotificationAdmin{
 		if(isset($pn_settings['on_edit']) && $pn_settings['on_edit']==1){
 			if ( $new_status === $old_status) {
 			 	$this->send_notification($post);
-			 	
+			 	$send_notification = true;
 			}
 		}
 		//for publish
-		if(isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1){
+		if(!$send_notification && isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1){
 			if ( $new_status !== $old_status) {
 			 	$this->send_notification($post);
 			}
@@ -303,7 +304,7 @@ class PushNotificationAdmin{
 			
 
 	}
-	function send_notification($post){
+	protected function send_notification($post){
 		$post_id = $post->ID;
 		$post_content = $post->post_content;
 		$post_title = $post->post_title;
@@ -327,21 +328,21 @@ class PushNotificationAdmin{
 	
 }
 
-//if(is_admin()){
-	$PushNotificationAdminObj  = new PushNotificationAdmin(); 
-	$PushNotificationAdminObj->init();
-//}
+if(is_admin() || wp_doing_ajax()){
+	$push_Notification_Admin_Obj  = new Push_Notification_Admin(); 
+	$push_Notification_Admin_Obj->init();
+}
 
 function push_notification_settings(){
-	$push_notification_settings = get_option( 'push_notification_settings' ); 
+	$push_notification_settings = get_option( 'push_notification_settings', array() ); 
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
-	$push_notification_auth_settings = get_option( 'push_notification_auth_settings' ); 
+	$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() ); 
 	return $push_notification_auth_settings;
 }
 function push_notification_details_settings(){
-	$push_notification_details_settings = get_option( 'push_notification_details_settings' ); 
+	$push_notification_details_settings = get_option( 'push_notification_details_settings', array() ); 
 	return $push_notification_details_settings;
 }
 
@@ -349,25 +350,25 @@ function push_notification_details_settings(){
 /** 
 * Server Side fields generation class
 */
-class pn_field_generator{
+class PN_Field_Generator{
 	static $settingName = 'push_notification_settings';
 
 	public static function get_input($name, $id="", $class=""){
 		$settings = push_notification_settings();
-		?><input type="text" name="<?php echo self::$settingName; ?>[<?php echo $name; ?>]" class="regular-text" id="<?php echo $id; ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
+		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
 	}
 	public static function get_input_checkbox($name, $value, $id="", $class=""){
 		$settings = push_notification_settings();
-		?><input type="checkbox" name="<?php echo self::$settingName; ?>[<?php echo $name; ?>]" class="regular-text" id="<?php echo $id; ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo "checked"; ?> value="<?php echo $value ?>"/><?php
+		?><input type="checkbox" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/><?php
 	}
 	public static function get_input_password($name, $id="", $class=""){
 		$settings = push_notification_settings();
-		?><input type="password" name="<?php echo self::$settingName; ?>[<?php echo $name; ?>]" class="regular-text" id="<?php echo $id; ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
+		?><input type="password" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
 	}
 	public static function get_button($name, $id="", $class=""){
 		$settings = push_notification_settings();
 		?>
-		<button type="button"  class="button <?php echo $class; ?>" id="<?php echo $id; ?>"><?php echo $name ?></button>
+		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo $id; ?>"><?php echo esc_html__($name) ?></button>
 	<?php
 	}
 }
