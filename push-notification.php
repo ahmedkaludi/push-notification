@@ -5,6 +5,7 @@ Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notification for WP allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
 Version: 1.0
+Author URI: http://pushnotifications.io/
 Text Domain: push-notification
 Domain Path: /languages
 License: GPL2+

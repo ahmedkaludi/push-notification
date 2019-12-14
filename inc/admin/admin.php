@@ -159,7 +159,7 @@ class Push_Notification_Admin{
 				</div>
 				';
 				do_settings_sections( 'push_notification_user_settings_section' );
-		echo   '<input type="submit" value="Save Settings" class="button">
+		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button">
 			</section>
 			';
 		echo '<br/><br/><div class="pn-other-settings-options">
