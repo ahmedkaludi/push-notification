@@ -20,48 +20,7 @@ class PushNotificationAdmin{
 
 		//Send push on publish and update
 		add_action( 'transition_post_status', array( $this, 'send_notification_on_update' ), 10, 3 ); 
-
-
-
-		//add_action('transition_post_status',array($this,'test'), 11, 3);
 	}
-
-	function test( $new_status, $old_status, $post ) {
-
-		// this is post update condition
-		if ( 'publish' !== $new_status ){
-        	return;
-		}
-
-
-		// Result: not working while update
- 
-
-    	$this->test_data($post, $old_status, $new_status);
-
-
-
-		// update_option('test_new_status_3'.$post->ID, $new_status );
-		// update_option('test_old_status_3'.$post->ID, $old_status );
-
-	
-	}
-
-	function test_data($post, $old_status, $new_status){
-
-		if ( $new_status === $old_status) {
-		 	return;
-		}
-
-		$user_token = '1648434fa4fb5689da104a1d99fa15e7';
-		$title = $post->ID . ' ' . $post->title . ' ' . $old_status;
-		$message = " love";
-		$link_url = "https://google.com";
-		$image_url = " ";
-
-		$data = PN_Server_Request::sendPushNotificatioData($user_token, $title, $message, $link_url, $image_url);
-	}
-
 
 	function load_admin_scripts($hook_suffix){
 		if($hook_suffix=='toplevel_page_push-notification'){
@@ -136,11 +95,11 @@ class PushNotificationAdmin{
 					 'push_notification_dashboard_section');
 		
 			add_settings_field(
-				'pn_key_validate_status',								// ID
+				'pn_key_validate_status',	// ID
 				'API',			// Title
-				array( $this, 'pn_key_validate_status_callback'),					// Callback
-				'push_notification_dashboard_section',							// Page slug
-				'push_notification_dashboard_section'							// Settings Section ID
+				array( $this, 'pn_key_validate_status_callback'),// Callback
+				'push_notification_dashboard_section',	// Page slug
+				'push_notification_dashboard_section'	// Settings Section ID
 			);
 
 		add_settings_section('push_notification_user_settings_section',
@@ -149,18 +108,18 @@ class PushNotificationAdmin{
 					 'push_notification_user_settings_section');
 		
 			add_settings_field(
-				'pn_key_sendpush_edit',								// ID
+				'pn_key_sendpush_edit',					// ID
 				'Send notification on editing',			// Title
-				array( $this, 'user_settings_callback'),					// Callback
-				'push_notification_user_settings_section',							// Page slug
-				'push_notification_user_settings_section'							// Settings Section ID
+				array( $this, 'user_settings_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_user_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_sendpush_publish',								// ID
 				'Send notification on publish',			// Title
-				array( $this, 'user_settings_onpublish_callback'),					// Callback
-				'push_notification_user_settings_section',							// Page slug
-				'push_notification_user_settings_section'							// Settings Section ID
+				array( $this, 'user_settings_onpublish_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_user_settings_section'	// Settings Section ID
 			);
 		
 	}

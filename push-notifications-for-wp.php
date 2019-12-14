@@ -2,11 +2,11 @@
 /**
 Plugin Name: Push Notification for WP
 Plugin URI: https://wordpress.org/plugins/pwa-for-wp/
-Description: We are bringing the power of the Progressive Web Apps to the WP & AMP to take the user experience to the next level!
+Description: Push Notification for WP allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
 Version: 1.0
 Author URI: http://pwa-for-wp.com
-Text Domain: push-notification
+Text Domain: push-notifications-for-wp
 Domain Path: /languages
 License: GPL2+
 */
