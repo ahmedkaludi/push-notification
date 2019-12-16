@@ -1,4 +1,4 @@
-=== Push Notification for WP ===
+=== Push Notification ===
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.3
@@ -9,13 +9,13 @@ Tags: Push Notification, send notification, notification, Mobile, Web Manifest, 
 
 
 == Description ==
-Push Notification for WP allow admin to automatically notify your audience when you have published new content on your site or custom notices
+Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
 
 This can be a notification on a phone or via a browser, such as Chrome, Firefox, or Safari.
 
 = Features: =
 * NEW: One step solution
-* NEW: Easily integration to wordpress site
+* NEW: Easily integration to WordPress site
 * Cache Expire option added
 * <strong>Notifications </strong>: Notifications appear as message alerts.
 * Publishing a post will trigger push notifications.
@@ -26,7 +26,7 @@ This can be a notification on a phone or via a browser, such as Chrome, Firefox,
 * More Push Notification Features Coming soon.
 
 **We Act Fast on Feedback!**
-We are actively developing this plugin and our aim is to make this plugin into the #1 solution for Push Notification in the world. You can [Request a Feature](https://github.com/ahmedkaludi/push-notifications-for-wp/issues) or [Report a Bug](https://push-notification.com/contact-us/).
+We are actively developing this plugin and our aim is to make this plugin into the #1 solution for Push Notification in the world. You can [Request a Feature](https://github.com/ahmedkaludi/push-notifications/issues) or [Report a Bug](https://push-notification.com/contact-us/).
 
 **Technical Support**
 Support is provided in [Forum](https://wordpress.org/support/plugin/push-notification). You can also [Contact us](https://push-notification.com/contact-us/), our turn around time on email is around 12 hours. 
