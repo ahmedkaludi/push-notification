@@ -86,17 +86,10 @@ class PN_Server_Request{
 	}
 
 	protected static function sendRequest($suffixUrl, $data, $method="post"){
-		switch($method){
-			case 'post':
+		if($method==='post'){
 				$url = self::$notificationServerUrl.$suffixUrl;
 				$postdata = array('body'=> $data);
 				$remoteResponse = wp_remote_post($url, $postdata);
-
-				break;
-			case 'get':
-			default:
-				# code...
-				break;
 		}
 		if( is_wp_error( $remoteResponse ) ){
 			$remoteData = array('status'=>401, "response"=>"could not connect to server");
