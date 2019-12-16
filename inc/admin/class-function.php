@@ -22,6 +22,7 @@ class PN_Server_Request{
 		if($response['status']==200){
 			$push_notification_auth_settings['token_details'] = $response['response'];
 		}
+		$push_notification_auth_settings = array_map( 'sanitize_text_field', wp_unslash( $push_notification_auth_settings ) );
 		update_option('push_notification_auth_settings', $push_notification_auth_settings);
 		return $response;
 	}
@@ -62,6 +63,7 @@ class PN_Server_Request{
 			$push_notification_auth_settings['subscriber_count'] = $response['subscriber_count'];
 			$push_notification_auth_settings['updated_at'] = date('Y-m-d H:i:s');
 		}
+		$push_notification_auth_settings = array_map( 'sanitize_text_field', wp_unslash( $push_notification_auth_settings ) );
 		update_option('push_notification_details_settings', $push_notification_auth_settings);
 		return $response;
 	}
