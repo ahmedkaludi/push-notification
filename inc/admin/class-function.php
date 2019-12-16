@@ -18,11 +18,12 @@ class PN_Server_Request{
 		$data = array("user_token"=>$user_token, "website"=>   $weblink);
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		$push_notification_auth_settings = get_option('push_notification_auth_settings');
-		$push_notification_auth_settings['user_token'] = $user_token;
+		$push_notification_auth_settings['user_token'] = sanitize_text_field($user_token);
 		if($response['status']==200){
+			$response['response'] = array_map( 'sanitize_text_field',  $response['response']  );
 			$push_notification_auth_settings['token_details'] = $response['response'];
 		}
-		$push_notification_auth_settings = array_map( 'sanitize_text_field', wp_unslash( $push_notification_auth_settings ) );
+
 		update_option('push_notification_auth_settings', $push_notification_auth_settings);
 		return $response;
 	}
@@ -60,10 +61,9 @@ class PN_Server_Request{
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		$push_notification_auth_settings = get_option('push_notification_details_settings', array());
 		if($response['status']==200){
-			$push_notification_auth_settings['subscriber_count'] = $response['subscriber_count'];
+			$push_notification_auth_settings['subscriber_count'] = sanitize_text_field($response['subscriber_count']);
 			$push_notification_auth_settings['updated_at'] = date('Y-m-d H:i:s');
 		}
-		$push_notification_auth_settings = array_map( 'sanitize_text_field', wp_unslash( $push_notification_auth_settings ) );
 		update_option('push_notification_details_settings', $push_notification_auth_settings);
 		return $response;
 	}
