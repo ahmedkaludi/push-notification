@@ -49,7 +49,7 @@ class Push_Notification_Frontend{
 	      if($access_type === 'direct')
 	      {
 	      	$file = sanitize_file_name(PUSH_NOTIFICATION_PLUGIN_DIR.$filePath);
-	         $creds = request_filesystem_credentials(, '', false, false, array());
+	         $creds = request_filesystem_credentials($file, '', false, false, array());
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
 	        }   
