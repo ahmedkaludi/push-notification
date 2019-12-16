@@ -40,7 +40,7 @@ class Push_Notification_Frontend{
 	}
 
 	public function pn_get_layout_files($filePath){
-	    $fileContentResponse = @wp_remote_get(PUSH_NOTIFICATION_PLUGIN_URL.'/assets/'.$filePath);
+	    $fileContentResponse = @wp_remote_get(esc_url_raw(PUSH_NOTIFICATION_PLUGIN_URL.'/assets/'.$filePath));
 	    if(wp_remote_retrieve_response_code($fileContentResponse)!=200){
 	      if(!function_exists('get_filesystem_method')){
 	        require_once( ABSPATH . 'wp-admin/includes/file.php' );
@@ -48,12 +48,13 @@ class Push_Notification_Frontend{
 	      $access_type = get_filesystem_method();
 	      if($access_type === 'direct')
 	      {
-	         $creds = request_filesystem_credentials(PUSH_NOTIFICATION_PLUGIN_DIR.$filePath, '', false, false, array());
+	      	$file = sanitize_file_name(PUSH_NOTIFICATION_PLUGIN_DIR.$filePath);
+	         $creds = request_filesystem_credentials(, '', false, false, array());
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
 	        }   
 	        global $wp_filesystem;
-	        $htmlContentbody = $wp_filesystem->get_contents(PWAFORWP_PLUGIN_DIR.$filePath);
+	        $htmlContentbody = $wp_filesystem->get_contents($file);
 	        return $htmlContentbody;
 	      }
 	      return false;
@@ -64,7 +65,7 @@ class Push_Notification_Frontend{
 
 
 	public function enqueue_pn_scripts(){
-		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/app.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/app.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		if ( is_multisite() ) {

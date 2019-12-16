@@ -269,8 +269,8 @@ class Push_Notification_Admin{
 			$auth_settings = push_notification_auth_settings();
 			$title = sanitize_text_field($_POST['title']);
 			$message = sanitize_textarea_field($_POST['message']);
-			$link_url = sanitize_text_field($_POST['link_url']);
-			$image_url = sanitize_text_field($_POST['image_url']);
+			$link_url = esc_url_raw($_POST['link_url']);
+			$image_url = esc_url_raw($_POST['image_url']);
 			if( isset( $auth_settings['user_token'] ) ){
 				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $image_url );
 				 echo json_encode($response);die;
@@ -370,7 +370,7 @@ class PN_Field_Generator{
 	public static function get_button($name, $id="", $class=""){
 		$settings = push_notification_settings();
 		?>
-		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo $id; ?>"><?php echo esc_html__($name) ?></button>
+		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>"><?php echo esc_html__($name) ?></button>
 	<?php
 	}
 }

@@ -3,7 +3,6 @@ if (!firebase.apps.length) {
 	firebase.initializeApp(config);	
 }                    		  		  	
  var swsource = pnScriptSetting.swsource;
-console.log(pnScriptSetting.scope);
 const messaging = firebase.messaging();
 if("serviceWorker" in navigator) {
 	window.addEventListener('load', function() {
@@ -24,7 +23,7 @@ if("serviceWorker" in navigator) {
       console.log('Token refreshed.');
       // Indicate that the new Instance ID token has not yet been sent to the
       // app server.
-      pwaForWpsetTokenSentToServer(false);
+      push_notification_setTokenSentToServer(false);
       // Send Instance ID token to app server.
       sendTokenToServer(refreshedToken);
       // [START_EXCLUDE]
@@ -41,36 +40,36 @@ if("serviceWorker" in navigator) {
 	
 messaging.requestPermission().then(function() {
 	console.log("Notification permission granted.");                                    
-	if(pwaForWpisTokenSentToServer()){
+	if(push_notification_isTokenSentToServer()){
 		console.log('Token already saved');
 	}else{
-		pwaForWpgetRegToken();
+		push_notification_getRegToken();
 	}                                   
 }).catch(function(err) {
 	  console.log("Unable to get permission to notify.", err);
 });
 
-function pwaForWpgetRegToken(argument){
+function push_notification_getRegToken(argument){
 	 
 	messaging.getToken().then(function(currentToken) {
 	  if (currentToken) {                      
-	   pwaForWpsaveToken(currentToken);
+	   push_notification_saveToken(currentToken);
 	   console.log(currentToken);
-		pwaForWpsetTokenSentToServer(true);
+		push_notification_setTokenSentToServer(true);
 	  } else {                       
 		console.log('No Instance ID token available. Request permission to generate one.');                       
-		pwaForWpsetTokenSentToServer(false);
+		push_notification_setTokenSentToServer(false);
 	  }
 	}).catch(function(err) {
 	  console.log('An error occurred while retrieving token. ', err);                      
-	  pwaForWpsetTokenSentToServer(false);
+	  push_notification_setTokenSentToServer(false);
 	});
 }
-function pwaForWpsetTokenSentToServer(sent) {
+function push_notification_setTokenSentToServer(sent) {
  window.localStorage.setItem('sentToServer', sent ? '1' : '0');
 }
 
-function pwaForWpisTokenSentToServer() {
+function push_notification_isTokenSentToServer() {
 return window.localStorage.getItem('sentToServer') === '1';
 }
 
@@ -78,9 +77,9 @@ return window.localStorage.getItem('sentToServer') === '1';
 // - send messages back to this app
 // - subscribe/unsubscribe the token from topics
 function sendTokenToServer(currentToken) {
-	if (!pwaForWpisTokenSentToServer()) {
+	if (!push_notification_isTokenSentToServer()) {
 	  console.log('Sending token to server...');
-	  pwaForWpsaveToken(currentToken);
+	  push_notification_saveToken(currentToken);
 	  
 	} else {
 	  console.log('Token already sent to server so won\'t send it again ' +
@@ -89,12 +88,12 @@ function sendTokenToServer(currentToken) {
 
 }
 
-function pwaForWpsaveToken(currentToken){
+function push_notification_saveToken(currentToken){
   var xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
 	  if (this.readyState == 4 && this.status == 200) {
 		if(this.responseText.status==200){
-			pwaForWpsetTokenSentToServer(true);
+			push_notification_setTokenSentToServer(true);
 		}
 		console.log(this.responseText);
 	  }
