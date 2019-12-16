@@ -113,14 +113,14 @@ jQuery(document).ready(function($){
 			success: function(response){
 				
 				if(response.status==200){
-					jQuery(".pn-send-messageDiv").text("&nbsp; "+response.message).css({"color":"green"});
+					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"green"});
 					
 					jQuery('#notification-title').val("");
 					jQuery('#notification-link').val("");
 					Query('#notification-imageurl').val("");
 					jQuery('#notification-message').val("");
 				}else{
-					jQuery(".pn-send-messageDiv").text("&nbsp; "+response.message).css({"color":"green"});
+					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"green"});
 				}
 				self.removeClass('updating-message');
 			},

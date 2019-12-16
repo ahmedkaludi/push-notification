@@ -3,8 +3,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 class PN_Server_Request{
-	public static $notificationServerUrl = 'http://109.199.122.201/~pushnotification/public/api/'; //slash necessary at last 
-	public static $notificationlanding = 'http://109.199.122.201/~pushnotification/public/'; //slash necessary at last
+	public static $notificationServerUrl = 'http://pushnotifications.io/api/'; //slash necessary at last 
+	public static $notificationlanding = 'http://pushnotifications.io/'; //slash necessary at last
 	public function __construct(){}
 
 	public static function varifyUser($user_token){
