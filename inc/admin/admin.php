@@ -2,7 +2,9 @@
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/class-function.php";
+if(file_exists(PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/class-function.php")){
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/class-function.php";
+}
 class Push_Notification_Admin{
 	
 	public function __construct(){}
@@ -35,7 +37,7 @@ class Push_Notification_Admin{
 	        }    
 			wp_localize_script("push_notification_script", 'pn_setings', 
 								array(
-									"home_url"=>  $link,
+									"home_url"=>  esc_url_raw($link),
 									"remote_nonce"=> wp_create_nonce("pn_notification")
 									)
 							);
@@ -152,7 +154,7 @@ class Push_Notification_Admin{
 						<div class="pn-card">
 							<div class="title-name">'.esc_html__('Total Subscribers', 'push-notification').':</div>
 							<div class="desc column-description">
-								'.$subscriber_count.'
+								'.esc_html($subscriber_count).'
 							</div>
 						</div>
 					</div>
@@ -199,7 +201,7 @@ class Push_Notification_Admin{
 			PN_Field_Generator::get_input_password('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
 			echo '<span class="resp_message"></span></fieldset>
-			<p>'.esc_html__('Get the API', 'push-notification').' <a target="_blank" href="'.PN_Server_Request::$notificationlanding.'">'.esc_html__('click here', 'push-notification').'</a></p>';
+			<p>'.esc_html__('Get the API', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding).'">'.esc_html__('click here', 'push-notification').'</a></p>';
 		}else{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>
 				<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>
