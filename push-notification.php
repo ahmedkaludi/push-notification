@@ -22,3 +22,11 @@ define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";
 require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/frontend/pn-frontend.php";
+
+add_filter( 'plugin_action_links_' . PUSH_NOTIFICATION_PLUGIN_FILE,'push_notification_add_action_links', 10, 1);
+
+function push_notification_add_action_links($links){
+    //print_r($links);die;
+    $mylinks = array('<a href="' . esc_url_raw(admin_url( 'admin.php?page=push-notification' )) . '">'.esc_html__( 'Settings', 'push-notification' ).'</a>');
+    return array_merge( $links, $mylinks );
+}

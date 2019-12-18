@@ -21,6 +21,8 @@ class Push_Notification_Frontend{
 
 		add_action( 'wp_ajax_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) ); 
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
+		//AMP Connect
+		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
 	}
 	function sw_template_query_var(){
 		global $wp;
@@ -29,7 +31,7 @@ class Push_Notification_Frontend{
 
 	function load_service_worker(WP_Query $query ){
 		if ( $query->is_main_query() && $query->get( 'push_notification_sw' ) ) {
-			//header("Service-Worker-Allowed: /");
+			header("Service-Worker-Allowed: /");
 			header("Content-Type: application/javascript");
 			header('Accept-Ranges: bytes');
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
@@ -48,7 +50,7 @@ class Push_Notification_Frontend{
 	      $access_type = get_filesystem_method();
 	      if($access_type === 'direct')
 	      {
-	      	$file = sanitize_file_name(PUSH_NOTIFICATION_PLUGIN_DIR.$filePath);
+	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.($filePath);
 	         $creds = request_filesystem_credentials($file, '', false, false, array());
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
@@ -156,6 +158,61 @@ class Push_Notification_Frontend{
 		}
 		return $ip;
 	} 
+
+	/**
+	* Amp Entry point
+	*/
+	public function amp_entry_gate(){
+		add_filter("amp_post_template_data", array($this,'script_add'));
+		add_action("ampforwp_after_header", array($this, 'header_content'));
+		add_action('amp_post_template_head',array($this, 'manifest_add_homescreen'),1);
+	}
+
+	function script_add($data){
+		if ( empty( $data['amp_component_scripts']['amp-web-push'] ) ) {
+				$data['amp_component_scripts']['amp-web-push'] = 'https://cdn.ampproject.org/v0/amp-web-push-0.1.js';
+			}
+		return $data;
+	}
+
+	function header_content(){
+		if ( is_multisite() ) {
+            $link = get_site_url();              
+        }
+        else {
+            $link = home_url();
+        }
+		?>
+		<amp-web-push-widget
+		  visibility="unsubscribed"
+		  layout="fixed"
+		  width="250"
+		  height="80"
+		>
+		  <button on="tap:amp-web-push.subscribe">Subscribe to Notifications</button>
+		</amp-web-push-widget>
+
+		<!-- An unsubscription widget -->
+		<amp-web-push-widget
+		  visibility="subscribed"
+		  layout="fixed"
+		  width="250"
+		  height="80"
+		>
+		  <button on="tap:amp-web-push.unsubscribe">
+		    Unsubscribe from Notifications
+		  </button>
+		</amp-web-push-widget>
+		<amp-web-push 
+		id="amp-web-push"
+    	layout="nodisplay" 
+		  helper-iframe-url="<?php echo PUSH_NOTIFICATION_PLUGIN_URL.'assets/amp/helper-iframe.html'; ?>"
+		  permission-dialog-url="<?php echo PUSH_NOTIFICATION_PLUGIN_URL.'assets/amp/permission-dialog.html'; ?>"
+		  service-worker-url="<?php echo esc_url_raw(trailingslashit($link)."?push_notification_sw=1"); ?>"
+		></amp-web-push>
+
+		<?php
+	}
 
 }
 add_action("plugins_loaded", 'push_notification_frontend_class');

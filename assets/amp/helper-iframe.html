@@ -1,0 +1,145 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        	<meta name="robots" content="noindex,nofollow"/>
+   </head>
+   <body>
+      <div class="line-gutter-backdrop"></div>
+      <table>
+         <tbody>
+            <tr>
+               <td class="line-number" value="1"></td>
+               <td class="line-content"><span class="html-doctype">&lt;!doctype html&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="2"></td>
+               <td class="line-content"><span class="html-tag">&lt;html&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="3"></td>
+               <td class="line-content"><span class="html-comment">&lt;!-- AMP Web Push Helper IFrame --&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="4"></td>
+               <td class="line-content"><br></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="5"></td>
+               <td class="line-content"><span class="html-tag">&lt;head&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="6"></td>
+               <td class="line-content">  <span class="html-tag">&lt;meta <span class="html-attribute-name">charset</span>="<span class="html-attribute-value">utf-8</span>"&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="7"></td>
+               <td class="line-content">  <span class="html-tag">&lt;script&gt;</span>(function(){var f,g=function(a){return"undefined"!=typeof window&amp;&amp;window===a?a:"undefined"!=typeof global&amp;&amp;null!=global?global:a}(this);function k(a,b){b=void 0===b?"":b;try{return decodeURIComponent(a)}catch(c){return b}};var l=/(?:^[#?]?|&amp;)([^=&amp;]+)(?:=([^&amp;]*))?/g;self.__AMP_LOG=self.__AMP_LOG||{user:null,dev:null,userForEmbed:null};var m=self.__AMP_LOG;/*</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="8"></td>
+               <td class="line-content"> https://mths.be/cssescape v1.5.1 by @mathias | MIT license */</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="9"></td>
+               <td class="line-content">function n(){var a=100;this.M=a;this.C=this.I=0;this.w=Object.create(null)}n.prototype.has=function(a){return!!this.w[a]};n.prototype.get=function(a){var b=this.w[a];if(b)return b.access=++this.C,b.payload};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="10"></td>
+               <td class="line-content">n.prototype.put=function(a,b){this.has(a)||this.I++;this.w[a]={payload:b,access:this.C};if(!(this.I&lt;=this.M)){if(m.dev)a=m.dev;else throw Error("failed to call initLogConstructor");a.warn("lru-cache","Trimming LRU cache");a=this.w;var c=this.C+1,d;for(d in a){var e=a[d].access;if(e&lt;c){c=e;var h=d}}void 0!==h&amp;&amp;(delete a[h],this.I--)}};(function(a){return a||{}})({c:!0,v:!0,a:!0,ad:!0,action:!0});var p,r;</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="11"></td>
+               <td class="line-content">function t(a){var b;p||(p=self.document.createElement("a"),r=self.__AMP_URL_CACHE||(self.__AMP_URL_CACHE=new n));var c=b?null:r,d=p;if(c&amp;&amp;c.has(a))a=c.get(a);else{d.href=a;d.protocol||(d.href=d.href);var e={href:d.href,protocol:d.protocol,host:d.host,hostname:d.hostname,port:"0"==d.port?"":d.port,pathname:d.pathname,search:d.search,hash:d.hash,origin:null};"/"!==e.pathname[0]&amp;&amp;(e.pathname="/"+e.pathname);if("http:"==e.protocol&amp;&amp;80==e.port||"https:"==e.protocol&amp;&amp;443==e.port)e.port="",e.host=e.hostname;</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="12"></td>
+               <td class="line-content">e.origin=d.origin&amp;&amp;"null"!=d.origin?d.origin:"data:"!=e.protocol&amp;&amp;e.host?e.protocol+"//"+e.host:e.href;c&amp;&amp;c.put(a,e);a=e}return a};function u(a){a||(a={debug:!1,windowContext:window});this.o={};this.l={};this.J=a.debug;this.A=this.N=this.O=!1;this.B=this.G=this.H=this.j=this.F=null;this.h=a.windowContext||window}f=u.prototype;</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="13"></td>
+               <td class="line-content">f.listen=function(a){var b=this;return(new Promise(function(c,d){b.A?d(Error("Already connected.")):b.O?d(Error("Already listening for connections.")):Array.isArray(a)?(b.H=b.W.bind(b,a,c,d),b.h.addEventListener("message",b.H)):d(Error("allowedOrigins should be a string array of allowed origins to accept messages from. Got:",a))})).then(function(){b.send(u.Topics.CONNECT_HANDSHAKE,null);b.A=!0})};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="14"></td>
+               <td class="line-content">f.W=function(a,b,c,d){var e=d.data,h=d,y=h.ports;a:{h=t(h.origin).origin;for(var q=0;q&lt;a.length;q++)if(t(a[q]).origin===h){a=!0;break a}a=!1}a&amp;&amp;e&amp;&amp;e.topic===u.Topics.CONNECT_HANDSHAKE&amp;&amp;(this.h.removeEventListener("message",this.H),this.j=y[0],this.B=this.K.bind(this),this.j.addEventListener("message",this.B,!1),this.j.start(),b())};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="15"></td>
+               <td class="line-content">f.connect=function(a,b){var c=this;return new Promise(function(d,e){a||e(Error("Provide a valid Window context to connect to."));b||e(Error("Provide an expected origin for the remote Window or provide the wildcard *."));c.A?e(Error("Already connected.")):c.N?e(Error("Already connecting.")):(c.F=new MessageChannel,c.j=c.F.port1,c.G=c.V.bind(c,c.j,b,d),c.j.addEventListener("message",c.G),c.j.start(),a.postMessage({topic:u.Topics.CONNECT_HANDSHAKE},"*"===b?"*":t(b).origin,[c.F.port2]))})};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="16"></td>
+               <td class="line-content">f.V=function(a,b,c){this.A=!0;a.removeEventListener("message",this.G);this.B=this.K.bind(this);a.addEventListener("message",this.B,!1);c()};f.K=function(a){a=a.data;if(this.o[a.id]&amp;&amp;a.isReply){var b=this.o[a.id];delete this.o[a.id];var c=b.promiseResolver;b.message=a.data;c([a.data,this.L.bind(this,a.id,b.topic)])}else{var d=this.l[a.topic];if(d)for(var e=0;e&lt;d.length;e++)(0,d[e])(a.data,this.L.bind(this,a.id,a.topic))}};f.on=function(a,b){this.l[a]?this.l[a].push(b):this.l[a]=[b]};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="17"></td>
+               <td class="line-content">f.off=function(a,b){if(b){var c=this.l[a].indexOf(b);-1!==c&amp;&amp;this.l[a].splice(c,1)}else this.l[a]&amp;&amp;delete this.l[a]};f.L=function(a,b,c){var d=this,e={id:a,topic:b,data:c,isReply:!0};this.j.postMessage(e);return new Promise(function(a){d.o[e.id]={message:c,topic:b,promiseResolver:a}})};f.send=function(a,b){var c=this,d={id:crypto.getRandomValues(new Uint8Array(10)).join(""),topic:a,data:b};this.j.postMessage(d);return new Promise(function(e){c.o[d.id]={message:b,topic:a,promiseResolver:e}})};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="18"></td>
+               <td class="line-content">g.Object.defineProperties(u,{Topics:{configurable:!0,enumerable:!0,get:function(){return{CONNECT_HANDSHAKE:"topic-connect-handshake",NOTIFICATION_PERMISSION_STATE:"topic-notification-permission-state",SERVICE_WORKER_STATE:"topic-service-worker-state",SERVICE_WORKER_REGISTRATION:"topic-service-worker-registration",SERVICE_WORKER_QUERY:"topic-service-worker-query",STORAGE_GET:"topic-storage-get"}}}});function v(){var a={debug:!1};this.J=a&amp;&amp;a.debug;this.h=a.windowContext||window;this.m=new u({debug:this.J,windowContext:this.h});this.D={}}function w(a,b){var c=!0,d=null;a({success:c,error:c?void 0:d,result:c?b:void 0})}f=v.prototype;f.P=function(a,b){if(a&amp;&amp;a.isQueryTopicSupported){var c=!1,d;for(d in u.Topics)a.isQueryTopicSupported===u.Topics[d]&amp;&amp;(c=!0);w(b,c)}else w(b,Notification.permission)};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="19"></td>
+               <td class="line-content">f.U=function(a,b){var c=null;try{if(a&amp;&amp;a.key&amp;&amp;this.h.localStorage)c=this.h.localStorage.getItem(a.key);else{if(!m.user)throw Error("failed to call initLogConstructor");m.user.warn("amp-web-push","LocalStorage retrieval failed.")}}catch(d){}w(b,c)};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="20"></td>
+               <td class="line-content">f.T=function(a,b){var c={isControllingFrame:!!this.h.navigator.serviceWorker.controller,url:this.h.navigator.serviceWorker.controller?this.h.navigator.serviceWorker.controller.scriptURL:null,state:this.h.navigator.serviceWorker.controller?this.h.navigator.serviceWorker.controller.state:null};w(b,c)};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="21"></td>
+               <td class="line-content">f.S=function(a,b){if(!a||!a.workerUrl||!a.registrationOptions)throw Error("Expected arguments workerUrl and registrationOptions in message, got:",a);this.h.navigator.serviceWorker.register(a.workerUrl,a.registrationOptions).then(function(){w(b,null)}).catch(function(a){w(b,a?a.message||a.toString():null)})};f.messageServiceWorker=function(a){this.h.navigator.serviceWorker.controller.postMessage({command:a.topic,payload:a.payload})};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="22"></td>
+               <td class="line-content">f.R=function(a,b){var c=this;if(!a||!a.topic)throw Error("Expected argument topic in message, got:",a);(new Promise(function(b){c.D[a.topic]=b;c.waitUntilWorkerControlsPage().then(function(){c.messageServiceWorker(a)})})).then(function(d){delete c.D[a.topic];return w(b,d)})};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="23"></td>
+               <td class="line-content">function x(a){a=a.h.location.search;var b=Object.create(null);if(a)for(var c;c=l.exec(a);){var d=k(c[1],c[1]);c=c[2]?k(c[2].replace(/\+/g," "),c[2]):"";b[d]=c}var e=b;if(!e.parentOrigin)throw Error("Expecting parentOrigin URL query parameter.");return e.parentOrigin}f.X=function(a){a=a.data;var b=a.command;a=a.payload;var c=this.D[b];"function"===typeof c&amp;&amp;c(a)};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="24"></td>
+               <td class="line-content">function z(a){return a.h.navigator.serviceWorker&amp;&amp;a.h.navigator.serviceWorker.controller&amp;&amp;"activated"===a.h.navigator.serviceWorker.controller.state}f.waitUntilWorkerControlsPage=function(){var a=this;return new Promise(function(b){z(a)?b():a.h.navigator.serviceWorker.addEventListener("controllerchange",function(){z(a)?b():a.h.navigator.serviceWorker.controller.addEventListener("statechange",function(){z(a)&amp;&amp;b()})})})};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="25"></td>
+               <td class="line-content">f.run=function(a){var b=this;this.m.on(u.Topics.NOTIFICATION_PERMISSION_STATE,this.P.bind(this));this.m.on(u.Topics.SERVICE_WORKER_STATE,this.T.bind(this));this.m.on(u.Topics.SERVICE_WORKER_REGISTRATION,this.S.bind(this));this.m.on(u.Topics.SERVICE_WORKER_QUERY,this.R.bind(this));this.m.on(u.Topics.STORAGE_GET,this.U.bind(this));this.waitUntilWorkerControlsPage().then(function(){b.h.navigator.serviceWorker.addEventListener("message",b.X.bind(b))});this.m.listen([a||x(this)])};</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="26"></td>
+               <td class="line-content">window._ampWebPushHelperFrame=new v;window._ampWebPushHelperFrame.run();})();</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="27"></td>
+               <td class="line-content"><br></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="28"></td>
+               <td class="line-content">//# sourceMappingURL=amp-web-push-helper-frame.js.map</td>
+            </tr>
+            <tr>
+               <td class="line-number" value="29"></td>
+               <td class="line-content"><span class="html-tag">&lt;/script&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="30"></td>
+               <td class="line-content"><span class="html-tag">&lt;/head&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="31"></td>
+               <td class="line-content"><span class="html-tag">&lt;body&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="32"></td>
+               <td class="line-content"><span class="html-tag">&lt;/body&gt;</span></td>
+            </tr>
+            <tr>
+               <td class="line-number" value="33"></td>
+               <td class="line-content"><span class="html-tag">&lt;/html&gt;</span><span class="html-end-of-file"></span></td>
+            </tr>
+         </tbody>
+      </table>
+   </body>
+</html>
