@@ -14,7 +14,8 @@ Push Notification allow admin to automatically notify your audience when you hav
 This can be a notification on a phone or via a browser, such as Chrome, Firefox, or Safari.
 
 = Features: =
-* NEW: One step solution
+* AMP Compatibility
+* Native WordPress Integration
 * NEW: Easily integration to WordPress site
 * Cache Expire option added
 * <strong>Notifications </strong>: Notifications appear as message alerts.
@@ -37,7 +38,7 @@ You may now contribute to this Push Notification plugin on Github: [View reposit
 == Frequently Asked Questions ==
 
 = How to install and use this Push Notification plugin? =
-After you Active this plugin, and go the push notification Options settings to setup options accordingly.  
+After you Active this plugin, and go the push notification Options settings to connect API accordingly.  
 
 = How do I report bugs and suggest new features? =
 You can report the bugs for this Push Notification plugin [here](https://github.com/ahmedkaludi/push-notification/issues)
@@ -49,5 +50,5 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
-= 1.0 (14 December 2019) =
+= 1.0 (19 December 2019) =
 * Version 1.0 Released
