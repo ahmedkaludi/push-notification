@@ -3,35 +3,56 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 class Push_Notification_Frontend{
+	public $notificatioArray = array("gcm_sender_id"=> "103953800507");
 	public function __construct(){
 		$this->init();
 	}
 
 	public function init(){
-		//manifest
-		add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-		//create manifest
-		add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
+		if( function_exists('pwaforwp_init_plugin') ){
+			
+			add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
+			add_filter( "pwaforwp_sw_js_template", array($this, 'add_sw_js_content') );
+		}else{
+			//manifest
+			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
+			//create manifest
+			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
+			//ServiceWorker
+			add_action("wp_enqueue_scripts", array($this, 'enqueue_pn_scripts') );
 
-		//ServiceWorker
-		add_action("wp_enqueue_scripts", array($this, 'enqueue_pn_scripts') );
-		//firebase serviceworker
+			//firebase serviceworker
+			add_action( 'parse_query', array($this, 'load_service_worker') );
+		}
+
 		add_action( 'init', array($this, 'sw_template_query_var') );
-		add_action( 'parse_query', array($this, 'load_service_worker') );
 
 		add_action( 'wp_ajax_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) ); 
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
 		//AMP Connect
 		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
+		add_filter('template_include', array($this, 'page_include'), 1, 1);
 	}
 	function sw_template_query_var(){
 		global $wp;
 		 $wp->add_query_var( 'push_notification_sw' );
+		 $wp->add_query_var( 'push_notification_amp_js' );
+		 $wp->add_query_var( 'subscribe_pushnotification' );
+
+		 add_rewrite_rule('subscribe/pushnotification/?$', 
+					'index.php?subscribe_pushnotification=1','top');
 	}
 
 	function load_service_worker(WP_Query $query ){
 		if ( $query->is_main_query() && $query->get( 'push_notification_sw' ) ) {
 			header("Service-Worker-Allowed: /");
+			header("Content-Type: application/javascript");
+			header('Accept-Ranges: bytes');
+			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
+			echo $messageSw;
+                exit;
+		}
+		if ( $query->is_main_query() && $query->get( 'push_notification_amp_js' ) ) {
 			header("Content-Type: application/javascript");
 			header('Accept-Ranges: bytes');
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
@@ -69,7 +90,7 @@ class Push_Notification_Frontend{
 	public function enqueue_pn_scripts(){
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/app.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/app.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		if ( is_multisite() ) {
             $link = get_site_url();              
         }
@@ -118,9 +139,14 @@ class Push_Notification_Frontend{
         return true;
     }
     public function get_manifest($request){
-    	$array = array("gcm_sender_id"=> "103953800507");
+    	$array = $this->notificatioArray;
         return $array;
     }  
+
+    public function manifest_add_gcm_id($manifest){
+    	$manifest = array_merge($manifest, $this->notificatioArray);
+    	return $manifest;
+    }
 
     public function pn_register_subscribers(){
 		$nonce = sanitize_text_field($_POST['nonce']);
@@ -163,16 +189,26 @@ class Push_Notification_Frontend{
 	* Amp Entry point
 	*/
 	public function amp_entry_gate(){
-		add_filter("amp_post_template_data", array($this,'script_add'));
+		if( !function_exists('pwaforwp_init_plugin') ){
+			add_action('amp_post_template_head',array($this, 'manifest_add_homescreen'),1);
+		}
 		add_action("ampforwp_after_header", array($this, 'header_content'));
-		add_action('amp_post_template_head',array($this, 'manifest_add_homescreen'),1);
+		add_action("amp_post_template_css", array($this, 'header_button_css'));
 	}
 
-	function script_add($data){
-		if ( empty( $data['amp_component_scripts']['amp-web-push'] ) ) {
-				$data['amp_component_scripts']['amp-web-push'] = 'https://cdn.ampproject.org/v0/amp-web-push-0.1.js';
-			}
-		return $data;
+	function page_include($template){
+		global $wp_query;
+    	if(isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification'){
+    		$template = PUSH_NOTIFICATION_PLUGIN_DIR.'/inc/frontend/amp-pn-subscribe.php';
+    	}
+    	return $template;
+	}
+
+	function header_button_css(){
+		echo '.pushnotification-class{width:100%; text-align:center;}
+		.pushnotification-class a{background-color: #0062cc;padding: .5rem 1rem;border-radius: 23px;color: white;}
+		.pushnotification-class a:hover{color: white;}
+		';
 	}
 
 	function header_content(){
@@ -183,33 +219,11 @@ class Push_Notification_Frontend{
             $link = home_url();
         }
 		?>
-		<amp-web-push-widget
-		  visibility="unsubscribed"
-		  layout="fixed"
-		  width="250"
-		  height="80"
-		>
-		  <button on="tap:amp-web-push.subscribe">Subscribe to Notifications</button>
-		</amp-web-push-widget>
-
-		<!-- An unsubscription widget -->
-		<amp-web-push-widget
-		  visibility="subscribed"
-		  layout="fixed"
-		  width="250"
-		  height="80"
-		>
-		  <button on="tap:amp-web-push.unsubscribe">
-		    Unsubscribe from Notifications
-		  </button>
-		</amp-web-push-widget>
-		<amp-web-push 
-		id="amp-web-push"
-    	layout="nodisplay" 
-		  helper-iframe-url="<?php echo PUSH_NOTIFICATION_PLUGIN_URL.'assets/amp/helper-iframe.html'; ?>"
-		  permission-dialog-url="<?php echo PUSH_NOTIFICATION_PLUGIN_URL.'assets/amp/permission-dialog.html'; ?>"
-		  service-worker-url="<?php echo esc_url_raw(trailingslashit($link)."?push_notification_sw=1"); ?>"
-		></amp-web-push>
+		<div class="pushnotification-class">
+			<a class="" target="_blank" href="<?php echo esc_url_raw($link."/subscribe/pushnotification")?>"><?php
+			echo esc_html__('Subscribe for notification', 'push-notification');
+			?></a>
+		</div>
 
 		<?php
 	}
