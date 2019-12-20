@@ -201,7 +201,7 @@ class Push_Notification_Admin{
 			PN_Field_Generator::get_input_password('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
 			echo '<span class="resp_message"></span></fieldset>
-			<p>'.esc_html__('Get the API', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding).'">'.esc_html__('click here', 'push-notification').'</a></p>';
+			<p>'.esc_html__('This plugin requires a free API key for PushNotification.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
 		}else{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>
 				<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>
