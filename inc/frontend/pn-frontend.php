@@ -97,17 +97,14 @@ class Push_Notification_Frontend{
         else {
             $link = home_url();
         }    
-		$settings = array(
+        $auth_settings = push_notification_auth_settings();
+        $messageConfig = '';
+        if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
+        	$messageConfig = json_decode($auth_settings['messageManager'], true);
+        }
+        $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
-					'pn_config'=> array(
-							  "apiKey"=> "AIzaSyCt8RVdgpFPaoTmzx84gAgi6zzVCpGlnZg",
-							  "authDomain"=> "fir-pushnotification-1940a.firebaseapp.com",
-							  "databaseURL"=> "https://fir-pushnotification-1940a.firebaseio.com",
-							  "projectId"=> "fir-pushnotification-1940a",
-							  "storageBucket"=> "fir-pushnotification-1940a.appspot.com",
-							  "messagingSenderId"=> "1231518440",
-							  "appId"=> "1:1231518440:web:9efeed716a5da8341aa75d"
-							),
+					'pn_config'=> $messageConfig,
 					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
 					"scope" => esc_url_raw(trailingslashit($link)),
 					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php'))

@@ -22,6 +22,7 @@ class PN_Server_Request{
 		if($response['status']==200){
 			$response['response'] = array_map( 'sanitize_text_field',  $response['response']  );
 			$push_notification_auth_settings['token_details'] = $response['response'];
+			$push_notification_auth_settings['messageManager'] = $response['response']['messageManager'];
 		}
 
 		update_option('push_notification_auth_settings', $push_notification_auth_settings);
