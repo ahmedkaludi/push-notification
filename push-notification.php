@@ -23,12 +23,15 @@ define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 add_action('plugins_loaded', 'push_notification_initialize');
 function push_notification_initialize(){
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";
+	if(is_admin()){
+		add_filter( 'plugin_action_links_' . PUSH_NOTIFICATION_PLUGIN_BASENAME,'push_notification_add_action_links', 10, 4);
+		//add_action( 'admin_notices', 'show_notification_to_users');
+	}
 }
 require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/frontend/pn-frontend.php";
-add_filter( 'plugin_action_links_' . PUSH_NOTIFICATION_PLUGIN_FILE,'push_notification_add_action_links', 10, 1);
 
-function push_notification_add_action_links($links){
-    //print_r($links);die;
+
+function push_notification_add_action_links($actions, $plugin_file, $plugin_data, $context){
     $mylinks = array('<a href="' . esc_url_raw(admin_url( 'admin.php?page=push-notification' )) . '">'.esc_html__( 'Settings', 'push-notification' ).'</a>');
-    return array_merge( $links, $mylinks );
+    return array_merge( $actions, $mylinks );
 }

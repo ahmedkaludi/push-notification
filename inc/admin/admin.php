@@ -130,7 +130,7 @@ if(\"serviceWorker\" in navigator) {
 	public function add_menu_links(){
 		// Main menu page
 		add_menu_page( esc_html__( 'Push Notification-Admin', 'push-notification' ), 
-	                esc_html__( 'Push Notification', 'push-notification' ), 
+	                esc_html__( 'Push Notifications Options', 'push-notification' ), 
 	                'manage_options',
 	                'push-notification',
 	                array($this, 'admin_interface_render'),
@@ -138,7 +138,7 @@ if(\"serviceWorker\" in navigator) {
 		
 		// Settings page - Same as main menu page
 		add_submenu_page( 'push-notification',
-	                esc_html__( 'Push Notification-Admin', 'push-notification' ),
+	                esc_html__( 'Push Notifications Options', 'push-notification' ),
 	                esc_html__( 'Settings', 'push-notification' ),
 	                'manage_options',
 	                'push-notification',
@@ -152,7 +152,7 @@ if(\"serviceWorker\" in navigator) {
 			return;
 		}
 		?><div class="wrap push_notification-settings-wrap">
-			<h1 class="page-title"><?php echo esc_html__('Push notification', 'push-notification'); ?></h1>
+			<h1 class="page-title"><?php echo esc_html__('Push Notifications Options', 'push-notification'); ?></h1>
 			<form action="options.php" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
 				<div class="form-wrap">
 					<?php
