@@ -26,12 +26,17 @@ class Push_Notification_Admin{
 
 		/** pwaforwp installed than work with that */
 		if( function_exists('pwaforwp_init_plugin') ){
-			/* * service worker change */
-			add_filter( "pwaforwp_sw_js_template", array($this, 'add_sw_js_content') , 10, 1);
-			add_filter( "pwaforwp_pn_config", array($this, 'add_pn_config') , 10, 1);
-			add_filter( "pwaforwp_pn_use_sw", array($this, 'add_pn_use_sw') , 10, 1);
-			add_filter( "pwaforwp_sw_register_template", array($this, 'add_sw_register_template') , 10, 1);
-			
+			/** service worker change */
+			$settings = pwaforwp_defaultSettings();
+			if($settings['notification_feature']==1 && $settings['notification_options']=='pushnotifications_io'){
+				add_filter( "pwaforwp_sw_js_template", array($this, 'add_sw_js_content') , 10, 1);
+				add_filter( "pwaforwp_pn_config", array($this, 'add_pn_config') , 10, 1);
+				add_filter( "pwaforwp_pn_use_sw", array($this, 'add_pn_use_sw') , 10, 1);
+				add_filter( "pwaforwp_sw_register_template", array($this, 'add_sw_register_template') , 10, 1);
+			}
+
+
+
 
 		}
 	}
