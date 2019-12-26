@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.3
-Stable tag: 1.1
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notification, send notification, notification, Mobile, Web Manifest, Manifest, Offline notification
@@ -49,6 +49,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.2 (26 December 2019) =
+* Added: Compatible with PWA for WP
+
 = 1.0 (19 December 2019) =
 * Minor Settings changes
 

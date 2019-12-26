@@ -124,9 +124,9 @@ class Push_Notification_Frontend{
 	}
 	public function pwaforwp_enqueue_pn_scripts(){
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
-		wp_localize_script('pn-script-messaging-frontend', 'pnScriptSetting', $settings);
+		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
 	}
 
 	public function manifest_add_homescreen(){
