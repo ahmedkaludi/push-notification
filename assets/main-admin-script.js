@@ -7,12 +7,12 @@ jQuery(document).ready(function($){
                 content += '<p>Do you want the latest on <b>Push Notification update</b> before others and some best resources on monetization in a single email? - Free just for users of Push Notification!</p>';
                         content += '<style type="text/css">';
                         content += '.wp-pointer-buttons{ padding:0; overflow: hidden; }';
-                        content += '.wp-pointer-content .button-secondary{  left: -25px;background: transparent;top: 5px; border: 0;position: relative; padding: 0; box-shadow: none;margin: 0;color: #0085ba;} .wp-pointer-content .button-primary{ display:none}  #afw_mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }';
+                        content += '.wp-pointer-content .button-secondary{  left: -25px;background: transparent;top: 5px; border: 0;position: relative; padding: 0; box-shadow: none;margin: 0;color: #0085ba;} .wp-pointer-content .button-primary{ display:none}  #pn_mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }';
                         content += '</style>';                        
-                        content += '<div id="afw_mc_embed_signup">';
+                        content += '<div id="pn_mc_embed_signup">';
                         content += '<form action="//app.mailerlite.com/webforms/submit/f3v4h7" data-id="82938986" data-code="f3v4h7" method="POST" target="_blank">';
-                        content += '<div id="afw_mc_embed_signup_scroll">';
-                        content += '<div class="afw-mc-field-group" style="    margin-left: 15px;    width: 195px;    float: left;">';
+                        content += '<div id="pn_mc_embed_signup_scroll">';
+                        content += '<div class="pn-mc-field-group" style="    margin-left: 15px;    width: 195px;    float: left;">';
                         content += '<input type="text" name="fields[name]" class="form-control" placeholder="Name" hidden value="'+pn_setings.current_user_name+'" style="display:none">';
                         content += '<input type="text" value="'+pn_setings.current_user_email+'" name="fields[email]" class="form-control" placeholder="Email*"  style="      width: 180px;    padding: 6px 5px;">';
                         content += '<input type="text" name="fields[company]" class="form-control" placeholder="Website" hidden style=" display:none; width: 168px; padding: 6px 5px;" value="'+pn_setings.get_home_url+'">';
