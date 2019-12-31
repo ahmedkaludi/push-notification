@@ -10,6 +10,7 @@ class Push_Notification_Admin{
 	public function __construct(){}
 
 	public function init(){
+		add_action('admin_notices', array($this, 'admin_notices_opt') );
 		add_action( 'admin_menu', array( $this, 'add_menu_links') );
 		add_action( 'admin_init', array( $this, 'settings_init') );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ) );
@@ -68,6 +69,7 @@ class Push_Notification_Admin{
 
 	function add_sw_register_template($swHtmlContent){
 		$sw_registerContent = $this->pn_get_layout_files('public/app.js');
+		//do not change content of $replaceCnt , "not single space" 
 		$replaceCnt = "var config=pnScriptSetting.pn_config;                     
 if (!firebase.apps.length) {
 	firebase.initializeApp(config);	
@@ -134,8 +136,8 @@ if(\"serviceWorker\" in navigator) {
 
 	public function add_menu_links(){
 		// Main menu page
-		add_menu_page( esc_html__( 'Push Notification-Admin', 'push-notification' ), 
-	                esc_html__( 'Push Notifications Options', 'push-notification' ), 
+		add_menu_page( esc_html__( 'Push Notification', 'push-notification' ), 
+	                esc_html__( 'Push Notifications', 'push-notification' ), 
 	                'manage_options',
 	                'push-notification',
 	                array($this, 'admin_interface_render'),
@@ -361,7 +363,11 @@ if(\"serviceWorker\" in navigator) {
 			$image_url = esc_url_raw($_POST['image_url']);
 			if( isset( $auth_settings['user_token'] ) ){
 				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $image_url );
+				if($response){
 				 echo json_encode($response);die;
+				}else{
+					echo json_encode(array("status"=> 403, 'message'=>'Request not completed'));die;
+				}
 			}else{
 				echo json_encode(array("status"=> 503, 'message'=>'User token not found'));die;	
 			}
@@ -436,6 +442,23 @@ if(\"serviceWorker\" in navigator) {
 	      return false;
 	    }else{
 	      return wp_remote_retrieve_body( $fileContentResponse );
+	    }
+	}
+
+	/**
+	* show notices if API is not entered in option panel
+	*/
+	function admin_notices_opt(){
+		global $pagenow;
+		$auth_settings = push_notification_auth_settings();
+		if( !isset( $auth_settings['user_token'] ) || (isset( $auth_settings['user_token'] ) && empty($auth_settings['user_token']) ) ){
+	         echo sprintf('<div class="notice notice-warning is-dismissible">
+				             <p>%s <a href="%s">%s</a>.</p>
+				         </div>',
+				         esc_html__('Push Notification is require API, Please enter', 'push-notification'),
+				         admin_url('admin.php?page=push-notification'),
+				         esc_html__('API key', 'push-notification')
+				     );
 	    }
 	}
 

@@ -117,7 +117,7 @@ jQuery(document).ready(function($){
 					
 					jQuery('#notification-title').val("");
 					jQuery('#notification-link').val("");
-					Query('#notification-imageurl').val("");
+					jQuery('#notification-imageurl').val("");
 					jQuery('#notification-message').val("");
 				}else{
 					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"green"});
