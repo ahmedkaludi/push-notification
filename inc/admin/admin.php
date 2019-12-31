@@ -23,6 +23,94 @@ class Push_Notification_Admin{
 
 		//Send push on publish and update
 		add_action( 'transition_post_status', array( $this, 'send_notification_on_update' ), 10, 3 ); 
+
+		/** pwaforwp installed than work with that */
+		if( function_exists('pwaforwp_init_plugin') ){
+			/** service worker change */
+			$settings = pwaforwp_defaultSettings();
+			if($settings['notification_feature']==1 && $settings['notification_options']=='pushnotifications_io'){
+				add_filter( "pwaforwp_sw_js_template", array($this, 'add_sw_js_content') , 10, 1);
+				add_filter( "pwaforwp_pn_config", array($this, 'add_pn_config') , 10, 1);
+				add_filter( "pwaforwp_pn_use_sw", array($this, 'add_pn_use_sw') , 10, 1);
+				add_filter( "pwaforwp_sw_register_template", array($this, 'add_sw_register_template') , 10, 1);
+			}
+
+
+
+
+		}
+	}
+
+
+	/*
+	* This function will Messaging functions in service worker
+	* 
+	*/
+	function add_sw_js_content($swJsContent){
+		$messageSw = $this->pn_get_layout_files('messaging-sw.js');
+			$settings = $this->json_settings();
+			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+		$swJsContent .= $messageSw;
+		return $swJsContent;
+	}
+
+	function add_pn_config($firebaseconfig){
+		$firebaseconfig   = 'var config = pnScriptSetting.pn_config;'
+                            .'if (!firebase.apps.length) {firebase.initializeApp(config);}
+                            const messaging = firebase.messaging();';
+		return $firebaseconfig;
+	}
+
+	function add_pn_use_sw($useserviceworker){
+		 $useserviceworker = 'messaging.useServiceWorker(reg);';
+		return $useserviceworker;
+	}
+
+	function add_sw_register_template($swHtmlContent){
+		$sw_registerContent = $this->pn_get_layout_files('public/app.js');
+		$replaceCnt = "var config=pnScriptSetting.pn_config;                     
+if (!firebase.apps.length) {
+	firebase.initializeApp(config);	
+}                    		  		  	
+ var swsource = pnScriptSetting.swsource;
+const messaging = firebase.messaging();
+if(\"serviceWorker\" in navigator) {
+	window.addEventListener('load', function() {
+		navigator.serviceWorker.register(swsource, {scope: pnScriptSetting.scope}).then(function(reg){
+			messaging.useServiceWorker(reg);
+			console.log('Congratulations!!Service Worker Registered ServiceWorker scope: ', reg.scope);
+																							
+		}).catch(function(err) {
+			console.log('ServiceWorker registration failed: ', err);
+		});	
+	})
+}";
+		$sw_registerContent = str_replace($replaceCnt, '', $sw_registerContent);
+		//Concatnate content in main service worker register
+		$swHtmlContent .= $sw_registerContent;
+		return $swHtmlContent;
+	}
+
+	public function json_settings(){
+		if ( is_multisite() ) {
+            $link = get_site_url();              
+        }
+        else {
+            $link = home_url();
+        }    
+        $auth_settings = push_notification_auth_settings();
+        $messageConfig = '';
+        if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
+        	$messageConfig = json_decode($auth_settings['messageManager'], true);
+        }
+        $settings = array(
+					'nonce' =>  wp_create_nonce("pn_notification"),
+					'pn_config'=> $messageConfig,
+					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
+					"scope" => esc_url_raw(trailingslashit($link)),
+					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php'))
+					);
+        return $settings;
 	}
 
 	function load_admin_scripts($hook_suffix){
@@ -47,7 +135,7 @@ class Push_Notification_Admin{
 	public function add_menu_links(){
 		// Main menu page
 		add_menu_page( esc_html__( 'Push Notification-Admin', 'push-notification' ), 
-	                esc_html__( 'Push Notification', 'push-notification' ), 
+	                esc_html__( 'Push Notifications Options', 'push-notification' ), 
 	                'manage_options',
 	                'push-notification',
 	                array($this, 'admin_interface_render'),
@@ -55,7 +143,7 @@ class Push_Notification_Admin{
 		
 		// Settings page - Same as main menu page
 		add_submenu_page( 'push-notification',
-	                esc_html__( 'Push Notification-Admin', 'push-notification' ),
+	                esc_html__( 'Push Notifications Options', 'push-notification' ),
 	                esc_html__( 'Settings', 'push-notification' ),
 	                'manage_options',
 	                'push-notification',
@@ -69,7 +157,7 @@ class Push_Notification_Admin{
 			return;
 		}
 		?><div class="wrap push_notification-settings-wrap">
-			<h1 class="page-title"><?php echo esc_html__('Push notification', 'push-notification'); ?></h1>
+			<h1 class="page-title"><?php echo esc_html__('Push Notifications Options', 'push-notification'); ?></h1>
 			<form action="options.php" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
 				<div class="form-wrap">
 					<?php
@@ -325,6 +413,30 @@ class Push_Notification_Admin{
 			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $image_url );
 		}//auth token check 
 	
+	}
+
+	public function pn_get_layout_files($filePath){
+	    $fileContentResponse = @wp_remote_get(esc_url_raw(PUSH_NOTIFICATION_PLUGIN_URL.'/assets/'.$filePath));
+	    if(wp_remote_retrieve_response_code($fileContentResponse)!=200){
+	      if(!function_exists('get_filesystem_method')){
+	        require_once( ABSPATH . 'wp-admin/includes/file.php' );
+	      }
+	      $access_type = get_filesystem_method();
+	      if($access_type === 'direct')
+	      {
+	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.($filePath);
+	         $creds = request_filesystem_credentials($file, '', false, false, array());
+	        if ( ! WP_Filesystem($creds) ) {
+	          return false;
+	        }   
+	        global $wp_filesystem;
+	        $htmlContentbody = $wp_filesystem->get_contents($file);
+	        return $htmlContentbody;
+	      }
+	      return false;
+	    }else{
+	      return wp_remote_retrieve_body( $fileContentResponse );
+	    }
 	}
 
 	

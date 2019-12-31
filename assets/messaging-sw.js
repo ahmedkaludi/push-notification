@@ -1,15 +1,7 @@
 importScripts("https://www.gstatic.com/firebasejs/6.2.4/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/6.2.4/firebase-messaging.js");
-
-var config ={
-  apiKey: "AIzaSyCt8RVdgpFPaoTmzx84gAgi6zzVCpGlnZg",
-  authDomain: "fir-pushnotification-1940a.firebaseapp.com",
-  databaseURL: "https://fir-pushnotification-1940a.firebaseio.com",
-  projectId: "fir-pushnotification-1940a",
-  storageBucket: "fir-pushnotification-1940a.appspot.com",
-  messagingSenderId: "1231518440",
-  appId: "1:1231518440:web:9efeed716a5da8341aa75d"
-};
+var pnScriptSetting = {{pnScriptSetting}}
+var config=pnScriptSetting.pn_config;   
 if (!firebase.apps.length) {firebase.initializeApp(config);}		  		  		  
 const messaging = firebase.messaging();
 
