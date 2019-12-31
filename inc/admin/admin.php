@@ -293,7 +293,7 @@ if(\"serviceWorker\" in navigator) {
 			PN_Field_Generator::get_input_password('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
 			echo '<span class="resp_message"></span></fieldset>
-			<p>'.esc_html__('This plugin requires a free API key for PushNotification.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
+			<p>'.esc_html__('This plugin requires a free API key form PushNotification.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
 		}else{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>
 				<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>
@@ -320,6 +320,12 @@ if(\"serviceWorker\" in navigator) {
 		}else{
 			$user_token = sanitize_text_field($_POST['user_token']);
 			$response = PN_Server_Request::varifyUser($user_token);
+			if( function_exists('pwaforwp_required_file_creation') ){
+				$pwaSettings = pwaforwp_defaultSettings();
+				if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+					pwaforwp_required_file_creation();
+				}
+			}
 
 			echo json_encode($response);die;
 		}
