@@ -125,12 +125,14 @@ if(\"serviceWorker\" in navigator) {
 	        else {
 	            $link = home_url();
 	        }    
-			wp_localize_script("push_notification_script", 'pn_setings', 
-								array(
-									"home_url"=>  esc_url_raw($link),
-									"remote_nonce"=> wp_create_nonce("pn_notification")
-									)
+	        $object = array(
+							"home_url"=>  esc_url_raw($link),
+							"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
+							"remote_nonce"=> wp_create_nonce("pn_notification")
 							);
+	        
+	        $object = apply_filters('pushnotification_localize_filter',$object, 'pn_setings');
+			wp_localize_script("push_notification_script", 'pn_setings', $object);
 		}
 	}
 

@@ -23,6 +23,7 @@ define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 add_action('plugins_loaded', 'push_notification_initialize');
 function push_notification_initialize(){
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/newsletter.php"; 
 	if(is_admin()){
 		add_filter( 'plugin_action_links_' . PUSH_NOTIFICATION_PLUGIN_BASENAME,'push_notification_add_action_links', 10, 4);
 	}
@@ -44,3 +45,10 @@ function push_notification_on_activate(){
 		update_option( 'pwaforwp_settings', $pwaforwp_settings); 
 	}
 }
+
+function push_notification_after_activation_redirect( $plugin ) {
+    if( $plugin == plugin_basename( __FILE__ ) ) {
+        exit( wp_redirect( admin_url( 'admin.php?page=push-notification' ) ) );
+    }
+}
+add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
