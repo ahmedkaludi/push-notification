@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.3
-Stable tag: 1.2
+Stable tag: 1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notification, send notification, notification, Mobile, Web Manifest, Manifest, Offline notification
@@ -27,10 +27,10 @@ This can be a notification on a phone or via a browser, such as Chrome, Firefox,
 * More Push Notification Features Coming soon.
 
 **We Act Fast on Feedback!**
-We are actively developing this plugin and our aim is to make this plugin into the #1 solution for Push Notification in the world. You can [Request a Feature](https://github.com/ahmedkaludi/push-notifications/issues) or [Report a Bug](https://push-notification.com/contact-us/).
+We are actively developing this plugin and our aim is to make this plugin into the #1 solution for Push Notification in the world. You can [Request a Feature](https://github.com/ahmedkaludi/push-notifications/issues) or [Report a Bug](http://pushnotifications.io/contact/).
 
 **Technical Support**
-Support is provided in [Forum](https://wordpress.org/support/plugin/push-notification). You can also [Contact us](https://push-notification.com/contact-us/), our turn around time on email is around 12 hours. 
+Support is provided in [Forum](https://wordpress.org/support/plugin/push-notification). You can also [Contact us](http://pushnotifications.io/contact), our turn around time on email is around 12 hours. 
 
 **Would you like to contribute?**
 You may now contribute to this Push Notification plugin on Github: [View repository](https://github.com/ahmedkaludi/push-notification) on Github
@@ -49,6 +49,10 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.3 (31 December 2019) =
+* Resolve: PWA service worker not update
+* Minor bugs fixes
+
 = 1.2 (26 December 2019) =
 * Added: Compatible with PWA for WP
 

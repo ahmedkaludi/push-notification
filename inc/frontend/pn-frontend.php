@@ -10,11 +10,18 @@ class Push_Notification_Frontend{
 
 	public function init(){
 		if( function_exists('pwaforwp_init_plugin') ){
-			
-			add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
-			
-			add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
-
+			$addNotification = false;
+			if( function_exists('pwaforwp_defaultSettings') ) {
+				$pwaSettings = pwaforwp_defaultSettings();
+				if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+					$addNotification = true;
+				}
+			}
+			if($addNotification){
+				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
+				
+				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
+			}
 		}else{
 			//manifest
 			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
@@ -117,10 +124,10 @@ class Push_Notification_Frontend{
 
 	public function enqueue_pn_scripts(){
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/app.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
-		wp_localize_script('pn-script-frontend', 'pnScriptSetting', $settings);
+		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
 	}
 	public function pwaforwp_enqueue_pn_scripts(){
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
