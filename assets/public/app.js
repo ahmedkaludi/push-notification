@@ -4,6 +4,7 @@ if (!firebase.apps.length) {
 }                    		  		  	
  var swsource = pnScriptSetting.swsource;
 const messaging = firebase.messaging();
+firebase.analytics();
 if("serviceWorker" in navigator) {
 	window.addEventListener('load', function() {
 		navigator.serviceWorker.register(swsource, {scope: pnScriptSetting.scope}).then(function(reg){
