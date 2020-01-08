@@ -52,3 +52,36 @@ function push_notification_after_activation_redirect( $plugin ) {
     }
 }
 add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
+
+
+register_activation_hook( __FILE__, 'push_notification_init_activation' );
+function push_notification_init_activation(){
+	$auth_settings = push_notification_auth_settings();
+	//Push notification Check
+    if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
+    	//pwaforamp check
+    	if( function_exists('pwaforwp_required_file_creation') ){
+			$pwaSettings = pwaforwp_defaultSettings();
+			if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+				pwaforwp_required_file_creation();
+			}
+		}
+
+    }
+
+	
+}
+
+
+add_action("plugins_loaded", 'push_notification_older_version_compatibility');
+function push_notification_older_version_compatibility(){
+	$configCompatible = get_transient( 'push_notification_older_version' );
+
+	if(!$configCompatible){
+		$auth_settings = push_notification_auth_settings();
+		if( isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1 && !isset($auth_settings['messageManager']) ){
+			$response = PN_Server_Request::varifyUser($auth_settings['user_token']);
+			set_transient( 'push_notification_older_version', 1 );
+		}
+	}
+}
