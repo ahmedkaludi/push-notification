@@ -215,6 +215,13 @@ if(\"serviceWorker\" in navigator) {
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_key_posttype_select',								// ID
+				esc_html__('Send notification on publish', 'push-notification'),// Title
+				array( $this, 'pn_key_posttype_select_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_user_settings_section'	// Settings Section ID
+			);
 		
 	}
 
@@ -312,6 +319,12 @@ if(\"serviceWorker\" in navigator) {
 		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
 
 	}
+	public function pn_key_posttype_select_callback(){
+		$notification = push_notification_settings();
+		$data = get_post_types();
+		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
+
+	}
 
 	public function pn_verify_user(){
 		$nonce = sanitize_text_field($_POST['nonce']);
@@ -389,6 +402,12 @@ if(\"serviceWorker\" in navigator) {
 
 		if ( 'publish' !== $new_status ){
         	return;
+		}
+		if(!isset($pn_settings['posttypes'])){
+			$pn_settings['posttypes'] = array("post");
+		}
+		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
+			return;
 		}
 		
 		$send_notification = false;
@@ -505,6 +524,21 @@ class PN_Field_Generator{
 	public static function get_input_checkbox($name, $value, $id="", $class=""){
 		$settings = push_notification_settings();
 		?><input type="checkbox" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/><?php
+	}
+	public static function get_input_multi_select($name, $value, $options, $id="", $class=""){
+		$settings = push_notification_settings();
+		if( isset($settings[$name]) ){
+			$value = $settings[$name];
+		}
+		?><select multiple name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text" id="<?php echo esc_attr($id); ?>" >
+			<?php foreach ($options as $key => $opt) {
+				$sel = '';
+				if(isset($value) && in_array($key, $value)){
+					$sel = 'selected';
+				}
+				echo '<option value="'.$key.'" '.$sel.'>'.$opt.'</option>';
+			} ?>
+		</select><?php
 	}
 	public static function get_input_password($name, $id="", $class=""){
 		$settings = push_notification_settings();
