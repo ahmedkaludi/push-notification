@@ -56,7 +56,7 @@ add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
 
 register_activation_hook( __FILE__, 'push_notification_init_activation' );
 function push_notification_init_activation(){
-	$auth_settings = push_notification_auth_settings();
+	$auth_settings = get_option( 'push_notification_auth_settings', array() );
 	//Push notification Check
     if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
     	//pwaforamp check

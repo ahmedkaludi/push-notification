@@ -4,7 +4,6 @@ if (!firebase.apps.length) {
 }                    		  		  	
  var swsource = pnScriptSetting.swsource;
 const messaging = firebase.messaging();
-firebase.analytics();
 if("serviceWorker" in navigator) {
 	window.addEventListener('load', function() {
 		navigator.serviceWorker.register(swsource, {scope: pnScriptSetting.scope}).then(function(reg){
@@ -15,7 +14,8 @@ if("serviceWorker" in navigator) {
 			console.log('ServiceWorker registration failed: ', err);
 		});	
 	})
-}	  
+}
+firebase.analytics();	  
 
   // [START refresh_token]
   // Callback fired if Instance ID token is updated.
