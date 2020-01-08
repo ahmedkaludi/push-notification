@@ -49,6 +49,12 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.4 (8 January 2020) =
+* Bug Fixed: Push notification will send on specified user defined post types
+* Added : Reporting feature for notification success or faliure
+* Resolve: Old Validated users added compatibility to get messager data
+* Added: Repoting feature compatibility with PWAforWP
+
 = 1.3 (31 December 2019) =
 * Resolve: PWA service worker not update
 * Minor bugs fixes
