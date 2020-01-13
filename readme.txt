@@ -1,23 +1,23 @@
-=== Push Notification ===
+=== Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 5.3
+Tested up to: 5.3.2
 Stable tag: 1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Tags: Push Notification, send notification, notification, Mobile, Web Manifest, Manifest, Offline notification
+Tags: Push Notifications, Mobile, amp, Mobile, Web Push Notifications, push, notifications, engagement, alert
 
 
 == Description ==
-Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
+Push Notifications for WP & AMP makes it easy to send Web Push notifications to your users for FREE with 2 Mins setup. 
 
-This can be a notification on a phone or via a browser, such as Chrome, Firefox, or Safari.
+Send push notifications automatically when a post is published or updated. You can also send custom notifications from the app dashboard. The audience reports and campaign reports are available as well.
 
 = Features: =
+* Free & Easy setup
+* PWA Friendly (with offline push notifications)
 * AMP Compatibility
 * Native WordPress Integration
-* NEW: Easily integration to WordPress site
-* Cache Expire option added
 * <strong>Notifications </strong>: Notifications appear as message alerts.
 * Publishing a post will trigger push notifications.
 * Update a post a draft will not trigger push notifications.
@@ -52,7 +52,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 = 1.4 (8 January 2020) =
 * Bug Fixed: Push notification will send on specified user-defined post types
 * Added: Reporting feature for notification success or failure
-* Resolve: Old Validated users added compatibility to get message data
+* Resolve: Old Validated users added compatibility to get messager data
 * Added: Reporting feature compatibility with PWAforWP
 
 = 1.3 (31 December 2019) =
