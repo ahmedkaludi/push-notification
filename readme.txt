@@ -5,8 +5,7 @@ Tested up to: 5.3.2
 Stable tag: 1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Tags: Push Notifications, Mobile, amp, Mobile, Web Push Notifications, push, notifications, engagement, alert
-
+Tags: Push Notifications, Mobile, amp, Web Push Notifications
 
 == Description ==
 Push Notifications for WP & AMP makes it easy to send Web Push notifications to your users for FREE with 2 Mins setup. 
