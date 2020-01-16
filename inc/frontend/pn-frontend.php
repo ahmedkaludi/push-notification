@@ -9,6 +9,16 @@ class Push_Notification_Frontend{
 	}
 
 	public function init(){
+		$auth_settings = push_notification_auth_settings();
+		if(empty($auth_settings) 
+			|| !isset($auth_settings['user_token']) 
+			|| !isset($auth_settings['messageManager'])
+			|| (isset($auth_settings['messageManager']) 
+				&& empty( $auth_settings['messageManager']) 
+				) 
+		){
+        	return false;
+        }
 		if( function_exists('pwaforwp_init_plugin') ){
 			$addNotification = false;
 			if( function_exists('pwaforwp_defaultSettings') ) {
@@ -33,6 +43,7 @@ class Push_Notification_Frontend{
 			//firebase serviceworker
 			add_action( 'parse_query', array($this, 'load_service_worker') );
 		}
+		
 
 		add_action( 'init', array($this, 'sw_template_query_var') );
 
@@ -41,6 +52,17 @@ class Push_Notification_Frontend{
 		//AMP Connect
 		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
 		add_filter('template_include', array($this, 'page_include'), 1, 1);
+	}
+	public static function update_autoptimize_exclude( $values, $option ){
+		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js')){
+			$values .= ", ".PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js';
+		}
+		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js')){
+			$values .= ", ".PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js';
+		}
+		
+
+		return $values;
 	}
 	function sw_template_query_var(){
 		global $wp;
@@ -227,6 +249,12 @@ class Push_Notification_Frontend{
 	public function amp_entry_gate(){
 		if( !function_exists('pwaforwp_init_plugin') ){
 			add_action('amp_post_template_head',array($this, 'manifest_add_homescreen'),1);
+
+		}else{
+			global $pwaServiceWorker;
+			remove_action('amp_wp_template_footer',array($pwaServiceWorker, 'pwaforwp_service_worker'));
+			remove_action('amp_post_template_footer',array($pwaServiceWorker, 'pwaforwp_service_worker'));
+            remove_filter('amp_post_template_data',array($pwaServiceWorker, 'pwaforwp_service_worker_script'),35);
 		}
 		add_action("ampforwp_after_header", array($this, 'header_content'));
 		add_action("amp_post_template_css", array($this, 'header_button_css'));
@@ -234,16 +262,46 @@ class Push_Notification_Frontend{
 
 	function page_include($template){
 		global $wp_query;
-    	if(isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification'){
+    	if((isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification') || (isset($wp_query->query['subscribe_pushnotification']) && $wp_query->query['subscribe_pushnotification']==1)){
     		$template = PUSH_NOTIFICATION_PLUGIN_DIR.'/inc/frontend/amp-pn-subscribe.php';
     	}
     	return $template;
 	}
 
 	function header_button_css(){
-		echo '.pushnotification-class{width:100%; text-align:center;}
+		echo '.pushnotification-class{width:100%; position: fixed;bottom: 55px;left:10px;z-index: 99;}
 		.pushnotification-class a{background-color: #0062cc;padding: .5rem 1rem;border-radius: 23px;color: white;}
 		.pushnotification-class a:hover{color: white;}
+		.pushnotification-class a:before{
+			content:"";
+			background: url(\''.PUSH_NOTIFICATION_PLUGIN_URL.'/assets/image/bell.png\');
+		  	width: 24px;
+		    height: 20px;
+		    background-repeat: no-repeat;
+		    display: inline-block;
+		    background-size: 20px;
+		    position: relative;
+		    top: 4px;
+		}
+				/* On screens that are 600px or less, set the background color to olive */
+		@media screen and (max-width: 600px) {
+		  .pushnotification-class a span{display:none;}
+		  .pushnotification-class a {
+			    background-color: #0062cc;
+			    padding: 11px 13px 12px 13px;
+			    border-radius: 100%;
+			    color: #fff;
+			    display: inline-block;
+			}
+		  .pushnotification-class a:before{
+			width: 25x;
+		    height: 25px;
+		    background-size: 25px;
+		    top: 0;
+
+		  }
+		}
+
 		';
 	}
 
@@ -256,9 +314,10 @@ class Push_Notification_Frontend{
         }
 		?>
 		<div class="pushnotification-class">
-			<a class="" target="_blank" href="<?php echo esc_url_raw($link."/subscribe/pushnotification")?>"><?php
+			<a class="" target="_blank" href="<?php echo esc_url_raw($link."/subscribe/pushnotification")?>">
+				<span><?php
 			echo esc_html__('Subscribe for notification', 'push-notification');
-			?></a>
+			?></span></a>
 		</div>
 
 		<?php
@@ -272,3 +331,4 @@ function push_notification_frontend_class(){
 	}
 
 }
+add_filter( "option_autoptimize_js_exclude", array('Push_Notification_Frontend', 'update_autoptimize_exclude') , 10, 2);
