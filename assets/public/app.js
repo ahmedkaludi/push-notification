@@ -40,7 +40,8 @@ firebase.analytics();
 
 	
 messaging.requestPermission().then(function() {
-	console.log("Notification permission granted.");                                    
+	console.log("Notification permission granted.");
+	document.cookie = "notification_permission=granted";                                    
 	if(push_notification_isTokenSentToServer()){
 		console.log('Token already saved');
 	}else{
@@ -203,4 +204,8 @@ var pushnotificationFCMGetOS = function() {
   }
 
   return os;
+}
+
+if (Notification.permission !== "granted") {
+	document.cookie = "notification_permission=granted";
 }
