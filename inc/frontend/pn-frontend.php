@@ -51,7 +51,11 @@ class Push_Notification_Frontend{
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
 		//AMP Connect
 		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
-		add_filter('template_include', array($this, 'page_include'), 1, 1);
+		if(function_exists('ampforwp_get_setting') && ampforwp_get_setting('amp-mobile-redirection')){
+			add_action('template_redirect', array($this, 'page_redirect'), 9);
+		}else{
+			add_filter('template_include', array($this, 'page_include'), 1, 1);
+		}
 	}
 	public static function update_autoptimize_exclude( $values, $option ){
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js')){
@@ -260,6 +264,15 @@ class Push_Notification_Frontend{
 		add_action("amp_post_template_css", array($this, 'header_button_css'));
 	}
 
+	function page_redirect(){
+		global $wp_query;
+    	if((isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification') || (isset($wp_query->query['subscribe_pushnotification']) && $wp_query->query['subscribe_pushnotification']==1)){
+    		$template = PUSH_NOTIFICATION_PLUGIN_DIR.'/inc/frontend/amp-pn-subscribe.php';
+    	}
+    	require_once $template;
+		exit;
+	}
+	
 	function page_include($template){
 		global $wp_query;
     	if((isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification') || (isset($wp_query->query['subscribe_pushnotification']) && $wp_query->query['subscribe_pushnotification']==1)){
