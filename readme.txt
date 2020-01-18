@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.3.2
-Stable tag: 1.4
+Stable tag: 1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,10 +48,16 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.5 (18 January 2020) =
+* Resolve: Resolve issue with autoptimize minimize and merge CSS
+* Improvement: Notification button design improved for mobile and desktop 
+* Resolve: AMP notification markup removed from IOS safari
+* Bug Fixed: Allow notification page not open while AMP default mobile redirection enabled.
+
 = 1.4 (8 January 2020) =
 * Bug Fixed: Push notification will send on specified user-defined post types
 * Added: Reporting feature for notification success or failure
-* Resolve: Old Validated users added compatibility to get messager data
+* Resolve: Old Validated users added compatibility to get message data
 * Added: Reporting feature compatibility with PWAforWP
 
 = 1.3 (31 December 2019) =
