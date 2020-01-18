@@ -49,10 +49,10 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 = 1.5 (18 January 2020) =
-* Resolve: Resolve issue with autoptimize minimize and merge CSS
-* Improvement: Notification button design improved for mobile and desktop 
+* Resolve: Resolve issue with autoptimize minimize and merge JS
+* Improvement: Notification button design improved for mobile and desktop in AMP
 * Resolve: AMP notification markup removed from IOS safari
-* Bug Fixed: Allow notification page not open while AMP default mobile redirection enabled.
+* Bug Fixed: Allow notification page not found while AMP default mobile redirection enabled.
 
 = 1.4 (8 January 2020) =
 * Bug Fixed: Push notification will send on specified user-defined post types
