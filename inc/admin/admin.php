@@ -68,26 +68,8 @@ class Push_Notification_Admin{
 	}
 
 	function add_sw_register_template($swHtmlContent){
-		$sw_registerContent = $this->pn_get_layout_files('public/app.js');
-		//do not change content of $replaceCnt , "not single space" 
-		$replaceCnt = "var config=pnScriptSetting.pn_config;                     
-if (!firebase.apps.length) {
-	firebase.initializeApp(config);	
-}                    		  		  	
- var swsource = pnScriptSetting.swsource;
-const messaging = firebase.messaging();
-if(\"serviceWorker\" in navigator) {
-	window.addEventListener('load', function() {
-		navigator.serviceWorker.register(swsource, {scope: pnScriptSetting.scope}).then(function(reg){
-			messaging.useServiceWorker(reg);
-			console.log('Congratulations!!Service Worker Registered ServiceWorker scope: ', reg.scope);
-																							
-		}).catch(function(err) {
-			console.log('ServiceWorker registration failed: ', err);
-		});	
-	})
-}";
-		$sw_registerContent = str_replace($replaceCnt, '', $sw_registerContent);
+		//its similar to app.js, not contain sercive worker installation
+		$sw_registerContent = $this->pn_get_layout_files('public/app-pwaforwp.js');
 		//Concatnate content in main service worker register
 		$swHtmlContent .= $sw_registerContent;
 		return $swHtmlContent;
