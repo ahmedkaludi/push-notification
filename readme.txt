@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.3.2
-Stable tag: 1.5
+Stable tag: 1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,10 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.6 (4 February 2020) =
+* Bug fixed: Integration with `PWA for WP` service worker merge issue remove own Service Worker registeration
+
+
 = 1.5 (18 January 2020) =
 * Resolve: Resolve issue with autoptimize minimize and merge JS
 * Improvement: Notification button design improved for mobile and desktop in AMP
