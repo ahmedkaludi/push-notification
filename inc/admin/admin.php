@@ -67,7 +67,7 @@ class Push_Notification_Admin{
 	}
 
 	function add_pn_use_sw($useserviceworker){
-		 $useserviceworker = 'messaging.useServiceWorker(reg);';
+		 $useserviceworker = 'messaging.useServiceWorker(reg); pushnotification_load_messaging();';
 		return $useserviceworker;
 	}
 

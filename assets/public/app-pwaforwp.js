@@ -1,5 +1,6 @@
 firebase.analytics();	  
 
+function pushnotification_load_messaging(){
   // [START refresh_token]
   // Callback fired if Instance ID token is updated.
   messaging.onTokenRefresh(() => {
@@ -22,18 +23,35 @@ firebase.analytics();
   // [END refresh_token]
 
 	
-messaging.requestPermission().then(function() {
-	console.log("Notification permission granted.");
-	document.cookie = "notification_permission=granted";                                    
-	if(push_notification_isTokenSentToServer()){
-		console.log('Token already saved');
-	}else{
-		push_notification_getRegToken();
-	}                                   
-}).catch(function(err) {
-	  console.log("Unable to get permission to notify.", err);
-});
+	messaging.requestPermission().then(function() {
+		console.log("Notification permission granted.");
+		document.cookie = "notification_permission=granted";                                    
+		if(push_notification_isTokenSentToServer()){
+			console.log('Token already saved');
+		}else{
+			push_notification_getRegToken();
+		}                                   
+	}).catch(function(err) {
+		  console.log("Unable to get permission to notify.", err);
+	});
 
+	 messaging.onMessage(function(payload) {
+		 console.log('Message received. ', payload);
+		 
+		 notificationTitle = payload.data.title;
+			notificationOptions = {
+			body: payload.data.body,
+			icon: payload.data.icon
+			}
+			var notification = new Notification(notificationTitle, notificationOptions); 
+				notification.onclick = function(event) {
+				event.preventDefault();
+				window.open(payload.data.url, '_blank');
+				notification.close();
+				}
+		});
+
+}
 function push_notification_getRegToken(argument){
 	 
 	messaging.getToken().then(function(currentToken) {
@@ -90,21 +108,7 @@ function push_notification_saveToken(currentToken){
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhttp.send('token_id='+currentToken+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
 }              
- messaging.onMessage(function(payload) {
- console.log('Message received. ', payload);
- 
- notificationTitle = payload.data.title;
-	notificationOptions = {
-	body: payload.data.body,
-	icon: payload.data.icon
-	}
-	var notification = new Notification(notificationTitle, notificationOptions); 
-		notification.onclick = function(event) {
-		event.preventDefault();
-		window.open(payload.data.url, '_blank');
-		notification.close();
-		}
-});
+
 
 var pushnotificationFCMbrowserclientDetector  = function (){
 	var browserClient = '';
