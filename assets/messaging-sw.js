@@ -1,6 +1,6 @@
-importScripts("https://www.gstatic.com/firebasejs/7.2.3/firebase-app.js");
-importScripts("https://www.gstatic.com/firebasejs/7.2.3/firebase-analytics.js");
-importScripts("https://www.gstatic.com/firebasejs/7.2.3/firebase-messaging.js");
+importScripts("https://www.gstatic.com/firebasejs/7.8.2/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/7.8.2/firebase-analytics.js");
+importScripts("https://www.gstatic.com/firebasejs/7.8.2/firebase-messaging.js");
 var pnScriptSetting = {{pnScriptSetting}}
 var config=pnScriptSetting.pn_config;   
 if (!firebase.apps.length) {firebase.initializeApp(config);}		  		  		  

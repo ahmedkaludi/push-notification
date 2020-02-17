@@ -4,19 +4,22 @@ if (!firebase.apps.length) {
 }                    		  		  	
  var swsource = pnScriptSetting.swsource;
 const messaging = firebase.messaging();
-if("serviceWorker" in navigator) {
 	window.addEventListener('load', function() {
-		navigator.serviceWorker.register(swsource, {scope: pnScriptSetting.scope}).then(function(reg){
-			messaging.useServiceWorker(reg);
-			console.log('Congratulations!!Service Worker Registered ServiceWorker scope: ', reg.scope);
-																							
-		}).catch(function(err) {
-			console.log('ServiceWorker registration failed: ', err);
-		});	
+		if("serviceWorker" in navigator) {
+				navigator.serviceWorker.register(swsource, {scope: pnScriptSetting.scope}).then(function(reg){
+					messaging.useServiceWorker(reg);
+					pushnotification_load_messaging();
+					console.log('Congratulations!!Service Worker Registered ServiceWorker scope: ', reg.scope);
+																									
+				}).catch(function(err) {
+					console.log('ServiceWorker registration failed: ', err);
+				});	
+		}else{
+			console.log('Pushnotification not supported ');
+		}
 	})
-}
 firebase.analytics();	  
-
+function pushnotification_load_messaging(){
   // [START refresh_token]
   // Callback fired if Instance ID token is updated.
   messaging.onTokenRefresh(() => {
@@ -39,17 +42,39 @@ firebase.analytics();
   // [END refresh_token]
 
 	
-messaging.requestPermission().then(function() {
-	console.log("Notification permission granted.");
-	document.cookie = "notification_permission=granted";                                    
-	if(push_notification_isTokenSentToServer()){
-		console.log('Token already saved');
-	}else{
-		push_notification_getRegToken();
-	}                                   
-}).catch(function(err) {
+	messaging.requestPermission().then(function() {
+		console.log("Notification permission granted.");
+		document.cookie = "notification_permission=granted";                                    
+		if(push_notification_isTokenSentToServer()){
+			console.log('Token already saved');
+		}else{
+			push_notification_getRegToken();
+		}                                   
+	}).catch(function(err) {
 	  console.log("Unable to get permission to notify.", err);
-});
+	});
+	messaging.onMessage(function(payload) {
+		console.log('Message received. ', payload);
+
+		notificationTitle = payload.data.title;
+		notificationOptions = {
+		body: payload.data.body,
+		icon: payload.data.icon,
+		vibrate: [100, 50, 100],
+		data: {
+			dateOfArrival: Date.now(),
+			primarykey: payload.data.primarykey,
+			url : payload.data.url
+		  },
+		}
+		var notification = new Notification(notificationTitle, notificationOptions); 
+			notification.onclick = function(event) {
+			event.preventDefault();
+			window.open(payload.data.url, '_blank');
+			notification.close();
+			}
+	});
+}
 
 function push_notification_getRegToken(argument){
 	 
@@ -107,21 +132,7 @@ function push_notification_saveToken(currentToken){
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhttp.send('token_id='+currentToken+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
 }              
- messaging.onMessage(function(payload) {
- console.log('Message received. ', payload);
- 
- notificationTitle = payload.data.title;
-	notificationOptions = {
-	body: payload.data.body,
-	icon: payload.data.icon
-	}
-	var notification = new Notification(notificationTitle, notificationOptions); 
-		notification.onclick = function(event) {
-		event.preventDefault();
-		window.open(payload.data.url, '_blank');
-		notification.close();
-		}
-});
+
 
 var pushnotificationFCMbrowserclientDetector  = function (){
 	var browserClient = '';

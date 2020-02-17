@@ -151,7 +151,7 @@ class Push_Notification_Frontend{
 	public function enqueue_pn_scripts(){
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
-		wp_enqueue_script('pn-script-analytics', 'https://www.gstatic.com/firebasejs/7.2.3/firebase-analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-gtag', 'https://www.googletagmanager.com/gtag/js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$data = "window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -166,7 +166,7 @@ class Push_Notification_Frontend{
 	public function pwaforwp_enqueue_pn_scripts(){
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
-		wp_enqueue_script('pn-script-analytics', 'https://www.gstatic.com/firebasejs/7.2.3/firebase-analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-gtag', 'https://www.googletagmanager.com/gtag/js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
 		wp_add_inline_script('pn-script-gtag', $data, 'after');
