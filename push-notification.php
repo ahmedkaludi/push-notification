@@ -20,6 +20,9 @@ define('PUSH_NOTIFICATION_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.7');
 define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
+/**
+ * Initialize pwa functions
+ */
 add_action('plugins_loaded', 'push_notification_initialize');
 function push_notification_initialize(){
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";
@@ -27,8 +30,10 @@ function push_notification_initialize(){
 	if(is_admin()){
 		add_filter( 'plugin_action_links_' . PUSH_NOTIFICATION_PLUGIN_BASENAME,'push_notification_add_action_links', 10, 4);
 	}
+	if( !is_admin() || wp_doing_ajax() ){
+		require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/frontend/pn-frontend.php";
+	}
 }
-require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/frontend/pn-frontend.php";
 
 
 function push_notification_add_action_links($actions, $plugin_file, $plugin_data, $context){
@@ -44,18 +49,11 @@ function push_notification_on_activate(){
 		$pwaforwp_settings['notification_feature'] = 1;
 		update_option( 'pwaforwp_settings', $pwaforwp_settings); 
 	}
-}
 
-function push_notification_after_activation_redirect( $plugin ) {
-    if( $plugin == plugin_basename( __FILE__ ) ) {
-        exit( wp_redirect( admin_url( 'admin.php?page=push-notification' ) ) );
-    }
-}
-add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
-
-
-register_activation_hook( __FILE__, 'push_notification_init_activation' );
-function push_notification_init_activation(){
+	/**
+	 * on activation of plugin compatibile with PWA for wp
+	 * if PWA activated and now activating PushNotification, Need to regenerate service worker files
+	 */
 	$auth_settings = get_option( 'push_notification_auth_settings', array() );
 	//Push notification Check
     if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
@@ -68,11 +66,22 @@ function push_notification_init_activation(){
 		}
 
     }
-
-	
 }
+/**
+ * After activate plugin path to redirect
+ * @plugin name of current activation plugin 
+ */
+function push_notification_after_activation_redirect( $plugin ) {
+    if( $plugin == plugin_basename( PUSH_NOTIFICATION_PLUGIN_FILE ) ) {
+        exit( wp_redirect( admin_url( 'admin.php?page=push-notification' ) ) );
+    }
+}
+add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
 
 
+/**
+ * TO compatible with older < 1.3 of pushnotification
+ */
 add_action("plugins_loaded", 'push_notification_older_version_compatibility');
 function push_notification_older_version_compatibility(){
 	$configCompatible = get_transient( 'push_notification_older_version' );

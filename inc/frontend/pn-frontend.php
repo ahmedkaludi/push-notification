@@ -367,11 +367,12 @@ class Push_Notification_Frontend{
 	}
 
 }
-add_action("plugins_loaded", 'push_notification_frontend_class');
+
 function push_notification_frontend_class(){
 	if(!is_admin() || wp_doing_ajax()){
 		$notificationFrontEnd = new Push_Notification_Frontend(); 
 	}
 
+	add_filter( "option_autoptimize_js_exclude", array('Push_Notification_Frontend', 'update_autoptimize_exclude') , 10, 2);
 }
-add_filter( "option_autoptimize_js_exclude", array('Push_Notification_Frontend', 'update_autoptimize_exclude') , 10, 2);
+push_notification_frontend_class();

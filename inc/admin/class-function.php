@@ -69,7 +69,7 @@ class PN_Server_Request{
 		return $response;
 	}
 
-	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $image_url){
+	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url){
 		$verifyUrl = 'campaign/create';
 		if ( is_multisite() ) {
             $weblink = get_site_url();              
@@ -81,7 +81,9 @@ class PN_Server_Request{
 					'title'=>$title, 
 					'message'=>$message, 
 					'link_url'=>$link_url, 
-					'image_url'=>$image_url);
+					'icon_url'=>$icon_url,
+					'image_url'=>$image_url,
+				);
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
 	}

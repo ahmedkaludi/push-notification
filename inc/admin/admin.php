@@ -186,7 +186,16 @@ class Push_Notification_Admin{
 					 esc_html__('','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
-		
+            if (!function_exists('pwaforwp_defaultSettings')) {
+                add_settings_field(
+					'pn_key__notification_icon_edit',					// ID
+					esc_html__('Notification icon URL', 'push-notification'),// Title
+					array( $this, 'user_settings_notification_icon_callback'),// Callback
+					'push_notification_user_settings_section',	// Page slug
+					'push_notification_user_settings_section'	// Settings Section ID
+				);
+            }
+			
 			add_settings_field(
 				'pn_key_sendpush_edit',					// ID
 				esc_html__('Send notification on editing', 'push-notification'),// Title
@@ -295,6 +304,10 @@ class Push_Notification_Admin{
 
 	}//function closed
 	
+	public function user_settings_notification_icon_callback(){
+		PN_Field_Generator::get_input('notification_icon', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
+	}
+
 	public function user_settings_callback(){
 		$notification = push_notification_settings();
 		PN_Field_Generator::get_input_checkbox('on_edit', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
@@ -364,12 +377,15 @@ class Push_Notification_Admin{
 			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
 		}else{
 			$auth_settings = push_notification_auth_settings();
+			$notification_settings = push_notification_settings();
+
 			$title = sanitize_text_field($_POST['title']);
 			$message = sanitize_textarea_field($_POST['message']);
 			$link_url = esc_url_raw($_POST['link_url']);
 			$image_url = esc_url_raw($_POST['image_url']);
+			$icon_url = $notification_settings['notification_icon'];
 			if( isset( $auth_settings['user_token'] ) ){
-				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $image_url );
+				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $icon_url, $image_url );
 				if($response){
 				 echo json_encode($response);die;
 				}else{
@@ -427,9 +443,11 @@ class Push_Notification_Admin{
 		if(has_post_thumbnail($post_id)){
 			$image_url = esc_url_raw(get_the_post_thumbnail_url($post_id));
 		}
+		$push_notification_settings = push_notification_settings();
+		$icon_url = $push_notification_settings['notification_icon'];
 		
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $image_url );
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url );
 		}//auth token check 
 	
 	}
@@ -485,6 +503,18 @@ if(is_admin() || wp_doing_ajax()){
 
 function push_notification_settings(){
 	$push_notification_settings = get_option( 'push_notification_settings', array() ); 
+	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'/assets/image/bell-icon.png';
+	if(function_exists('pwaforwp_defaultSettings')){
+		$pwaforwpSettings = pwaforwp_defaultSettings();
+		$icon = $pwaforwpSettings['icon'];
+	}
+	$default = array(
+		'notification_icon' => $icon,
+		'on_edit'=> 0,
+		'on_publish'=> 1,
+		'posttypes'=> array("post","page"),
+	);
+	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
