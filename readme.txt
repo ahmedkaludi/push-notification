@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.3.2
-Stable tag: 1.8
+Stable tag: 1.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.9 (05 May 2020) =
+* Improvement: Shortcodes appearing on notification #367
+
 = 1.8 (25 February 2020) =
 * Added : An option to allow user to change icon of notification; For PWA users can change from pwa panel #339
 * Added : an option to send notification with image; user can send message with bigger image;
