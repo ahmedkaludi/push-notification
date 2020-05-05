@@ -436,8 +436,8 @@ class Push_Notification_Admin{
 		$auth_settings = push_notification_auth_settings();
 
 		//API Data
-		$title = sanitize_text_field(wp_strip_all_tags($post_title) );
-		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content)), 20);
+		$title = sanitize_text_field(wp_strip_all_tags($post_title, true) );
+		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$link_url = esc_url_raw(get_permalink( $post_id ));
 		$image_url = '';
 		if(has_post_thumbnail($post_id)){
