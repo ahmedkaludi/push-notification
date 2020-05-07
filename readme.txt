@@ -26,7 +26,7 @@ Send push notifications automatically when a post is published or updated. You c
 * More Push Notification Features Coming soon.
 
 **We Act Fast on Feedback!**
-We are actively developing this plugin and our aim is to make this plugin into the #1 solution for Push Notification in the world. You can [Request a Feature](https://github.com/ahmedkaludi/push-notifications/issues) or [Report a Bug](http://pushnotifications.io/contact/).
+We are actively developing this plugin and our aim is to make this plugin into the #1 solution for Push Notification in the world. You can [Request a Feature](https://github.com/ahmedkaludi/push-notification/issues) or [Report a Bug](http://pushnotifications.io/contact/).
 
 **Technical Support**
 Support is provided in [Forum](https://wordpress.org/support/plugin/push-notification). You can also [Contact us](http://pushnotifications.io/contact), our turn around time on email is around 12 hours. 
