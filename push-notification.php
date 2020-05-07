@@ -37,7 +37,9 @@ function push_notification_initialize(){
 
 
 function push_notification_add_action_links($actions, $plugin_file, $plugin_data, $context){
-    $mylinks = array('<a href="' . esc_url_raw(admin_url( 'admin.php?page=push-notification' )) . '">'.esc_html__( 'Settings', 'push-notification' ).'</a>');
+    $mylinks = array('<a href="' . esc_url_raw(admin_url( 'admin.php?page=push-notification' )) . '">'.esc_html__( 'Settings', 'push-notification' ).'</a>',
+    	'<a href="https://pushnotifications.io/documentation/" target="_blank">'.esc_html__( 'Documentation', 'push-notification' ).'</a>',
+					);
     return array_merge( $actions, $mylinks );
 }
 

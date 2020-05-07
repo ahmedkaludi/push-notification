@@ -301,6 +301,7 @@ class Push_Notification_Admin{
 				<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>
 				<button type='button' class='button dashicons-before dashicons-no-alt' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
+		echo "<br/><br/><div>Need help! Read the Complete <a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>Documentation</a>.</div><br/>";
 
 	}//function closed
 	
