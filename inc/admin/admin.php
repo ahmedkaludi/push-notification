@@ -20,6 +20,7 @@ class Push_Notification_Admin{
 		add_action( 'wp_ajax_pn_subscribers_data', array( $this, 'pn_subscribers_data' ) ); 
 		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 
 		
+		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
 
 
 		//Send push on publish and update
@@ -494,6 +495,25 @@ class Push_Notification_Admin{
 	    }
 	}
 
+	public function pn_subscribe_newsletter(){
+		$nonce = sanitize_text_field($_POST['nonce']);
+		if( !wp_verify_nonce($nonce, 'pn_notification') ){
+			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
+		}else{
+		    $api_url = 'http://magazine3.company/wp-json/api/central/email/subscribe';
+		    $api_params = array(
+		        'name' => sanitize_text_field($_POST['name']),
+		        'email'=> sanitize_text_field($_POST['email']),
+		        'website'=> sanitize_text_field($_POST['website']),
+		        'type'=> 'notification'
+		    );
+		    $response = wp_remote_post( $api_url, array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
+		    $response = wp_remote_retrieve_body( $response );
+		    echo $response;
+		    die;
+		}
+	}
+
 	
 }
 
@@ -566,5 +586,5 @@ class PN_Field_Generator{
 		?>
 		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>"><?php echo esc_html__($name) ?></button>
 	<?php
-	}
+	} 	
 }
