@@ -19,8 +19,16 @@ get_header();
         .pn-content {
             text-align: center;
         }
-        .pn-title {
+        .pn-full-height .pn-content .pn-title {
 		    font-size: 40px;
+		}
+		@media only screen and (max-width: 600px) {
+			.pn-full-height .pn-content .pn-title {
+			    font-size: 24px;
+			}
+			.pn-full-height .pn-content p{
+				font-size: 14px;
+			}
 		}
 	</style>
 	<section id="primary" class="content-area pn-flex-center pn-full-height">
