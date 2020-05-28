@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.4.1
-Stable tag: 1.10
+Stable tag: 1.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.11 (28 May 2020) =
+* Bug fixed: Responsive issue of add to home page in With AMP #396
+
 = 1.10 (12 May 2020) =
 * Bug fixed: Github link in the report issue #386
 * Added    : Added documentation link #385
