@@ -31,6 +31,7 @@ class Push_Notification_Frontend{
 				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
 				
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
+				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			}
 		}else{
 			//manifest
@@ -364,6 +365,80 @@ class Push_Notification_Frontend{
 		</div>
 
 		<?php
+	}
+	function pwaforwp_notification_confirm_banner(){
+		echo '<style>.pn-notification-wrapper{box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
+    font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+    font-size: 12px;
+    letter-spacing: .2px;
+    align-items: center;
+    background-color: #202124;
+    border: none;
+    border-radius: 4px;
+    bottom: 0;
+    box-sizing: border-box;
+    color: #fff;
+    display: none;
+    flex-wrap: wrap;
+    font-weight: 400;
+    left: 0;
+    margin: 24px;
+    max-width: 640px;
+    min-height: 52px;
+    padding: 8px 24px;
+    position: fixed;
+    right: auto;
+    text-align: left;
+    top: auto;
+    white-space: normal;
+}
+.pn-notification-wrapper .pn-nt-txt-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    margin: 10px 0;
+    margin-right: 24px;
+}
+.pn-notification-wrapper .btn.act{color: #8ab4f8;}
+.pn-notification-wrapper .btn{
+	align-items: center;
+    border: none;
+    display: inline-flex;
+    justify-content: center;
+    outline: none;
+    position: relative;
+    z-index: 0;
+    -webkit-font-smoothing: antialiased;
+    font-family: \'Google Sans\', Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+    font-size: 13px;
+    letter-spacing: .25px;
+    background: none;
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: #5f6368;
+    cursor: pointer;
+    font-weight: 500;
+    height: 36px;
+    outline: none;
+    
+    margin-left: 8px;
+    min-width: auto;
+    padding: 0 8px;
+    text-decoration: none;
+}
+</style><div class="pn-notification-wrapper">
+			   	<span class="pn-nt-txt-wrapper">
+			   		<span class="pn-msg-txt-wrapper">Enable Notification.</span>
+			   		<span class="bAo">&nbsp;&nbsp;
+			   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" idlink="" aria-label="ok link">
+			   				Ok
+			   			</span>
+			   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" idlink="" aria-label="no thanks link">
+			   				No thanks
+			   			</span>
+			   		</span>
+			   	</span>
+			</div>';
 	}
 
 }

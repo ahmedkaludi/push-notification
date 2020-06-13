@@ -49,7 +49,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 = 1.11 (28 May 2020) =
-* Bug fixed: Responsive issue of add to home page in With AMP #396
+* Bug fixed: Responsive issue of add to home page With AMP #396
 
 = 1.10 (12 May 2020) =
 * Bug fixed: Github link in the report issue #386
