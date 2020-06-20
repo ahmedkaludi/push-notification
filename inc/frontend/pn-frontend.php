@@ -367,12 +367,12 @@ class Push_Notification_Frontend{
 		<?php
 	}
 	function pwaforwp_notification_confirm_banner(){
-		echo '<style>.pn-notification-wrapper{box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
+		echo '<style>.pn-wrapper{
+			box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
     font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
-    font-size: 12px;
-    letter-spacing: .2px;
+    font-size: 14px;
     align-items: center;
-    background-color: #202124;
+    background-color: #222;
     border: none;
     border-radius: 4px;
     bottom: 0;
@@ -382,59 +382,53 @@ class Push_Notification_Frontend{
     flex-wrap: wrap;
     font-weight: 400;
     left: 0;
-    margin: 24px;
-    max-width: 640px;
-    min-height: 52px;
-    padding: 8px 24px;
+    margin: 20px;
+    padding: 16px 22px;
     position: fixed;
     right: auto;
     text-align: left;
     top: auto;
     white-space: normal;
 }
-.pn-notification-wrapper .pn-nt-txt-wrapper {
+.pn-wrapper .pn-txt-wrap {
     display: flex;
     flex-wrap: wrap;
     position: relative;
-    margin: 10px 0;
-    margin-right: 24px;
+    height: auto;
+    line-height: 1;
 }
-.pn-notification-wrapper .btn.act{color: #8ab4f8;}
-.pn-notification-wrapper .btn{
+.pn-wrapper .pn-btns{
+    margin-left: 10px;
+}
+.pn-wrapper .btn.act{color: #8ab4f8;}
+.pn-wrapper .btn{
 	align-items: center;
     border: none;
     display: inline-flex;
-    justify-content: center;
     outline: none;
     position: relative;
-    z-index: 0;
-    -webkit-font-smoothing: antialiased;
-    font-family: \'Google Sans\', Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
-    font-size: 13px;
-    letter-spacing: .25px;
+    font-size: 14px;
     background: none;
     border-radius: 4px;
     box-sizing: border-box;
     color: #5f6368;
     cursor: pointer;
     font-weight: 500;
-    height: 36px;
     outline: none;
-    
     margin-left: 8px;
     min-width: auto;
     padding: 0 8px;
     text-decoration: none;
 }
-</style><div class="pn-notification-wrapper">
-			   	<span class="pn-nt-txt-wrapper">
-			   		<span class="pn-msg-txt-wrapper">Enable Notification.</span>
-			   		<span class="bAo">&nbsp;&nbsp;
-			   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" idlink="" aria-label="ok link">
-			   				Ok
+</style><div class="pn-wrapper">
+			   	<span class="pn-txt-wrap">
+			   		<span class="pn-msg">'.esc_html__('Enable Notifications', 'push-notification').'.</span>
+			   		<span class="pn-btns">&nbsp;&nbsp;
+			   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
+			   				'.esc_html__('Ok', 'push-notification').'
 			   			</span>
-			   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" idlink="" aria-label="no thanks link">
-			   				No thanks
+			   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
+			   				'.esc_html__('No thanks', 'push-notification').'
 			   			</span>
 			   		</span>
 			   	</span>
