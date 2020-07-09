@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.4.1
-Stable tag: 1.12
+Stable tag: 1.12.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.12.1 (09 July 2020) =
+* Bug fixed: minor update
+
 = 1.12 (20 June 2020) =
 * Bug fixed: An error is being shown in light house report for push notification with PWA. #394
 

@@ -505,7 +505,7 @@ class Push_Notification_Admin{
 		        'name' => sanitize_text_field($_POST['name']),
 		        'email'=> sanitize_text_field($_POST['email']),
 		        'website'=> sanitize_text_field($_POST['website']),
-		        'type'=> 'pushnotification'
+		        'type'=> 'notification'
 		    );
 		    $response = wp_remote_post( $api_url, array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
 		    $response = wp_remote_retrieve_body( $response );
