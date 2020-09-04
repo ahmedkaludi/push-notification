@@ -36,10 +36,12 @@ class Push_Notification_Frontend{
 		}else{
 			//manifest
 			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
+			add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			//create manifest
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			//ServiceWorker
 			add_action("wp_enqueue_scripts", array($this, 'enqueue_pn_scripts') );
+
 
 			//firebase serviceworker
 			add_action( 'parse_query', array($this, 'load_service_worker') );
@@ -367,29 +369,67 @@ class Push_Notification_Frontend{
 		<?php
 	}
 	function pwaforwp_notification_confirm_banner(){
+		$settings = push_notification_settings();
+		$position = $settings['notification_position'];
+		$cssPosition = '';
+		switch ($position) {
+			case 'bottom-left':
+				$cssPosition = 'bottom: 0;
+		    left: 0;
+		    margin: 20px;
+		    right: auto;
+		    top: auto;';
+				break;
+			case 'bottom-right':
+				$cssPosition = 'bottom: 0;
+		    left: auto;
+		    margin: 20px;
+		    right: 0;
+		    top: auto;';
+				break;
+			case 'top-right':
+				$cssPosition = 'bottom: auto;
+		    left: auto;
+		    margin: 20px;
+		    margin-top: 40px;
+		    right: 0;
+		    top: 0;';
+				break;
+			case 'top-left':
+				$cssPosition = 'bottom: auto;
+						    left: 0;
+						    margin: 20px;
+						    margin-top: 40px;
+						    right: auto;
+						    top: 0;';
+				break;
+			default:
+				$cssPosition = 'bottom: 0;
+		    left: 0;
+		    margin: 20px;
+		    right: auto;
+		    top: auto;';
+				break;
+		}
 		echo '<style>.pn-wrapper{
 			box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
-    font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
-    font-size: 14px;
-    align-items: center;
-    background-color: #222;
-    border: none;
-    border-radius: 4px;
-    bottom: 0;
-    box-sizing: border-box;
-    color: #fff;
-    display: none;
-    flex-wrap: wrap;
-    font-weight: 400;
-    left: 0;
-    margin: 20px;
-    padding: 16px 22px;
-    position: fixed;
-    right: auto;
-    text-align: left;
-    top: auto;
-    white-space: normal;
-}
+		    font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
+		    font-size: 14px;
+		    align-items: center;
+		    background-color: #222;
+		    border: none;
+		    border-radius: 4px;
+		    box-sizing: border-box;
+		    color: #fff;
+		    display: none;
+		    flex-wrap: wrap;
+		    font-weight: 400;
+		    padding: 16px 22px;
+		    z-index:99999;
+		    text-align: left;
+		    position: fixed;
+		    '.$cssPosition.'
+		}
 .pn-wrapper .pn-txt-wrap {
     display: flex;
     flex-wrap: wrap;
@@ -422,7 +462,7 @@ class Push_Notification_Frontend{
 }
 </style><div class="pn-wrapper">
 			   	<span class="pn-txt-wrap">
-			   		<span class="pn-msg">'.esc_html__('Enable Notifications', 'push-notification').'.</span>
+			   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'.</span>
 			   		<span class="pn-btns">&nbsp;&nbsp;
 			   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
 			   				'.esc_html__('Ok', 'push-notification').'

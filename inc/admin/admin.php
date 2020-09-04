@@ -218,7 +218,24 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
-		
+		add_settings_section('push_notification_notification_settings_section',
+					 esc_html__('Notification message','push-notification'), 
+					 '__return_false', 
+					 'push_notification_user_settings_section');
+			add_settings_field(
+				'pn_key_message_position_select',								// ID
+				esc_html__('Where whould you like to display', 'push-notification'),// Title
+				array( $this, 'pn_key_position_select_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_popup_message_select',								// ID
+				esc_html__('Popup banner message', 'push-notification'),// Title
+				array( $this, 'pn_key_banner_message_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
 	}
 
 	function shownotificationData(){
@@ -324,7 +341,20 @@ class Push_Notification_Admin{
 		$notification = push_notification_settings();
 		$data = get_post_types();
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
-
+	}
+	public function pn_key_position_select_callback(){
+		$notification = push_notification_settings();
+		$data = array(
+			'top-left'=> 'Top left',
+			'top-right'=> 'Top right',
+			'bottom-right'=> 'Bottom right',
+			'bottom-left'=> 'Bottom Left'
+		);
+		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
+	}
+	public function pn_key_banner_message_callback(){
+		$notification = push_notification_settings();
+		PN_Field_Generator::get_input('popup_banner_message', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
 	}
 
 	public function pn_verify_user(){
@@ -534,8 +564,11 @@ function push_notification_settings(){
 		'on_edit'=> 0,
 		'on_publish'=> 1,
 		'posttypes'=> array("post","page"),
+		'notification_position'=> 'bottom-left',
+		'popup_banner_message'=> 'Enable Notifications',
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
+	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
@@ -571,6 +604,21 @@ class PN_Field_Generator{
 			<?php foreach ($options as $key => $opt) {
 				$sel = '';
 				if(isset($value) && in_array($key, $value)){
+					$sel = 'selected';
+				}
+				echo '<option value="'.$key.'" '.$sel.'>'.$opt.'</option>';
+			} ?>
+		</select><?php
+	}
+	public static function get_input_select($name, $value, $options, $id="", $class=""){
+		$settings = push_notification_settings();
+		if( isset($settings[$name]) ){
+			$value = $settings[$name];
+		}
+		?><select name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" >
+			<?php foreach ($options as $key => $opt) {
+				$sel = '';
+				if(isset($value) && $key==$value){
 					$sel = 'selected';
 				}
 				echo '<option value="'.$key.'" '.$sel.'>'.$opt.'</option>';
