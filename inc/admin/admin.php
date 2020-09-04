@@ -339,6 +339,7 @@ class Push_Notification_Admin{
 	public function pn_key_posttype_select_callback(){
 		$notification = push_notification_settings();
 		$data = get_post_types();
+		$data = array_merge(array('none'=>'None'), $data);
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
 	}
 	public function pn_key_position_select_callback(){
@@ -550,7 +551,8 @@ $push_Notification_Admin_Obj  = new Push_Notification_Admin();
 if(is_admin() || wp_doing_ajax()){
 	$push_Notification_Admin_Obj->init();
 }
-//Send push on publish and update
+//Send push on publish and update 
+// Put it here because in Gutenberg is_admin gives us false
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 
 function push_notification_settings(){
@@ -594,7 +596,13 @@ class PN_Field_Generator{
 	}
 	public static function get_input_checkbox($name, $value, $id="", $class=""){
 		$settings = push_notification_settings();
-		?><input type="checkbox" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/><?php
+		if(!isset($settings[$name])){$settings[$name] = 0; }
+		?>
+		<div class="checkbox_wrapper">
+			<input type="checkbox" class="regular-text checkbox_operator" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/>
+			<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text checkbox_target" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($settings[$name]); ?>" data-truevalue="<?php echo esc_attr($value); ?>"/>
+		</div>
+		<?php
 	}
 	public static function get_input_multi_select($name, $value, $options, $id="", $class=""){
 		$settings = push_notification_settings();
