@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 5.4.1
-Stable tag: 1.10
+Tested up to: 5.5.1
+Stable tag: 1.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,21 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.13 (04 September 2020) =
+* Improvement: Given the feature to change the position & message of the push notification bar #471
+* Bug Fixed: Push notification not getting notification while creating post with Gutenberg #481
+* Bug Fixed: Click target on notification, its shows js file #482
+* Bug Fixed: Sending the notification even when the new post/page is uncheked in the options. #458
+	
+= 1.12.1 (09 July 2020) =
+* Bug fixed: minor update
+
+= 1.12 (20 June 2020) =
+* Bug fixed: An error is being shown in light house report for push notification with PWA. #394
+
+= 1.11 (28 May 2020) =
+* Bug fixed: Responsive issue of add to home page With AMP #396
+
 = 1.10 (12 May 2020) =
 * Bug fixed: Github link in the report issue #386
 * Added    : Added documentation link #385

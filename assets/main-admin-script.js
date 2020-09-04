@@ -240,4 +240,12 @@ jQuery(document).ready(function($){
 			}
 		})
 	})
+	jQuery('.checkbox_operator').click(function(e){
+		var value = 0;
+		var target = jQuery(this).parent('.checkbox_wrapper').find('.checkbox_target');
+		if(jQuery(this).prop("checked")==true){
+			var value = target.attr("data-truevalue");
+		}
+		target.val(value);
+	})
 });
