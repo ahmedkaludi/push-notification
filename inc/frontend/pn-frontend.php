@@ -439,6 +439,7 @@ class Push_Notification_Frontend{
 }
 .pn-wrapper .pn-btns{
     margin-left: 10px;
+    display: flex;
 }
 .pn-wrapper .btn.act{color: #8ab4f8;}
 .pn-wrapper .btn{
@@ -462,7 +463,7 @@ class Push_Notification_Frontend{
 }
 </style><div class="pn-wrapper">
 			   	<span class="pn-txt-wrap">
-			   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'.</span>
+			   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>
 			   		<span class="pn-btns">&nbsp;&nbsp;
 			   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
 			   				'.esc_html__('Ok', 'push-notification').'

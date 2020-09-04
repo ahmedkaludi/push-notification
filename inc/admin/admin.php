@@ -23,8 +23,7 @@ class Push_Notification_Admin{
 		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
 
 
-		//Send push on publish and update
-		add_action( 'transition_post_status', array( $this, 'send_notification_on_update' ), 10, 3 ); 
+		 
 
 		/** pwaforwp installed than work with that */
 		if( function_exists('pwaforwp_init_plugin') ){
@@ -547,10 +546,12 @@ class Push_Notification_Admin{
 	
 }
 
+$push_Notification_Admin_Obj  = new Push_Notification_Admin(); 
 if(is_admin() || wp_doing_ajax()){
-	$push_Notification_Admin_Obj  = new Push_Notification_Admin(); 
 	$push_Notification_Admin_Obj->init();
 }
+//Send push on publish and update
+add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 
 function push_notification_settings(){
 	$push_notification_settings = get_option( 'push_notification_settings', array() ); 
