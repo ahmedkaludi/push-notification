@@ -52,7 +52,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 * Improvement: Given the feature to change the position & message of the push notification bar #471
 * Bug Fixed: Push notification not getting notification while creating post with Gutenberg #481
 * Bug Fixed: Click target on notification, its shows js file #482
-* Bug Fixed: Sending the notification even when the new post/page is uncheked in the options. #458
+* Bug Fixed: Sending the notification even when the new post/page is unchecked in the options. #458
 	
 = 1.12.1 (09 July 2020) =
 * Bug fixed: minor update
