@@ -170,7 +170,7 @@ class Push_Notification_Admin{
 		register_setting( 'push_notification_setting_dashboard_group', 'push_notification_settings' );
 
 		add_settings_section('push_notification_dashboard_section',
-					 esc_html__('','push-notification'), 
+					 esc_html__(' ','push-notification'), 
 					 '__return_false', 
 					 'push_notification_dashboard_section');
 		
@@ -183,7 +183,7 @@ class Push_Notification_Admin{
 			);
 
 		add_settings_section('push_notification_user_settings_section',
-					 esc_html__('','push-notification'), 
+					 esc_html__(' ','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
             if (!function_exists('pwaforwp_defaultSettings')) {
