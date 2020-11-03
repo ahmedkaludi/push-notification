@@ -235,6 +235,20 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_key_popup_accept_btn',								// ID
+				esc_html__('Popup banner accept', 'push-notification'),// Title
+				array( $this, 'pn_key_banner_accept_btn_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_popup_decline_btn',								// ID
+				esc_html__('Popup banner decline', 'push-notification'),// Title
+				array( $this, 'pn_key_banner_decline_btn_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
 	}
 
 	function shownotificationData(){
@@ -354,7 +368,16 @@ class Push_Notification_Admin{
 	}
 	public function pn_key_banner_message_callback(){
 		$notification = push_notification_settings();
-		PN_Field_Generator::get_input('popup_banner_message', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
+		PN_Field_Generator::get_input('popup_banner_message', 'popup_banner_message_id');
+	}
+
+	public function pn_key_banner_accept_btn_callback(){
+		$notification = push_notification_settings();
+		PN_Field_Generator::get_input('popup_banner_accept_btn', 'popup_banner_accept_btn_id');
+	}
+	public function pn_key_banner_decline_btn_callback(){
+		$notification = push_notification_settings();
+		PN_Field_Generator::get_input('popup_banner_decline_btn', 'popup_banner_decline_btn_id');
 	}
 
 	public function pn_verify_user(){
@@ -569,6 +592,8 @@ function push_notification_settings(){
 		'posttypes'=> array("post","page"),
 		'notification_position'=> 'bottom-left',
 		'popup_banner_message'=> 'Enable Notifications',
+		'popup_banner_accept_btn'=> 'OK',
+		'popup_banner_decline_btn'=> 'No thanks',
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
