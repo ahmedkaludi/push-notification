@@ -217,13 +217,25 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
+		add_settings_section('push_notification_utm_tracking_settings_section',
+					 esc_html__('UTM tracking','push-notification'), 
+					 '__return_false', 
+					 'push_notification_user_settings_section');
+			add_settings_field(
+				'pn_utm_tracking_select',								// ID
+				esc_html__('Enable', 'push-notification'),// Title
+				array( $this, 'pn_utm_tracking_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_utm_tracking_settings_section'	// Settings Section ID
+			);
+
 		add_settings_section('push_notification_notification_settings_section',
 					 esc_html__('Notification message','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
 			add_settings_field(
 				'pn_key_message_position_select',								// ID
-				esc_html__('Where whould you like to display', 'push-notification'),// Title
+				esc_html__('Where would you like to display', 'push-notification'),// Title
 				array( $this, 'pn_key_position_select_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
@@ -356,6 +368,33 @@ class Push_Notification_Admin{
 		$data = array_merge(array('none'=>'None'), $data);
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
 	}
+	public function pn_utm_tracking_callback(){
+		$notification = push_notification_settings();
+		$name = 'utm_tracking_checkbox';
+		$value = 1;$class = $id = 'utm_tracking_checkbox';
+		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
+		$display="style='display:none;'";
+		if(isset($notification['utm_tracking_checkbox']) && $notification['utm_tracking_checkbox']){
+			$display="style='display:block;'";
+		}
+		echo "<div id='utm_tracking_wrapper' ".$display.">";
+			echo '<div class="pn-field_wrap"><label>UTM source</label>';
+				PN_Field_Generator::get_input('notification_utm_source', 'notification_utm_source', '');
+			echo '</div>';
+			echo '<div class="pn-field_wrap"><label>UTM Medium</label>';
+			PN_Field_Generator::get_input('notification_utm_medium', 'notification_utm_medium', '');
+			echo '</div>';
+			echo '<div class="pn-field_wrap"><label>UTM Campaign</label>';
+			PN_Field_Generator::get_input('notification_utm_campaign', 'notification_utm_campaign', '');
+			echo '</div>';
+			echo '<div class="pn-field_wrap"><label>UTM Term</label>';
+			PN_Field_Generator::get_input('notification_utm_term', 'notification_utm_term', '');
+			echo '</div>';
+			echo '<div class="pn-field_wrap" style="display:flex;"><label>UTM Content</label>';
+			PN_Field_Generator::get_input('notification_utm_content', 'notification_utm_content', '');
+			echo '</div>';
+		echo "</div>";
+	}
 	public function pn_key_position_select_callback(){
 		$notification = push_notification_settings();
 		$data = array(
@@ -439,6 +478,18 @@ class Push_Notification_Admin{
 			$link_url = esc_url_raw($_POST['link_url']);
 			$image_url = esc_url_raw($_POST['image_url']);
 			$icon_url = $notification_settings['notification_icon'];
+
+			if(isset($notification_settings['utm_tracking_checkbox']) && $notification_settings['utm_tracking_checkbox']){
+				$utm_details = array(
+				    'utm_source'=> $notification_settings['notification_utm_source'],
+				    'utm_medium'=> $notification_settings['notification_utm_medium'],
+				    'utm_campaign'=> $notification_settings['notification_utm_campaign'],
+				    'utm_term'  => $notification_settings['notification_utm_term'],
+				    'utm_content'  => $notification_settings['notification_utm_content'],
+				    );
+				$link_url = add_query_arg( array_filter($utm_details), $link_url  );
+			}
+
 			if( isset( $auth_settings['user_token'] ) ){
 				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $icon_url, $image_url );
 				if($response){
@@ -490,15 +541,26 @@ class Push_Notification_Admin{
 		$post_title = $post->post_title;
 		$auth_settings = push_notification_auth_settings();
 
+		$push_notification_settings = push_notification_settings();
 		//API Data
 		$title = sanitize_text_field(wp_strip_all_tags($post_title, true) );
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$link_url = esc_url_raw(get_permalink( $post_id ));
+		if(isset($push_notification_settings['utm_tracking_checkbox']) && $push_notification_settings['utm_tracking_checkbox']){
+			$utm_details = array(
+			    'utm_source'=> $push_notification_settings['notification_utm_source'],
+			    'utm_medium'=> $push_notification_settings['notification_utm_medium'],
+			    'utm_campaign'=> $push_notification_settings['notification_utm_campaign'],
+			    'utm_term'  => $push_notification_settings['notification_utm_term'],
+			    'utm_content'  => $push_notification_settings['notification_utm_content'],
+			    );
+			$link_url = add_query_arg( array_filter($utm_details), $link_url  );
+		}
+
 		$image_url = '';
 		if(has_post_thumbnail($post_id)){
 			$image_url = esc_url_raw(get_the_post_thumbnail_url($post_id));
 		}
-		$push_notification_settings = push_notification_settings();
 		$icon_url = $push_notification_settings['notification_icon'];
 		
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
@@ -591,9 +653,14 @@ function push_notification_settings(){
 		'on_publish'=> 1,
 		'posttypes'=> array("post","page"),
 		'notification_position'=> 'bottom-left',
-		'popup_banner_message'=> 'Enable Notifications',
-		'popup_banner_accept_btn'=> 'OK',
-		'popup_banner_decline_btn'=> 'No thanks',
+		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
+		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
+		'popup_banner_decline_btn'=> esc_html__('No thanks', 'push-notification'),
+		'notification_utm_source'=> 'pn-ref',
+		'notification_utm_medium'=> 'pn-ref',
+		'notification_utm_campaign'=> 'pn-campaign',
+		'notification_utm_term'=> 'pn-term',
+		'notification_utm_content'=> 'pn-content',
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);

@@ -47,3 +47,6 @@ font-size: 16px;
      margin: 0; 
      line-height: 1.4;
  }
+ .pn-field_wrap{
+ 	display:flex;margin-top: 10px;
+ } .pn-field_wrap label{width:20%;}
