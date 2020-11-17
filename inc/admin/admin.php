@@ -21,7 +21,8 @@ class Push_Notification_Admin{
 		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 
 		
 		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
-
+		//on oreder status change
+		add_action('woocommerce_order_status_changed', array( $this, 'pn_order_send_notification'), 10, 4);
 
 		 
 
@@ -567,6 +568,41 @@ class Push_Notification_Admin{
 			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url );
 		}//auth token check 
 	
+	}
+
+	public function pn_order_send_notification($order_id, $status_from, $status_to, $obj){
+		$order_id = $order_id;
+		if(strtolower($status_to)==='pending'){ return; }
+		$post_title = esc_html__('Order status changed', 'push-notification');
+		$post_content = esc_html__('Order id #'.$order_id.' changed from '.$status_from.' to '.$status_to);
+		$auth_settings = push_notification_auth_settings();
+
+		$push_notification_settings = push_notification_settings();
+		//API Data
+		$title = sanitize_text_field(wp_strip_all_tags($post_title, true) );
+		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
+		$link_url = esc_url_raw( get_home_url() );
+		if(isset($push_notification_settings['utm_tracking_checkbox']) && $push_notification_settings['utm_tracking_checkbox']){
+			$utm_details = array(
+			    'utm_source'=> $push_notification_settings['notification_utm_source'],
+			    'utm_medium'=> $push_notification_settings['notification_utm_medium'],
+			    'utm_campaign'=> $push_notification_settings['notification_utm_campaign'],
+			    'utm_term'  => $push_notification_settings['notification_utm_term'],
+			    'utm_content'  => $push_notification_settings['notification_utm_content'],
+			    );
+			$link_url = add_query_arg( array_filter($utm_details), $link_url  );
+		}
+
+		$image_url = $push_notification_settings['notification_icon'];
+		$icon_url = $push_notification_settings['notification_icon'];
+		
+		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
+			$userid = 1;
+			if(function_exists('get_current_user_id')){
+				$userid = get_current_user_id();
+			}
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $userid );
+		}//auth token check 
 	}
 
 	public function pn_get_layout_files($filePath){
