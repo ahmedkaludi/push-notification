@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 5.5.1
-Stable tag: 1.14
+Tested up to: 5.6
+Stable tag: 1.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.14 (17 November 2020) =
+* Improvement: Resolve remove empty expiration cookies, added an expiration date for the cookies #560
+
 = 1.14 (17 November 2020) =
 * Improvement: Added translation files
 * Improvement: Added options to change the label of the push notification  #490
