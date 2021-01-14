@@ -48,7 +48,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
-= 1.14 (17 November 2020) =
+= 1.15 (13 January 2021) =
 * Improvement: Resolve remove empty expiration cookies, added an expiration date for the cookies #560
 
 = 1.14 (17 November 2020) =
