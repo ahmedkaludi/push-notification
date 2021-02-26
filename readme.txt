@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 5.5.1
-Stable tag: 1.13
+Tested up to: 5.6
+Stable tag: 1.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,16 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.15 (13 January 2021) =
+* Improvement: Resolve remove empty expiration cookies, added an expiration date for the cookies #560
+
+= 1.14 (17 November 2020) =
+* Improvement: Added translation files
+* Improvement: Added options to change the label of the push notification  #490
+* Improvement: added UTM tracking data to track the analytics of push notification #548
+* Improvement: sending push notification to users when the order status changed. #531
+
+
 = 1.13 (04 September 2020) =
 * Improvement: Given the feature to change the position & message of the push notification bar #471
 * Bug Fixed: Push notification not getting notification while creating post with Gutenberg #481

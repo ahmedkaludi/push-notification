@@ -1,0 +1,149 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2020-09-14 11:20+0530\n"
+"PO-Revision-Date: 2020-09-14 11:29+0530\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.1\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-KeywordsList: __;_e;esc_html;esc_html__;esc_att;esc_attr__;"
+"esc_attr_e;esc_html_e\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: inc/admin/admin.php:127
+msgid "Push Notification"
+msgstr ""
+
+#: inc/admin/admin.php:128
+msgid "Push Notifications"
+msgstr ""
+
+#: inc/admin/admin.php:136 inc/admin/admin.php:150
+msgid "Push Notifications Options"
+msgstr ""
+
+#: inc/admin/admin.php:137 push-notification.php:40
+msgid "Settings"
+msgstr ""
+
+#: inc/admin/admin.php:173 inc/admin/admin.php:186
+msgid " "
+msgstr ""
+
+#: inc/admin/admin.php:179
+msgid "API"
+msgstr ""
+
+#: inc/admin/admin.php:192
+msgid "Notification icon URL"
+msgstr ""
+
+#: inc/admin/admin.php:201
+msgid "Send notification on editing"
+msgstr ""
+
+#: inc/admin/admin.php:208 inc/admin/admin.php:215
+msgid "Send notification on publish"
+msgstr ""
+
+#: inc/admin/admin.php:221
+msgid "Notification message"
+msgstr ""
+
+#: inc/admin/admin.php:226
+msgid "Where whould you like to display"
+msgstr ""
+
+#: inc/admin/admin.php:233
+msgid "Popup banner message"
+msgstr ""
+
+#: inc/admin/admin.php:261
+msgid "Refresh data"
+msgstr ""
+
+#: inc/admin/admin.php:266
+msgid "Total Subscribers"
+msgstr ""
+
+#: inc/admin/admin.php:275
+msgid "Save Settings"
+msgstr ""
+
+#: inc/admin/admin.php:280
+msgid "Send Custom Notification"
+msgstr ""
+
+#: inc/admin/admin.php:284
+msgid "Title"
+msgstr ""
+
+#: inc/admin/admin.php:288
+msgid "Link"
+msgstr ""
+
+#: inc/admin/admin.php:292
+msgid "Image url"
+msgstr ""
+
+#: inc/admin/admin.php:296
+msgid "Message"
+msgstr ""
+
+#: inc/admin/admin.php:299
+msgid "Send Notification"
+msgstr ""
+
+#: inc/admin/admin.php:315
+msgid "This plugin requires a free API key form PushNotification.io"
+msgstr ""
+
+#: inc/admin/admin.php:315
+msgid "Get the Key"
+msgstr ""
+
+#: inc/admin/admin.php:318
+msgid "User Verified"
+msgstr ""
+
+#: inc/admin/admin.php:319
+msgid "Revoke key"
+msgstr ""
+
+#: inc/admin/admin.php:521
+msgid "Push Notification is require API, Please enter"
+msgstr ""
+
+#: inc/admin/admin.php:523
+msgid "API key"
+msgstr ""
+
+#: inc/admin/newsletter.php:34
+msgid "No Thanks"
+msgstr ""
+
+#: inc/frontend/pn-frontend.php:202
+msgid "Sorry, you are not allowed to edit the manifest."
+msgstr ""
+
+#: inc/frontend/pn-frontend.php:365
+msgid "Subscribe for notification"
+msgstr ""
+
+#: inc/frontend/pn-frontend.php:469
+msgid "Ok"
+msgstr ""
+
+#: inc/frontend/pn-frontend.php:472
+msgid "No thanks"
+msgstr ""
+
+#: push-notification.php:41
+msgid "Documentation"
+msgstr ""

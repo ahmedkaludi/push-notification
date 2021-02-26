@@ -64,8 +64,10 @@ function pushnotification_load_messaging(){
 		if(wrapper){ wrapper[0].style.display="none"; }
 		messaging.requestPermission().then(function() {
 			console.log("Notification permission granted.");
-			document.cookie = "pn_notification_block=true";
-			document.cookie = "notification_permission=granted";
+			var date = new Date;
+			date.setDate(date.getDate() + 30);
+			document.cookie = "pn_notification_block=true;expires="+date+";";
+			document.cookie = "notification_permission=granted;expires="+date+";";
 			if(push_notification_isTokenSentToServer()){
 				console.log('Token already saved');
 			}else{
@@ -74,7 +76,9 @@ function pushnotification_load_messaging(){
 		}).catch(function(err) {
 			if(Notification && Notification.permission=='denied'){
 				console.log("Notification permission denied.");
-				document.cookie = "pn_notification_block=true";
+				var date = new Date;
+				date.setDate(date.getDate() + 30);
+				document.cookie = "pn_notification_block=true;expires="+date+";";
 			}else{
 				console.log("Unable to get permission to notify.", err);
 			}

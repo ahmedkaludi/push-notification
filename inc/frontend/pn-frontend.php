@@ -466,10 +466,10 @@ class Push_Notification_Frontend{
 			   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>
 			   		<span class="pn-btns">&nbsp;&nbsp;
 			   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
-			   				'.esc_html__('Ok', 'push-notification').'
+			   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
 			   			</span>
 			   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
-			   				'.esc_html__('No thanks', 'push-notification').'
+			   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
 			   			</span>
 			   		</span>
 			   	</span>

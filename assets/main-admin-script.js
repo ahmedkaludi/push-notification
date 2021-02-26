@@ -248,4 +248,9 @@ jQuery(document).ready(function($){
 		}
 		target.val(value);
 	})
+	jQuery('#utm_tracking_checkbox').click(function(){
+		if(jQuery(this).prop("checked")==true){
+			jQuery("#utm_tracking_wrapper").show();
+		}else{jQuery("#utm_tracking_wrapper").hide();}
+	});
 });
