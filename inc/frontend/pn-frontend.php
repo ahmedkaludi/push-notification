@@ -232,6 +232,7 @@ class Push_Notification_Frontend{
 				echo json_encode(array("status"=> 503, 'message'=>'os is blank'));die;
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address);
+			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
 			echo json_encode($response);die;
 		}
 	}

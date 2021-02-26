@@ -31,7 +31,31 @@ function pushnotification_load_messaging(){
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		if(wrapper){ wrapper[0].style.display="none"; }
 	})
-	document.getElementById("pn-activate-permission_link").addEventListener("click", function(){
+	document.getElementById("pn-activate-permission_link").addEventListener("click",  function (){pn_allowed_notification()});
+	var allowed = document.getElementsByClassName("pn-activate-allow-permission-subscripbe");
+	for (var i = allowed.length - 1; i >= 0; i--) {
+		allowed[i].addEventListener("click", function (){pn_allowed_notification()});
+	}
+
+	 messaging.onMessage(function(payload) {
+		 console.log('Message received. ', payload);
+		 
+		 notificationTitle = payload.data.title;
+			notificationOptions = {
+			body: payload.data.body,
+			icon: payload.data.icon
+			}
+			var notification = new Notification(notificationTitle, notificationOptions); 
+				notification.onclick = function(event) {
+				event.preventDefault();
+				window.open(payload.data.url, '_blank');
+				notification.close();
+				}
+		});
+
+}
+
+ function pn_allowed_notification(){
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		if(wrapper){ wrapper[0].style.display="none"; }
 		messaging.requestPermission().then(function() {
@@ -51,25 +75,8 @@ function pushnotification_load_messaging(){
 				console.log("Unable to get permission to notify.", err);
 			}
 		});
-	})
+	}
 
-	 messaging.onMessage(function(payload) {
-		 console.log('Message received. ', payload);
-		 
-		 notificationTitle = payload.data.title;
-			notificationOptions = {
-			body: payload.data.body,
-			icon: payload.data.icon
-			}
-			var notification = new Notification(notificationTitle, notificationOptions); 
-				notification.onclick = function(event) {
-				event.preventDefault();
-				window.open(payload.data.url, '_blank');
-				notification.close();
-				}
-		});
-
-}
 function push_notification_getRegToken(argument){
 	 
 	messaging.getToken().then(function(currentToken) {
