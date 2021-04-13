@@ -614,7 +614,7 @@ class Push_Notification_Admin{
 	      $access_type = get_filesystem_method();
 	      if($access_type === 'direct')
 	      {
-	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.($filePath);
+	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.('/assets/'.$filePath);
 	         $creds = request_filesystem_credentials($file, '', false, false, array());
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
