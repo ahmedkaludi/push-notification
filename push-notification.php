@@ -33,6 +33,16 @@ function push_notification_initialize(){
 	if( !is_admin() || wp_doing_ajax() ){
 		require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/frontend/pn-frontend.php";
 	}
+	if ( class_exists( 'OneSignal' ) ) {
+		add_action('admin_notices', 'push_notification_feature_notice');
+	}
+}
+
+function push_notification_feature_notice(){
+	$class = 'notice notice-warning';
+    $message = esc_html__( 'There is may some conflict issue with the other push notification plugin. To take benefit all features of the Push Notification plugin, Please deactivate the OneSignal plugin.', 'push-notification' );
+ 
+    printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 
 }
 
 
