@@ -104,6 +104,12 @@ function pushnotification_load_messaging(){
 			notification.onclick = function(event) {
 			event.preventDefault();
 			window.open(payload.data.url, '_blank');
+			
+			var xhttp = new XMLHttpRequest();
+			xhttp.open("POST", pnScriptSetting.ajax_url, true);
+	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhttp.send('campaign='+payload.data.currentCampaign+'&nonce='+pnScriptSetting.nonce+'&action=pn_noteclick_subscribers');
+			
 			notification.close();
 			}
 	});
