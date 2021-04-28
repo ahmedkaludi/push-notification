@@ -149,7 +149,8 @@ class Push_Notification_Frontend{
 					'pn_config'=> $messageConfig,
 					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
 					"scope" => esc_url_raw(trailingslashit($link)),
-					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php'))
+					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
+					"cookie_scope"=>esc_url_raw(apply_filters('push_notification_cookies_scope', "/")),
 					);
         return $settings;
 	}
