@@ -88,6 +88,14 @@ class PN_Server_Request{
 		return $response;
 	}
 
+	public static function sendPushNotificatioClickData( $campaign ){
+		$verifyUrl = 'campaign/click';
+		    
+		$data = array( "campaign_id"=>$campaign );
+		$response = self::sendRequest($verifyUrl, $data, 'post');
+		return $response;
+	}
+
 	protected static function sendRequest($suffixUrl, $data, $method="post"){
 		if($method==='post'){
 				$url = self::$notificationServerUrl.$suffixUrl;
