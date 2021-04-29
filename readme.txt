@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 5.6
-Stable tag: 1.16
+Tested up to: 5.7.1
+Stable tag: 1.17
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,11 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.17 (29 April 2021) =
+* Enhancement: Added feature for click count information related to every campaign #572
+* Improvement: Added notice for conflict with other notification plugin #603
+* Improvement: Added an filter to change the path of the cookies #602
+
 = 1.16 (26 February 2021) =
 * Improvement: users can send personal one to one push notification pop up messages
 * Compatibility with "PWA for WP & AMP" and "BuddyPress" (Notification feature)
