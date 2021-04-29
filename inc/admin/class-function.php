@@ -3,8 +3,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 class PN_Server_Request{
-	public static $notificationServerUrl = 'http://pushnotifications.io/api/'; //slash necessary at last 
-	public static $notificationlanding = 'http://pushnotifications.io/'; //slash necessary at last
+	public static $notificationServerUrl = 'https://pushnotifications.io/api/'; //slash necessary at last 
+	public static $notificationlanding = 'https://pushnotifications.io/'; //slash necessary at last
 	public function __construct(){}
 
 	public static function varifyUser($user_token){
@@ -84,6 +84,14 @@ class PN_Server_Request{
 					'icon_url'=>$icon_url,
 					'image_url'=>$image_url,
 				);
+		$response = self::sendRequest($verifyUrl, $data, 'post');
+		return $response;
+	}
+
+	public static function sendPushNotificatioClickData( $campaign ){
+		$verifyUrl = 'campaign/click';
+		    
+		$data = array( "campaign_id"=>$campaign );
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
 	}

@@ -55,7 +55,7 @@ function pushnotification_load_messaging(){
 		if(wrapper){ wrapper[0].style.display="flex"; }
 	}
 	document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
-		document.cookie = "pn_notification_block=true";
+		document.cookie = "pn_notification_block=true;path="+pnScriptSetting.cookie_scope;
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		if(wrapper){ wrapper[0].style.display="none"; }
 	})
@@ -66,8 +66,8 @@ function pushnotification_load_messaging(){
 			console.log("Notification permission granted.");
 			var date = new Date;
 			date.setDate(date.getDate() + 30);
-			document.cookie = "pn_notification_block=true;expires="+date+";";
-			document.cookie = "notification_permission=granted;expires="+date+";";
+			document.cookie = "pn_notification_block=true;expires="+date+";path="+pnScriptSetting.cookie_scope;
+			document.cookie = "notification_permission=granted;expires="+date+";path="+pnScriptSetting.cookie_scope;
 			if(push_notification_isTokenSentToServer()){
 				console.log('Token already saved');
 			}else{
@@ -78,7 +78,7 @@ function pushnotification_load_messaging(){
 				console.log("Notification permission denied.");
 				var date = new Date;
 				date.setDate(date.getDate() + 30);
-				document.cookie = "pn_notification_block=true;expires="+date+";";
+				document.cookie = "pn_notification_block=true;expires="+date+";path="+pnScriptSetting.cookie_scope;
 			}else{
 				console.log("Unable to get permission to notify.", err);
 			}
@@ -104,6 +104,12 @@ function pushnotification_load_messaging(){
 			notification.onclick = function(event) {
 			event.preventDefault();
 			window.open(payload.data.url, '_blank');
+			
+			var xhttp = new XMLHttpRequest();
+			xhttp.open("POST", pnScriptSetting.ajax_url, true);
+	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhttp.send('campaign='+payload.data.currentCampaign+'&nonce='+pnScriptSetting.nonce+'&action=pn_noteclick_subscribers');
+			
 			notification.close();
 			}
 	});

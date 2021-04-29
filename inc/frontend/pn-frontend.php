@@ -52,6 +52,10 @@ class Push_Notification_Frontend{
 
 		add_action( 'wp_ajax_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) ); 
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
+
+		//click event
+		add_action( 'wp_ajax_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) ); 
+		add_action( 'wp_ajax_nopriv_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) );
 		//AMP Connect
 		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
 		if( function_exists('ampforwp_get_setting') && ampforwp_get_setting('amp-mobile-redirection') && wp_is_mobile() ){
@@ -145,7 +149,8 @@ class Push_Notification_Frontend{
 					'pn_config'=> $messageConfig,
 					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
 					"scope" => esc_url_raw(trailingslashit($link)),
-					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php'))
+					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
+					"cookie_scope"=>esc_url_raw(apply_filters('push_notification_cookies_scope', "/")),
 					);
         return $settings;
 	}
@@ -232,6 +237,21 @@ class Push_Notification_Frontend{
 				echo json_encode(array("status"=> 503, 'message'=>'os is blank'));die;
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address);
+			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
+			echo json_encode($response);die;
+		}
+	}
+
+	public function pn_noteclick_subscribers(){
+		$nonce = sanitize_text_field($_POST['nonce']);
+		if( !wp_verify_nonce($nonce, 'pn_notification') ){
+			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
+		}else{
+			$campaign = sanitize_text_field($_POST['campaign']);
+			if(empty($campaign)){
+				echo json_encode(array("status"=> 503, 'message'=>'Campaign is blank'));die;
+			}
+			$response = PN_Server_Request::sendPushNotificatioClickData($campaign);
 			echo json_encode($response);die;
 		}
 	}
