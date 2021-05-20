@@ -262,6 +262,21 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
+
+		//WC compatiblility
+		add_settings_section('push_notification_user_wc_settings_section',
+					 esc_html__('WooCommerce settings','push-notification'), 
+					 '__return_false', 
+					 'push_notification_user_wc_settings_section');
+            add_settings_field(
+				'pn_wc_notification_orderchgn_edit',					// ID
+				esc_html__('Notification on order change', 'push-notification'),// Title
+				array( $this, 'user_notification_order_change_callback'),// Callback
+				'push_notification_user_wc_settings_section',	// Page slug
+				'push_notification_user_wc_settings_section'	// Settings Section ID
+			);
+            
+
 	}
 
 	function shownotificationData(){
@@ -302,6 +317,12 @@ class Push_Notification_Admin{
 		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button">
 			</section>
 			';
+		if ( class_exists( 'WooCommerce' ) ) {
+			echo '<section style="margin-top:20px"><div class="postbox" style="padding:20px">';
+				do_settings_sections( 'push_notification_user_wc_settings_section' );
+				echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button">';
+			echo '</div></section>';
+		}
 		echo '<br/><br/><div class="pn-other-settings-options">
 					<div id="dashboard_right_now" class="postbox " >
 						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
@@ -399,10 +420,10 @@ class Push_Notification_Admin{
 	public function pn_key_position_select_callback(){
 		$notification = push_notification_settings();
 		$data = array(
-			'top-left'=> 'Top left',
-			'top-right'=> 'Top right',
-			'bottom-right'=> 'Bottom right',
-			'bottom-left'=> 'Bottom Left'
+			'top-left'=> esc_html__('Top left', 'push-notification'),
+			'top-right'=> esc_html__('Top right', 'push-notification'),
+			'bottom-right'=> esc_html__('Bottom right', 'push-notification'),
+			'bottom-left'=> esc_html__('Bottom Left', 'push-notification'),
 		);
 		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
 	}
@@ -418,6 +439,13 @@ class Push_Notification_Admin{
 	public function pn_key_banner_decline_btn_callback(){
 		$notification = push_notification_settings();
 		PN_Field_Generator::get_input('popup_banner_decline_btn', 'popup_banner_decline_btn_id');
+	}
+
+	public function user_notification_order_change_callback(){
+		$notification = push_notification_settings();
+		PN_Field_Generator::get_input_checkbox('notification_on_order_change_to_user', 1, 'send_notification_to_user_order', "", esc_html__("To User", 'push-notification'));
+		PN_Field_Generator::get_input_checkbox('notification_on_order_change_to_admin', 1, 'send_notification_to_admin_order', "", esc_html__("To Admin", 'push-notification'));
+		echo "<p class='description'>".esc_html__('Send notification when order status will change',"push-notification")."</p>";
 	}
 
 	public function pn_verify_user(){
@@ -570,14 +598,47 @@ class Push_Notification_Admin{
 	
 	}
 
+	/**
+	 * Send the push notification when orders will change
+	 * @method pn_order_send_notification
+	 * @param  string 			Ref Order id 
+	 * @param  string 			Ref status_from
+	 * @param  string           $status_to  converted status.
+	 * @param  string           $$obj  Order Object.
+	 * @return Void                                            
+	 */
 	public function pn_order_send_notification($order_id, $status_from, $status_to, $obj){
-		$order_id = $order_id;
 		if(strtolower($status_to)==='pending'){ return; }
+		$push_notification_settings = push_notification_settings();
+		if(isset($push_notification_settings['notification_on_order_change_to_user']) && $push_notification_settings['notification_on_order_change_to_user']!=1){ return ; }
+		$order = wc_get_order( $order_id );
+		$user_id = $order->get_user_id();
+		$token_ids = get_user_meta($user_id, 'pnwoo_notification_token',true);
+		
+		//Send notificarion to admin
+		if(isset($push_notification_settings['notification_on_order_change_to_admin']) && $push_notification_settings['notification_on_order_change_to_admin']==1){ 
+			$args = array(
+			    'role'    => 'administrator',
+			    'order'   => 'ASC'
+			);
+			$users = get_users( $args );
+			if(count($users)>0){
+				foreach ($users as $key => $user) {
+					$tokens = get_user_meta($user->ID, 'pnwoo_notification_token',true);
+					if(is_array($tokens)){
+						$token_ids = array_merge($token_ids, $tokens);
+					}
+				}
+			}
+		}
+
+		$token_ids = array_filter($token_ids);
+		$token_ids = array_unique($token_ids);
+		
 		$post_title = esc_html__('Order status changed', 'push-notification');
 		$post_content = esc_html__('Order id #'.$order_id.' changed from '.$status_from.' to '.$status_to);
 		$auth_settings = push_notification_auth_settings();
 
-		$push_notification_settings = push_notification_settings();
 		//API Data
 		$title = sanitize_text_field(wp_strip_all_tags($post_title, true) );
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
@@ -601,7 +662,27 @@ class Push_Notification_Admin{
 			if(function_exists('get_current_user_id')){
 				$userid = get_current_user_id();
 			}
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $userid );
+
+			$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
+	        $weblink = is_multisite()? get_site_url() : home_url();
+			$data = array("user_token"=>$auth_settings['user_token'],
+						"audience_token_id"=>$token_ids,
+						"title"=>wp_strip_all_tags($title),
+						"message"=> wp_strip_all_tags($message),
+						"link_url"=>$link_url,
+						"icon_url"=> $icon_url,
+						"image_url"=> $image_url,
+						"website"=>   $weblink,
+						);
+			$postdata = array('body'=> $data);
+			$remoteResponse = wp_remote_post($verifyUrl, $postdata);
+
+			if( is_wp_error( $remoteResponse ) ){
+				$remoteData = array('status'=>401, "response"=>"could not connect to server");
+			}else{
+				$remoteData = wp_remote_retrieve_body($remoteResponse);
+				$remoteData = json_decode($remoteData, true);
+			}
 		}//auth token check 
 	}
 
@@ -722,13 +803,16 @@ class PN_Field_Generator{
 		$settings = push_notification_settings();
 		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
 	}
-	public static function get_input_checkbox($name, $value, $id="", $class=""){
+	public static function get_input_checkbox($name, $value, $id="", $class="", $label=''){
 		$settings = push_notification_settings();
 		if(!isset($settings[$name])){$settings[$name] = 0; }
 		?>
 		<div class="checkbox_wrapper">
 			<input type="checkbox" class="regular-text checkbox_operator" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/>
 			<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text checkbox_target" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($settings[$name]); ?>" data-truevalue="<?php echo esc_attr($value); ?>"/>
+			<?php if(!empty($label)){
+				echo '<label style="display:inline-block" for="'.$id.'">'.$label.'</label>';
+			} ?>
 		</div>
 		<?php
 	}

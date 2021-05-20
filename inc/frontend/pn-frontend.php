@@ -63,6 +63,10 @@ class Push_Notification_Frontend{
 		}else{
 			add_filter('template_include', array($this, 'page_include'), 1, 1);
 		}
+
+		//Woocommerce order status Compatibility
+		//Store token ID
+		add_action('pn_tokenid_registration_id', array($this, 'store_user_registered_tokens'), 10, 5);
 	}
 	public static function update_autoptimize_exclude( $values, $option ){
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/application.min.js')){
@@ -494,6 +498,28 @@ class Push_Notification_Frontend{
 			   		</span>
 			   	</span>
 			</div>';
+	}
+
+	/**
+	 * To store the token in db after allow
+	 * @method store_user_registered_tokens
+	 * @param  String                       $token_id   Generated token we get as string
+	 * @param  Array                        $response   response as in Array
+	 * @param  String                       $user_agent Type of browser
+	 * @param  String                       $os         optional 
+	 * @param  String                       $ip_address optional Grab the client ipaddress dummy
+	 * @return Void                                   [description]
+	 */
+	function store_user_registered_tokens($token_id, $response, $user_agent, $os, $ip_address){
+		
+		$userData = wp_get_current_user();
+		if(is_object($userData) && isset($userData->ID)){
+		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
+		 	$token_ids = $token_ids? json_decode($token_ids): array();
+		 	$userid = $userData->ID;
+		 	$token_ids[] = $response['data']['id'];
+		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
+		}
 	}
 
 }
