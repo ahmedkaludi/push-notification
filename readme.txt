@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 5.7.1
-Stable tag: 1.18
+Tested up to: 5.8
+Stable tag: 1.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.19 (23 July 2021) =
+* Improvement: Pushnotification compatibility with Automattic amp #329
+
 = 1.18 (21 May 2021) =
 * Improvement: Notification send for Woo commerce order change #585
 * Added: Notification send for Woo-commerce administrator also on order change #585
