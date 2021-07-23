@@ -33,6 +33,12 @@ class Push_Notification_Frontend{
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
 				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			}
+		}elseif(function_exists('amp_is_enabled') && amp_is_enabled()){
+			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
+			//add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+
+			add_action("wp_footer", array($this, 'header_content'));
+			add_action("wp_footer", array($this, 'amp_header_button_css'));
 		}else{
 			//manifest
 			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
@@ -43,9 +49,9 @@ class Push_Notification_Frontend{
 			add_action("wp_enqueue_scripts", array($this, 'enqueue_pn_scripts') );
 
 
-			//firebase serviceworker
-			add_action( 'parse_query', array($this, 'load_service_worker') );
 		}
+		//firebase serviceworker
+		add_action( 'parse_query', array($this, 'load_service_worker') );
 		
 
 		add_action( 'init', array($this, 'sw_template_query_var') );
@@ -190,7 +196,11 @@ class Push_Notification_Frontend{
 	}
 
 	public function manifest_add_homescreen(){
-		echo '<link rel="manifest" href="'. esc_url( rest_url( 'push-notification/v2/pn-manifest-json' ) ).'">';
+		echo '<link rel="manifest" href="'. esc_url( $this->urls_https( rest_url( 'push-notification/v2/pn-manifest-json' ) ) ).'">';
+	}
+
+	public function urls_https( $url ) {
+           return str_replace( 'http://', 'https://', $url );
 	}
 
 	public function register_manifest_rest_route() {
@@ -520,6 +530,14 @@ class Push_Notification_Frontend{
 		 	$token_ids[] = $response['data']['id'];
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}
+	}
+
+	function amp_header_button_css(){
+		ob_start();
+		$this->header_button_css();
+		$css = ob_get_contents();
+		ob_clean();
+		echo "<style>".$css."</style>";
 	}
 
 }
