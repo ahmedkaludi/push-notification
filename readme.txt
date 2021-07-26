@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.8
-Stable tag: 1.19
+Stable tag: 1.20
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.20 (23 July 2021) =
+* Added: Real-time Notifications addon of Ulltimate Member compatibility with Push Notifications for WP & AMP  #242
+
 = 1.19 (23 July 2021) =
 * Improvement: Pushnotification compatibility with Automattic amp #329
 
