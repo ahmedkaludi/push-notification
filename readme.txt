@@ -48,8 +48,8 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
-= 1.20 (23 July 2021) =
-* Added: Real-time Notifications addon of Ulltimate Member compatibility with Push Notifications for WP & AMP  #242
+= 1.20 (26 July 2021) =
+* Added: Real-time Notifications add-on of Ultimate Member compatibility with Push Notifications for WP & AMP  #242
 
 = 1.19 (23 July 2021) =
 * Improvement: Pushnotification compatibility with Automattic amp #329
