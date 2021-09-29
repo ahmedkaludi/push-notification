@@ -269,6 +269,13 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_key_prompt_after_nseconds',								// ID
+				esc_html__('Popup show after n seconds', 'push-notification'),// Title
+				array( $this, 'pn_key_popupshowafternseconds_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
 
 		//WC compatiblility
 		add_settings_section('push_notification_user_wc_settings_section',
@@ -448,9 +455,13 @@ class Push_Notification_Admin{
 		PN_Field_Generator::get_input('popup_banner_decline_btn', 'popup_banner_decline_btn_id');
 	}
 	public function pn_key_popupshowagain_callback(){
-		$notification = push_notification_settings();
 		PN_Field_Generator::get_input('notification_popup_show_again', 'notification_popup_show_again', '');
 		echo "<p class='help'> ".esc_html__('Show Popup again after decline by the user (in Days)', 'push-notification')." </p>";
+	}
+	public function pn_key_popupshowafternseconds_callback(){
+		$notification = push_notification_settings();
+		PN_Field_Generator::get_input('notification_popup_show_afternseconds', 'notification_popup_show_afternseconds', '');
+		echo "<p class='help'> ".esc_html__('Show Popup after n seconds (in Seconds)', 'push-notification')." </p>";
 	}
 
 	public function user_notification_order_change_callback(){
@@ -786,6 +797,7 @@ function push_notification_settings(){
 		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
 		'popup_banner_decline_btn'=> esc_html__('No thanks', 'push-notification'),
 		'notification_popup_show_again'=>'30',
+		'notification_popup_show_afternseconds'=>'3',
 		'notification_utm_source'=> 'pn-ref',
 		'notification_utm_medium'=> 'pn-ref',
 		'notification_utm_campaign'=> 'pn-campaign',

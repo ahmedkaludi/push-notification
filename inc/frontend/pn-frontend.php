@@ -163,6 +163,7 @@ class Push_Notification_Frontend{
 					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
 					"cookie_scope"=>esc_url_raw(apply_filters('push_notification_cookies_scope', "/")),
 					'notification_popup_show_again'=>$pn_Settings['notification_popup_show_again'],
+					'popup_show_afternseconds'=> $pn_Settings['notification_popup_show_afternseconds'],
 					);
         return $settings;
 	}

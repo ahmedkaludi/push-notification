@@ -52,7 +52,9 @@ function pushnotification_load_messaging(){
   	}
   	if(pnreadCookie("pn_notification_block")==null){
 		var wrapper = document.getElementsByClassName("pn-wrapper");
-		if(wrapper){ wrapper[0].style.display="flex"; }
+		setTimeout(function() {
+			if(wrapper){ wrapper[0].style.display="flex"; }
+	   }, pnScriptSetting.notification_popup_show_afternseconds);
 	}
 	document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
 		var date = new Date;
