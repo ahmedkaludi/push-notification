@@ -150,7 +150,8 @@ class Push_Notification_Frontend{
             $link = home_url();
         }    
         $auth_settings = push_notification_auth_settings();
-        $messageConfig = '';
+		$pn_Settings = push_notification_settings();
+		$messageConfig = '';
         if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
         	$messageConfig = json_decode($auth_settings['messageManager'], true);
         }
@@ -161,6 +162,7 @@ class Push_Notification_Frontend{
 					"scope" => esc_url_raw(trailingslashit($link)),
 					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
 					"cookie_scope"=>esc_url_raw(apply_filters('push_notification_cookies_scope', "/")),
+					'notification_popup_show_again'=>$pn_Settings['notification_popup_show_again'],
 					);
         return $settings;
 	}

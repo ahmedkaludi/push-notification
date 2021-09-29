@@ -213,7 +213,7 @@ class Push_Notification_Admin{
 			);
 			add_settings_field(
 				'pn_key_posttype_select',								// ID
-				esc_html__('Send notification on publish', 'push-notification'),// Title
+				esc_html__('Send notification on', 'push-notification'),// Title
 				array( $this, 'pn_key_posttype_select_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
@@ -259,6 +259,13 @@ class Push_Notification_Admin{
 				'pn_key_popup_decline_btn',								// ID
 				esc_html__('Popup banner decline', 'push-notification'),// Title
 				array( $this, 'pn_key_banner_decline_btn_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_show_again_on',								// ID
+				esc_html__('Popup show again', 'push-notification'),// Title
+				array( $this, 'pn_key_popupshowagain_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
@@ -439,6 +446,11 @@ class Push_Notification_Admin{
 	public function pn_key_banner_decline_btn_callback(){
 		$notification = push_notification_settings();
 		PN_Field_Generator::get_input('popup_banner_decline_btn', 'popup_banner_decline_btn_id');
+	}
+	public function pn_key_popupshowagain_callback(){
+		$notification = push_notification_settings();
+		PN_Field_Generator::get_input('notification_popup_show_again', 'notification_popup_show_again', '');
+		echo "<p class='help'> ".esc_html__('Show Popup again after decline by the user (in Days)', 'push-notification')." </p>";
 	}
 
 	public function user_notification_order_change_callback(){
@@ -773,6 +785,7 @@ function push_notification_settings(){
 		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
 		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
 		'popup_banner_decline_btn'=> esc_html__('No thanks', 'push-notification'),
+		'notification_popup_show_again'=>'30',
 		'notification_utm_source'=> 'pn-ref',
 		'notification_utm_medium'=> 'pn-ref',
 		'notification_utm_campaign'=> 'pn-campaign',

@@ -55,7 +55,9 @@ function pushnotification_load_messaging(){
 		if(wrapper){ wrapper[0].style.display="flex"; }
 	}
 	document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
-		document.cookie = "pn_notification_block=true;path="+pnScriptSetting.cookie_scope;
+		var date = new Date;
+		date.setDate(date.getDate() + parseInt(pnScriptSetting.notification_popup_show_again));
+		document.cookie = "pn_notification_block=true;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		if(wrapper){ wrapper[0].style.display="none"; }
 	})
@@ -65,9 +67,9 @@ function pushnotification_load_messaging(){
 		messaging.requestPermission().then(function() {
 			console.log("Notification permission granted.");
 			var date = new Date;
-			date.setDate(date.getDate() + 30);
-			document.cookie = "pn_notification_block=true;expires="+date+";path="+pnScriptSetting.cookie_scope;
-			document.cookie = "notification_permission=granted;expires="+date+";path="+pnScriptSetting.cookie_scope;
+			date.setDate(date.getDate() + parseInt(pnScriptSetting.notification_popup_show_again));
+			document.cookie = "pn_notification_block=true;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
+			document.cookie = "notification_permission=granted;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
 			if(push_notification_isTokenSentToServer()){
 				console.log('Token already saved');
 			}else{
@@ -77,7 +79,7 @@ function pushnotification_load_messaging(){
 			if(Notification && Notification.permission=='denied'){
 				console.log("Notification permission denied.");
 				var date = new Date;
-				date.setDate(date.getDate() + 30);
+				date.setDate(date.getDate() + pnScriptSetting.notification_popup_show_again);
 				document.cookie = "pn_notification_block=true;expires="+date+";path="+pnScriptSetting.cookie_scope;
 			}else{
 				console.log("Unable to get permission to notify.", err);
