@@ -231,7 +231,7 @@ class Push_Notification_Admin{
 			);
 
 		add_settings_section('push_notification_notification_settings_section',
-					 esc_html__('Notification message','push-notification'), 
+					 esc_html__('Notification settings','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
 			add_settings_field(
@@ -273,6 +273,13 @@ class Push_Notification_Admin{
 				'pn_key_prompt_after_nseconds',								// ID
 				esc_html__('Popup show after n seconds', 'push-notification'),// Title
 				array( $this, 'pn_key_popupshowafternseconds_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_prompt_after_npageview',								// ID
+				esc_html__('Popup show after n seconds', 'push-notification'),// Title
+				array( $this, 'pn_key_popupshowafternpageview_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
@@ -462,6 +469,11 @@ class Push_Notification_Admin{
 		$notification = push_notification_settings();
 		PN_Field_Generator::get_input('notification_popup_show_afternseconds', 'notification_popup_show_afternseconds', '');
 		echo "<p class='help'> ".esc_html__('Show Popup after n seconds (in Seconds)', 'push-notification')." </p>";
+	}
+	public function pn_key_popupshowafternpageview_callback(){
+		$notification = push_notification_settings();
+		PN_Field_Generator::get_input('notification_popup_show_afternpageview', 'notification_popup_show_afternpageview', '');
+		echo "<p class='help'> ".esc_html__('Show Popup after nth page view (Default 1)', 'push-notification')." </p>";
 	}
 
 	public function user_notification_order_change_callback(){
@@ -798,6 +810,7 @@ function push_notification_settings(){
 		'popup_banner_decline_btn'=> esc_html__('No thanks', 'push-notification'),
 		'notification_popup_show_again'=>'30',
 		'notification_popup_show_afternseconds'=>'3',
+		'notification_popup_show_afternpageview'=>'1',
 		'notification_utm_source'=> 'pn-ref',
 		'notification_utm_medium'=> 'pn-ref',
 		'notification_utm_campaign'=> 'pn-campaign',

@@ -50,7 +50,12 @@ function pushnotification_load_messaging(){
 	      }
 	      return null;
   	}
+	
   	if(pnreadCookie("pn_notification_block")==null){
+		const pageAccessedByReload = window.history.length;
+		if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
+			return false;
+		}
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		setTimeout(function() {
 			if(wrapper){ wrapper[0].style.display="flex"; }
