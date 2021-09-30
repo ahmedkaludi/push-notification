@@ -278,7 +278,7 @@ class Push_Notification_Admin{
 			);
 			add_settings_field(
 				'pn_key_prompt_after_npageview',								// ID
-				esc_html__('Popup show after n seconds', 'push-notification'),// Title
+				esc_html__('Popup show after n pages view', 'push-notification'),// Title
 				array( $this, 'pn_key_popupshowafternpageview_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
