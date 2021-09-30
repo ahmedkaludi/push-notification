@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 5.8
-Stable tag: 1.21
+Stable tag: 1.22
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,11 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+= 1.22 (30 September 2021) =
+* Added: Option to display the notification popup banner after the Nth page view #571
+* Added: Option to show the notification popup after the "Nth" seconds. #570
+* Added: Option to show the pop-up after some days again if closed by user. #532
+
 = 1.21 (20 September 2021) =
 * Added: Badge, number of notification will show on the app ICON of PWA #644
 
