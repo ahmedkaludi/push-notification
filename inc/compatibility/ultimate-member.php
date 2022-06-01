@@ -18,7 +18,7 @@ class PN_Ultimate_Member{
 	 * @return Void                                            
 	 */
 	public function init(){
-		add_action("um_notification_after_notif_submission", array($this, 'send_notification_to_user'), 10, 2);
+		add_action("um_notification_after_notif_update", array($this, 'send_notification_to_user'), 10, 2);
 	}
 
 	/**
@@ -30,13 +30,14 @@ class PN_Ultimate_Member{
 	 */
 	public function send_notification_to_user( $user_id, $content){
 		$push_notification_settings = push_notification_settings();
-
+        
 		$auth_settings = push_notification_auth_settings();
 		if( !isset( $auth_settings['user_token'] ) || ( isset( $auth_settings['user_token'] ) && empty($auth_settings['user_token']) ) ){
 			return ; 	
 		}
 
 		$token_ids = get_user_meta($user_id, 'pnwoo_notification_token',true);
+		if(!empty($token_ids)){
 		$token_ids = array_filter($token_ids);
 		$token_ids = array_unique($token_ids);
 
@@ -76,6 +77,7 @@ class PN_Ultimate_Member{
 			$remoteData = wp_remote_retrieve_body($remoteResponse);
 			$remoteData = json_decode($remoteData, true);
 		}
+	}
 	}
 }
 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API') && ( !is_admin() || wp_doing_ajax() ) ){
