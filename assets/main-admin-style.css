@@ -9,6 +9,8 @@
  section.pn_general_wrapper{
 	background-color: #fff;
 	height:100%;	
+ 	margin-top: 35px;
+ 	border: 1px solid #c3c4c7;
 }
 .pn_general_wrapper{position: relative;padding: 20px;}
 .pn_general_wrapper button i{
@@ -50,3 +52,28 @@ font-size: 16px;
  .pn-field_wrap{
  	display:flex;margin-top: 10px;
  } .pn-field_wrap label{width:20%;}
+ select#pn_push_on_category {
+    margin-top: 5px;
+}
+#pn_connect {
+    background-color: #fff;
+    padding: 8px 20px 20px;
+    margin-top: 35px;
+    border: 1px solid #c3c4c7;
+}
+#segment_category_selector_wrapper {
+	width: 18em;
+	border: 1px solid #8c8f94;
+	border-radius: 3px;
+	padding: 10px 24px 10px 8px;
+	margin-top: 5px;
+}
+#pn_help {
+    background: #ffffff;
+    border: 1px solid #c3c4c7;
+    padding: 5px 25px 20px;
+}
+.button.pn-submit-button {
+    color: #fff;
+    background: #2271b1;
+}

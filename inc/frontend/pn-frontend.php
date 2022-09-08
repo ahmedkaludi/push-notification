@@ -10,12 +10,12 @@ class Push_Notification_Frontend{
 
 	public function init(){
 		$auth_settings = push_notification_auth_settings();
-		if(empty($auth_settings) 
+		if(empty($auth_settings)
 			|| !isset($auth_settings['user_token']) 
 			|| !isset($auth_settings['messageManager'])
-			|| (isset($auth_settings['messageManager']) 
-				&& empty( $auth_settings['messageManager']) 
-				) 
+			|| (isset($auth_settings['messageManager'])
+				&& empty( $auth_settings['messageManager'])
+				)
 		){
         	return false;
         }
@@ -29,7 +29,7 @@ class Push_Notification_Frontend{
 			}
 			if($addNotification){
 				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
-				
+
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
 				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			}
@@ -52,15 +52,15 @@ class Push_Notification_Frontend{
 		}
 		//firebase serviceworker
 		add_action( 'parse_query', array($this, 'load_service_worker') );
-		
 
+		
 		add_action( 'init', array($this, 'sw_template_query_var') );
 
 		add_action( 'wp_ajax_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) ); 
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
 
 		//click event
-		add_action( 'wp_ajax_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) ); 
+		add_action( 'wp_ajax_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) );
 		add_action( 'wp_ajax_nopriv_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) );
 		//AMP Connect
 		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
@@ -81,7 +81,7 @@ class Push_Notification_Frontend{
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js')){
 			$values .= ", ".PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js';
 		}
-		
+
 
 		return $values;
 	}
@@ -193,7 +193,7 @@ class Push_Notification_Frontend{
 		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
 		wp_add_inline_script('pn-script-gtag', $data, 'after');
 
-
+		
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
 		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
@@ -229,7 +229,7 @@ class Push_Notification_Frontend{
     public function get_manifest($request){
     	$array = $this->notificatioArray;
         return $array;
-    }  
+    }
 
     public function manifest_add_gcm_id($manifest){
     	$manifest = array_merge($manifest, $this->notificatioArray);
@@ -243,6 +243,7 @@ class Push_Notification_Frontend{
 		}else{
 			$token_id = sanitize_text_field($_POST['token_id']);
 			$user_agent = sanitize_text_field($_POST['user_agent']);
+			$category = sanitize_text_field($_POST['category']);
 			$os = sanitize_text_field($_POST['os']);
 			$ip_address = $this->get_the_user_ip();
 			if(empty($token_id)){
@@ -254,7 +255,7 @@ class Push_Notification_Frontend{
 			if(empty($os)){
 				echo json_encode(array("status"=> 503, 'message'=>'os is blank'));die;
 			}
-			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address);
+			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
 			echo json_encode($response);die;
 		}
@@ -274,7 +275,6 @@ class Push_Notification_Frontend{
 		}
 	}
 
-
 	public function get_the_user_ip() {
 		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 			//check ip from share internet
@@ -286,7 +286,7 @@ class Push_Notification_Frontend{
 			$ip = $_SERVER['REMOTE_ADDR'];
 		}
 		return $ip;
-	} 
+	}
 
 	/**
 	* Amp Entry point
@@ -294,7 +294,6 @@ class Push_Notification_Frontend{
 	public function amp_entry_gate(){
 		if( !function_exists('pwaforwp_init_plugin') ){
 			add_action('amp_post_template_head',array($this, 'manifest_add_homescreen'),1);
-
 		}else{
 			global $pwaServiceWorker;
 			remove_action('amp_wp_template_footer',array($pwaServiceWorker, 'pwaforwp_service_worker'));
@@ -314,9 +313,8 @@ class Push_Notification_Frontend{
 				exit;
     		}
     	}
-    	
 	}
-	
+
 	function page_include($template){
 		global $wp_query;
     	if((isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification') || (isset($wp_query->query['subscribe_pushnotification']) && $wp_query->query['subscribe_pushnotification']==1)){
@@ -378,7 +376,6 @@ class Push_Notification_Frontend{
             elseif (stripos($_SERVER['HTTP_USER_AGENT'], 'webOS')) $user_agent_name = 'webos';
             elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome'))  $user_agent_name = 'chrome';
             elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Safari'))  $user_agent_name = 'safari';
-            
             return $user_agent_name;
 	}
 
@@ -386,12 +383,11 @@ class Push_Notification_Frontend{
 		if(in_array($this->check_browser_type(), array('ipod','iphone', 'ipad', 'internet_explorer')) ){
 			return false;
 		}
-
 		if(isset($_COOKIE['notification_permission']) && $_COOKIE['notification_permission']=='granted'){
 			return ;
 		}
 		if ( is_multisite() ) {
-            $link = get_site_url();              
+            $link = get_site_url();
         }
         else {
             $link = home_url();
@@ -403,13 +399,18 @@ class Push_Notification_Frontend{
 			echo esc_html__('Subscribe for notification', 'push-notification');
 			?></span></a>
 		</div>
-
 		<?php
 	}
 	function pwaforwp_notification_confirm_banner(){
 		$settings = push_notification_settings();
 		$position = $settings['notification_position'];
 		$cssPosition = '';
+		$get_all_categories = get_categories();
+		$category = $settings['category'];
+		$catArray = array();
+		if(!empty($category)){
+			$catArray = explode(',', $category);
+		}
 		switch ($position) {
 			case 'bottom-left':
 				$cssPosition = 'bottom: 0;
@@ -451,7 +452,6 @@ class Push_Notification_Frontend{
 		}
 		echo '<style>.pn-wrapper{
 			box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
-		    font-family: Roboto,RobotoDraft,Helvetica,Arial,sans-serif;
 		    font-size: 14px;
 		    align-items: center;
 		    background-color: #222;
@@ -475,10 +475,6 @@ class Push_Notification_Frontend{
     height: auto;
     line-height: 1;
 }
-.pn-wrapper .pn-btns{
-    margin-left: 10px;
-    display: flex;
-}
 .pn-wrapper .btn.act{color: #8ab4f8;}
 .pn-wrapper .btn{
 	align-items: center;
@@ -499,20 +495,64 @@ class Push_Notification_Frontend{
     padding: 0 8px;
     text-decoration: none;
 }
+.pn-txt-wrap.pn-select-box {
+	display: block;
+	padding: 5px 15px;
+}
+.categories-multiselect {
+	font-size: 13px;
+    margin: 10px 0;
+}
+#pn-activate-permission-categories {
+    background-color: #fff;
+    padding: 8px 15px;
+    color: #000;
+}
+#pn-categories-checkboxes label{
+    padding-right: 12px;
+    text-transform: capitalize;
+}
+#pn-categories-checkboxes input{
+	margin-right: 3px;
+}
+#pn-activate-permission-categories-text {
+    padding: 12px 0;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
 </style><div class="pn-wrapper">
-			   	<span class="pn-txt-wrap">
-			   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>
-			   		<span class="pn-btns">&nbsp;&nbsp;
-			   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
-			   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
-			   			</span>
-			   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
-			   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
-			   			</span>
-			   		</span>
-			   	</span>
+			   	<span class="pn-txt-wrap pn-select-box">
+			   		<div class="pn-msg-box">
+				   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>
+				   		<span class="pn-btns">
+				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
+				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
+				   			</span>
+				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
+				   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
+				   			</span>
+				   		</span>
+			   		</div>';
+			   		if($settings['on_category'] == 1){
+				   		echo '<div id="pn-activate-permission-categories-text">
+			   				'.esc_html__('Which Notifications would you like to receive?', 'push-notification').'
+			   			</div>
+				   		<div class="categories-multiselect">
+				   			<div id="pn-categories-checkboxes">
+			   			 		<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />All</label>';
+			   			 		for ($i=0; $i < count($get_all_categories); $i++) {
+			   			 			if(in_array($get_all_categories[$i]->name, $catArray)){
+	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$get_all_categories[$i]->name.'" />'.$get_all_categories[$i]->name.'</label>';
+	   			 					}
+					      		}
+				   			echo '</div>
+			   			</div>';
+		   			}
+			   	echo '</span>
 			</div>';
 	}
+
 
 	/**
 	 * To store the token in db after allow
@@ -525,7 +565,6 @@ class Push_Notification_Frontend{
 	 * @return Void                                   [description]
 	 */
 	function store_user_registered_tokens($token_id, $response, $user_agent, $os, $ip_address){
-		
 		$userData = wp_get_current_user();
 		if(is_object($userData) && isset($userData->ID)){
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
@@ -535,7 +574,6 @@ class Push_Notification_Frontend{
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}
 	}
-
 	function amp_header_button_css(){
 		ob_start();
 		$this->header_button_css();
@@ -543,14 +581,12 @@ class Push_Notification_Frontend{
 		ob_clean();
 		echo "<style>".$css."</style>";
 	}
-
 }
 
 function push_notification_frontend_class(){
 	if(!is_admin() || wp_doing_ajax()){
 		$notificationFrontEnd = new Push_Notification_Frontend(); 
 	}
-
 	add_filter( "option_autoptimize_js_exclude", array('Push_Notification_Frontend', 'update_autoptimize_exclude') , 10, 2);
 }
 push_notification_frontend_class();

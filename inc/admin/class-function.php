@@ -3,11 +3,11 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 class PN_Server_Request{
-	public static $notificationServerUrl = 'https://pushnotifications.io/api/'; //slash necessary at last 
-	public static $notificationlanding = 'https://pushnotifications.io/'; //slash necessary at last
+	public static $notificationServerUrl = 'https://notification.ahmedk25.sg-host.com/api/'; //slash necessary at last 
+	public static $notificationlanding = 'https://notification.ahmedk25.sg-host.com/'; //slash necessary at last
 	public function __construct(){}
 
-	public static function varifyUser($user_token){
+	public static function varifyUser($user_token){  
 		$verifyUrl = 'validate/user';
 		if ( is_multisite() ) {
             $weblink = get_site_url();              
@@ -29,7 +29,7 @@ class PN_Server_Request{
 		return $response;
 	}
 
-	public static function registerSubscribers($token_id, $user_agent, $os, $ip_address){
+	public static function registerSubscribers($token_id, $user_agent, $os, $ip_address, $category){
 		$verifyUrl = 'register/audience/token';
 		if ( is_multisite() ) {
             $weblink = get_site_url();              
@@ -44,7 +44,8 @@ class PN_Server_Request{
 					'user_agent'=>$user_agent, 
 					'os'=>$os, 
 					'user_token'=> $user_token,
-					'ip_address'=> $ip_address
+					'ip_address'=> $ip_address,
+					'category'=> $category
 				);
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
@@ -69,20 +70,21 @@ class PN_Server_Request{
 		return $response;
 	}
 
-	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url){
+	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url, $category){
 		$verifyUrl = 'campaign/create';
 		if ( is_multisite() ) {
             $weblink = get_site_url();              
         }
         else {
             $weblink = home_url();
-        }    
+        }   
 		$data = array("user_token"=>$user_token, "website"=>   $weblink, 
 					'title'=>$title, 
 					'message'=>$message, 
 					'link_url'=>$link_url, 
 					'icon_url'=>$icon_url,
 					'image_url'=>$image_url,
+					'category'=>$category
 				);
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
@@ -97,11 +99,13 @@ class PN_Server_Request{
 	}
 
 	protected static function sendRequest($suffixUrl, $data, $method="post"){
+
 		if($method==='post'){
 				$url = self::$notificationServerUrl.$suffixUrl;
 				$postdata = array('body'=> $data);
 				$remoteResponse = wp_remote_post($url, $postdata);
 		}
+		// print_r($remoteResponse);
 		if( is_wp_error( $remoteResponse ) ){
 			$remoteData = array('status'=>401, "response"=>"could not connect to server");
 		}else{
@@ -111,6 +115,5 @@ class PN_Server_Request{
 		return $remoteData;
 
 	}
-
 
 }

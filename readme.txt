@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.0
-Stable tag: 1.23
+Stable tag: 1.24
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.24 (08 September 2022) =
+* Improvement: Improvement In pushnotification #745
 
 = 1.23 (01 June 2022) =
 * Bug Fixed: "Ultimate member" real-time notifications are not working in the PWA app #716

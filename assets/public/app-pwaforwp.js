@@ -1,5 +1,4 @@
 firebase.analytics();	  
-
 function pushnotification_load_messaging(){
   // [START refresh_token]
   // Callback fired if Instance ID token is updated.
@@ -30,8 +29,8 @@ function pushnotification_load_messaging(){
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		setTimeout(function() {
 			if(wrapper){ wrapper[0].style.display="flex"; }
-	   }, pnScriptSetting.notification_popup_show_afternseconds);
-		
+	   }, pnScriptSetting.notification_popup_show_afternseconds);		
+
 	}
 	document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
 		var date = new Date;
@@ -40,8 +39,11 @@ function pushnotification_load_messaging(){
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		if(wrapper){ wrapper[0].style.display="none"; }
 	})
-	document.getElementById("pn-activate-permission_link").addEventListener("click",  function (){pn_allowed_notification()});
+	document.getElementById("pn-activate-permission_link").addEventListener("click",  function (){
+		pn_allowed_notification();
+	});
 	var allowed = document.getElementsByClassName("pn-activate-allow-permission-subscripbe");
+	// var category = document.getElementById("pn-activate-permission-categories");
 	for (var i = allowed.length - 1; i >= 0; i--) {
 		allowed[i].addEventListener("click", function (){pn_allowed_notification()});
 	}
@@ -95,7 +97,7 @@ function pushnotification_load_messaging(){
 	}
 
 function push_notification_getRegToken(argument){
-	 
+
 	messaging.getToken().then(function(currentToken) {
 	  if (currentToken) {                      
 	   push_notification_saveToken(currentToken);
@@ -125,7 +127,7 @@ function sendTokenToServer(currentToken) {
 	if (!push_notification_isTokenSentToServer()) {
 	  console.log('Sending token to server...');
 	  push_notification_saveToken(currentToken);
-	  
+
 	} else {
 	  console.log('Token already sent to server so won\'t send it again ' +
 		  'unless it changes');
@@ -146,11 +148,16 @@ function push_notification_saveToken(currentToken){
 	console.log(currentToken);
 	var grabOs = pushnotificationFCMGetOS();
 	var browserClient = pushnotificationFCMbrowserclientDetector();
+	const optioArr = [];
+  const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
+	for (var i=0; i <=  optElm.length - 1 ; i++) {
+		optioArr.push(optElm[i].attributes.value.value);
+	}
+	var catArraystr = [...optioArr].join(',');
 	xhttp.open("POST", pnScriptSetting.ajax_url, true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhttp.send('token_id='+currentToken+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
+	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
 }              
-
 
 var pushnotificationFCMbrowserclientDetector  = function (){
 	var browserClient = '';
@@ -175,7 +182,6 @@ var pushnotificationFCMbrowserclientDetector  = function (){
 
 	// Blink engine detection
 	var isBlink = (isChrome || isOpera) && !!window.CSS;
-
 
 	if(navigator.userAgent.match('CriOS')){
 		browserClient = 'Chrome ios';
@@ -208,7 +214,6 @@ var pushnotificationFCMbrowserclientDetector  = function (){
 		browserClient = 'Blink';
 		return browserClient;
 	}
-
 
 }
 

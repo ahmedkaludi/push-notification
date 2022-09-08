@@ -253,4 +253,126 @@ jQuery(document).ready(function($){
 			jQuery("#utm_tracking_wrapper").show();
 		}else{jQuery("#utm_tracking_wrapper").hide();}
 	});
+
+	jQuery('#pn_push_on_category_checkbox').click(function(){
+		if(jQuery(this).prop("checked")==true){
+			jQuery("#category_selector_wrapper").show();
+		}else{jQuery("#category_selector_wrapper").hide();}
+	});
+
+	jQuery('#pn_push_segment_on_category_checkbox').click(function(){
+		if(jQuery(this).prop("checked")==true){
+			jQuery("#segment_category_selector_wrapper").show();
+		}else{jQuery("#segment_category_selector_wrapper").hide();}
+
+	});
+
+	jQuery(".push-notification-tabs a").click(function(e){
+	        e.preventDefault();
+	        var link = jQuery(this).attr("link");
+	        console.log(link);
+	        jQuery(this).siblings().removeClass("nav-tab-active");
+	        jQuery(this).addClass("nav-tab-active");
+	        if( link == "pn_connect") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_connect").show();
+	        }
+	        if(link == "pn_dashboard"){
+	        	jQuery("#pn_dashboard").show();
+	        	jQuery("#pn_wc_settings_section").show();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_connect").hide();
+	        } 
+	        if( link == "pn_segmentation") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_segmentation").show();
+	        	jQuery("#pn_connect").hide();
+	        	
+	        }
+	        if( link == "pn_notification_bell") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").show();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_connect").hide();
+	        }
+	        if( link == "pn_help") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_help").show();
+	        	jQuery("#pn_connect").hide();
+	        }
+	        
+	});
+
+	jQuery(".pn_push_segment_category_checkbox").click(function(){
+		chkCategory();
+	});
+
+	function chkCategory() {
+			var category = [];
+		jQuery(".pn_push_segment_category_checkbox").each(function(value, index){
+			var chk = jQuery(this).is(':checked');
+			if(chk==true){
+				var chk_val = jQuery(this).val();
+			 	category.push(chk_val);	
+			}
+		});
+		// console.log(category);
+		jQuery("#pn_push_segment_category_input").val(category);
+	}
+
+	//Help Query
+	jQuery(".pn_help-send-query").on("click", function(e){
+	        e.preventDefault();   
+	        var message = jQuery("#pn_help_query_message").val();           
+	        var customer = jQuery("#pn_help_query_customer").val();    
+	        if(jQuery.trim(message) !='' && customer){       
+	                    jQuery.ajax({
+	                        type: "POST",    
+	                        url: ajaxurl,                    
+	                        dataType: "json",
+	                        data:{action:"pn_send_query_message", customer_type: customer, message:message, nonce: pn_setings.remote_nonce},
+	                        success:function(response){                       
+	                          if(response['status'] =='t'){
+	                            jQuery(".pn_help-query-success").show();
+	                            jQuery(".pn_help-query-error").hide();
+	                          }else{
+	                            jQuery(".pn_help-query-success").hide();  
+	                            jQuery(".pn_help-query-error").show();
+	                          }
+	                        },
+	                        error: function(response){                    
+	                        console.log(response);
+	                        }
+	                        });
+	        }else{
+	            if(jQuery.trim(message) =='' && customer ==''){
+	                alert('Please enter the message and select customer type');
+	            }else{
+	            
+	            if(customer ==''){
+	                alert('Select Customer type');
+	            }
+	            if(jQuery.trim(message) == ''){
+	                alert('Please enter the message');
+	            }
+	                
+	            }
+	            
+	        }                   
+	        
+	});
 });

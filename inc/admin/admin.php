@@ -6,7 +6,7 @@ if(file_exists(PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/class-function.php")){
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/class-function.php";
 }
 class Push_Notification_Admin{
-	
+
 	public function __construct(){}
 
 	public function init(){
@@ -19,12 +19,12 @@ class Push_Notification_Admin{
 		add_action( 'wp_ajax_pn_revoke_keys', array( $this, 'pn_revoke_keys' ) ); 
 		add_action( 'wp_ajax_pn_subscribers_data', array( $this, 'pn_subscribers_data' ) ); 
 		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 
-		
+		add_action( 'wp_ajax_pn_send_notification_on_category', array( $this, 'pn_send_notification_on_category' ) ); 
+		add_action('wp_ajax_pn_send_query_message', 'pn_send_query_message');
 		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
 		//on oreder status change
 		add_action('woocommerce_order_status_changed', array( $this, 'pn_order_send_notification'), 10, 4);
 
-		 
 
 		/** pwaforwp installed than work with that */
 		if( function_exists('pwaforwp_init_plugin') ){
@@ -39,13 +39,8 @@ class Push_Notification_Admin{
 				add_filter( "pwaforwp_pn_use_sw", array($this, 'add_pn_use_sw') , 10, 1);
 				add_filter( "pwaforwp_sw_register_template", array($this, 'add_sw_register_template') , 10, 1);
 			}
-
-
-
-
 		}
 	}
-
 
 	/*
 	* This function will Messaging functions in service worker
@@ -56,14 +51,14 @@ class Push_Notification_Admin{
 			$settings = $this->json_settings();
 			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
 			$swJsContent .= $messageSw;
-		
+
 		return $swJsContent;
 	}
 
 	function add_pn_config($firebaseconfig){
 		$firebaseconfig   = 'var config = pnScriptSetting.pn_config;'
-                            .'if (!firebase.apps.length) {firebase.initializeApp(config);}
-                            const messaging = firebase.messaging();';
+                            .'if (!firebase.app._apps.size) {firebase.app.initializeApp(config);}
+                            const messaging = firebase.messaging;';
 		return $firebaseconfig;
 	}
 
@@ -117,7 +112,7 @@ class Push_Notification_Admin{
 							"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
 							"remote_nonce"=> wp_create_nonce("pn_notification")
 							);
-	        
+
 	        $object = apply_filters('pushnotification_localize_filter',$object, 'pn_setings');
 			wp_localize_script("push_notification_script", 'pn_setings', $object);
 		}
@@ -142,30 +137,51 @@ class Push_Notification_Admin{
 	            );
 	}
 	function admin_interface_render(){
-    
 		// Authentication
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 		?><div class="wrap push_notification-settings-wrap">
 			<h1 class="page-title"><?php echo esc_html__('Push Notifications Options', 'push-notification'); ?></h1>
-			<form action="options.php" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
-				<div class="form-wrap">
+			<div class="push-notification-main-wrapper">
+				<h2 class="nav-tab-wrapper push-notification-tabs">
 					<?php
-					settings_fields( 'push_notification_setting_dashboard_group' );
-					echo "<div class='push_notification-dashboard'>";
-						// Status
-						do_settings_sections( 'push_notification_dashboard_section' );	// Page slug
-						$authData = push_notification_auth_settings();
-						if(isset($authData['token_details']['validated']) && $authData['token_details']['validated']==1){
-							$this->shownotificationData();
-						}
-					echo "</div>";
+					$authData = push_notification_auth_settings();
+					if( (isset($authData['token_details']) && $authData['token_details']['validated']==1) ){
+						$plugin_icon_color = "#008416;";
+					}else{
+						$plugin_icon_color = "#000;";
+					}
+					echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
+					echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
+					echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
+					if( (isset($authData['token_details']) && $authData['token_details']['user_payment']==1) ){
+						echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+					}
+					echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					?>
-				</div>
-			</form>
+				</h2>
+			</div>
+
+				<form action="options.php" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
+					<div class="form-wrap">
+						<?php
+						settings_fields( 'push_notification_setting_dashboard_group' );
+						echo "<div class='push_notification-dashboard'>";
+							// Status
+							echo "<div id='pn_connect'>";
+								do_settings_sections( 'push_notification_dashboard_section' );	// Page slug
+							echo "</div>";
+							$authData = push_notification_auth_settings();
+							if(isset($authData['token_details']['validated']) && $authData['token_details']['validated']==1){
+								$this->shownotificationData();
+							}
+						echo "</div>";
+						?>
+					</div>
+				</form>
 		</div><?php
-	}
+	} 
 
 	public function settings_init(){
 		register_setting( 'push_notification_setting_dashboard_group', 'push_notification_settings' );
@@ -174,13 +190,31 @@ class Push_Notification_Admin{
 					 esc_html__(' ','push-notification'), 
 					 '__return_false', 
 					 'push_notification_dashboard_section');
-		
+
 			add_settings_field(
 				'pn_key_validate_status',	// ID
 				esc_html__('API', 'push-notification'),			// Title
 				array( $this, 'pn_key_validate_status_callback'),// Callback
 				'push_notification_dashboard_section',	// Page slug
 				'push_notification_dashboard_section'	// Settings Section ID
+			);
+		add_settings_section('push_notification_segment_settings_section',
+					 esc_html__('Notification Segment','push-notification'), 
+					 '__return_false', 
+					 'push_notification_segment_settings_section');
+			add_settings_field(
+				'pn_key_segment_select',								// ID
+				esc_html__('Select segmentation for notification', 'push-notification'),// Title
+				array( $this, 'pn_key_segment_select_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_segment_on_categories',								// ID
+				esc_html__('Segment on Categories', 'push-notification'),// Title
+				array( $this, 'pn_key_segment_on_categories_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
 			);
 
 		add_settings_section('push_notification_user_settings_section',
@@ -197,13 +231,13 @@ class Push_Notification_Admin{
 				);
             }
 			
-			add_settings_field(
-				'pn_key_sendpush_edit',					// ID
-				esc_html__('Send notification on editing', 'push-notification'),// Title
-				array( $this, 'user_settings_callback'),// Callback
-				'push_notification_user_settings_section',	// Page slug
-				'push_notification_user_settings_section'	// Settings Section ID
-			);
+			// add_settings_field(
+			// 	'pn_key_sendpush_edit',					// ID
+			// 	esc_html__('Send notification on editing', 'push-notification'),// Title
+			// 	array( $this, 'user_settings_callback'),// Callback
+			// 	'push_notification_user_settings_section',	// Page slug
+			// 	'push_notification_user_settings_section'	// Settings Section ID
+			// );
 			add_settings_field(
 				'pn_key_sendpush_publish',								// ID
 				esc_html__('Send notification on publish', 'push-notification'),// Title
@@ -218,6 +252,7 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
+
 		add_settings_section('push_notification_utm_tracking_settings_section',
 					 esc_html__('UTM tracking','push-notification'), 
 					 '__return_false', 
@@ -295,8 +330,7 @@ class Push_Notification_Admin{
 				array( $this, 'user_notification_order_change_callback'),// Callback
 				'push_notification_user_wc_settings_section',	// Page slug
 				'push_notification_user_wc_settings_section'	// Settings Section ID
-			);
-            
+			);           
 
 	}
 
@@ -307,20 +341,20 @@ class Push_Notification_Admin{
 			 PN_Server_Request::getsubscribersData( $auth_settings['user_token'] );
 			 $detail_settings = push_notification_details_settings();
 		}
-		
+
 		$updated_at = '';
 		if(isset($detail_settings['updated_at'])){
 			//echo $detail_settings['updated_at'];die;
 			$updated_at = human_time_diff( strtotime( $detail_settings['updated_at'] ), strtotime( date('Y-m-d H:i:s') ) );
 			if(!empty( $updated_at ) ){
 				$updated_at .= " ago";
-			} 
-
+			}
 
 		}
 		$subscriber_count = 0;
 		if(isset($detail_settings['subscriber_count'])){ $subscriber_count = $detail_settings['subscriber_count']; }
-		echo '<section class="pn_general_wrapper">
+		echo '<div id="pn_dashboard" style="display:none;">
+		<section class="pn_general_wrapper">
 				<div class="action-wrapper"> '.esc_html__($updated_at, 'push-notification').' <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update">'.esc_html__('Refresh data', 'push-notification').'</button>
 				</div>
 				<div class="pn-content">
@@ -335,16 +369,27 @@ class Push_Notification_Admin{
 				</div>
 				';
 				do_settings_sections( 'push_notification_user_settings_section' );
-		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button">
+		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
 			</section>
+			</div>
+			';
+
+		echo '<div id="pn_segmentation" style="display:none">
+		<section class="pn_general_wrapper">';
+				do_settings_sections( 'push_notification_segment_settings_section' );
+		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
+			</section>
+			</div>
 			';
 		if ( class_exists( 'WooCommerce' ) ) {
-			echo '<section style="margin-top:20px"><div class="postbox" style="padding:20px">';
-				do_settings_sections( 'push_notification_user_wc_settings_section' );
-				echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button">';
-			echo '</div></section>';
+			echo '<div id="pn_wc_settings_section" style="display:none;">
+				<section style="margin-top:20px"><div class="postbox" style="padding:20px">';
+					do_settings_sections( 'push_notification_user_wc_settings_section' );
+					echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">';
+				echo '</div></section>
+			</div>';
 		}
-		echo '<br/><br/><div class="pn-other-settings-options">
+		echo '<br/><br/><div id="pn_notification_bell" class="pn-other-settings-options" style="display:none">
 					<div id="dashboard_right_now" class="postbox " >
 						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
 						<div class="inside">
@@ -365,12 +410,37 @@ class Push_Notification_Admin{
 									<label for="notification-message">'.esc_html__('Message', 'push-notification').'</label>
 									<textarea type="text" id="notification-message" class="regular-text"></textarea>
 								</div>
-								<input type="button" class="button" id="pn-send-custom-notification" value="'.esc_html__('Send Notification', 'push-notification').'">
+								<input type="button" class="button pn-submit-button" id="pn-send-custom-notification" value="'.esc_html__('Send Notification', 'push-notification').'">
 								<div class="pn-send-messageDiv"></div>
 							</div>
 						</div>
 					</div>
-				</div>';
+				</div>
+
+				<div id="pn_help" style="display:none;">
+					<h3>'.esc_html__('Documentation', 'push-notification').'</h3>
+					<a target="_blank" class="button pn-submit-button" href="https://pushnotifications.helpscoutdocs.com/">'.esc_html__('View Setup Documentation', 'push-notification').'</a>
+
+                   	<h3>'.esc_html__('Ask for Technical Support', 'push-notification') .'</h3>
+                   	<p>'.esc_html__('We are always available to help you with anything', 'push-notification').'</p>
+		            <ul>
+		                <li><label for="pn_help_query_customer">'.esc_html__('Are you existing Premium Customer?', 'push-notification').'</label>
+		                    <select class="regular-select" rows="5" cols="60" id="pn_help_query_customer" name="pn_help_query_customer">
+		                    	<option value="">Select</option>
+		                    	<option value="Yes">'.esc_html__('Yes', 'push-notification').'</option>
+		                    	<option value="No">'.esc_html__('No', 'push-notification').'</option>
+		                    </select>
+		                </li> 
+		                <li><label for="pn_help_query_message">'.esc_html__('Message', 'push-notification').'</label>
+		                    <textarea rows="5" cols="60" id="pn_help_query_message" name="pn_help_query_message" class="regular-textarea"></textarea>
+		                    <br>
+		                    <p class="pn_help-query-success" style="display:none;">'.esc_html__('Message sent successfully, Please wait we will get back to you shortly', 'push-notification').'</p>
+		                    <p class="pn_help-query-error" style="display:none;">'.esc_html__('Message not sent. please check your network connection', 'push-notification').'</p>
+		                </li> 
+		                <li><button class="button pn_help-send-query pn-submit-button">'.esc_html__('Send Message', 'push-notification').'</button></li>
+		            </ul>            		                  
+		        </div>
+				';
 	}
 
 	public function pn_key_validate_status_callback(){
@@ -385,31 +455,61 @@ class Push_Notification_Admin{
 		}else{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>
 				<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>
-				<button type='button' class='button dashicons-before dashicons-no-alt' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
+				<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
+		echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Fetch Premium API', 'push-notification')."</button>";
 		echo "<br/><br/><div>Need help! Read the Complete <a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>Documentation</a>.</div><br/>";
-
 	}//function closed
-	
+
 	public function user_settings_notification_icon_callback(){
 		PN_Field_Generator::get_input('notification_icon', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
 	}
 
-	public function user_settings_callback(){
-		$notification = push_notification_settings();
-		PN_Field_Generator::get_input_checkbox('on_edit', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
+	// public function user_settings_callback(){
+	// 	$notification = push_notification_settings();
+	// 	PN_Field_Generator::get_input_checkbox('on_edit', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
+	// }
 
-	}
 	public function user_settings_onpublish_callback(){
 		$notification = push_notification_settings();
 		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
-
 	}
+
 	public function pn_key_posttype_select_callback(){
 		$notification = push_notification_settings();
 		$data = get_post_types();
 		$data = array_merge(array('none'=>'None'), $data);
+		// print_r($data);
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
+	}
+	public function pn_key_segment_select_callback(){
+		$notification = push_notification_settings();
+		$name = 'on_category';
+		$value = 1;$class = $id = 'pn_push_on_category_checkbox';
+		echo '<div class="pn-field_wrap">';
+			PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
+		echo '</div>';
+	}
+	public function pn_key_segment_on_categories_callback(){
+		$notification = push_notification_settings();
+		$display="style='display:none;'";
+		if(isset($notification['on_category']) && $notification['on_category']){
+			$display="style='display:block;'";
+		}
+		echo "<div id='category_selector_wrapper' ".$display.">";
+			echo '<div class="pn-field_wrap">';
+				PN_Field_Generator::get_input_checkbox('segment_on_category', '1', 'pn_push_segment_on_category_checkbox', 'pn-checkbox pn_push_segment_on_category_checkbox');
+			echo '</div>';
+			$display_category="style='display:none;'";
+			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
+				$display_category="style='display:block;'";
+			}
+			echo "<div id='segment_category_selector_wrapper' ".$display_category.">";
+				$data = get_categories();
+				PN_Field_Generator::get_multi_input_checkbox('category_checkbox', '1', $data, '', '', 'pn-checkbox pn_push_category_checkbox', '');
+				PN_Field_Generator::get_input_category('category', 'pn_push_segment_category_input', '');
+			echo '</div>
+		</div>';
 	}
 	public function pn_utm_tracking_callback(){
 		$notification = push_notification_settings();
@@ -498,12 +598,23 @@ class Push_Notification_Admin{
 			}
 
 			echo json_encode($response);die;
-		}
-		
+		}		
 
 		echo json_encode(array("status"=> 503, 'message'=>'Request not identified'));die;
 	}
-	
+	public function notification_refresh_api_key(){
+		$authData = push_notification_auth_settings();
+		$verifyUrl = 'validate/user';
+		if ( is_multisite() ) {
+            $weblink = get_site_url();
+        }
+		else {
+            $weblink = home_url();
+        }    
+		$data = array("user_token"=>$authData['user_token'], "website"=>   $weblink);
+		$response = PN_Server_Request::varifyUser($authData['user_token']);
+		echo json_encode($response);
+	}
 	public function pn_revoke_keys(){
 		$nonce = sanitize_text_field($_POST['nonce']);
 		if( !wp_verify_nonce($nonce, 'pn_notification') ){
@@ -526,8 +637,9 @@ class Push_Notification_Admin{
 			}else{
 				echo json_encode(array("status"=> 503, 'message'=>'User token not found'));die;	
 			}
-			
+
 		}
+
 	}
 	public function pn_send_notification(){
 		$nonce = sanitize_text_field($_POST['nonce']);
@@ -555,7 +667,7 @@ class Push_Notification_Admin{
 			}
 
 			if( isset( $auth_settings['user_token'] ) ){
-				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $icon_url, $image_url );
+				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $icon_url, $image_url, '' );
 				if($response){
 				 echo json_encode($response);die;
 				}else{
@@ -563,15 +675,14 @@ class Push_Notification_Admin{
 				}
 			}else{
 				echo json_encode(array("status"=> 503, 'message'=>'User token not found'));die;	
-			}
-			
+			}			
+
 		}
 	}
 
 	public function send_notification_on_update($new_status, $old_status, $post){
 		$pn_settings = push_notification_settings();
 		$auth_settings = push_notification_auth_settings();
-
 		if ( 'publish' !== $new_status ){
         	return;
 		}
@@ -580,34 +691,48 @@ class Push_Notification_Admin{
 		}
 		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
 			return;
-		}
-		
+		}		
+
 		$send_notification = false;
 		//for Edit
-		if(isset($pn_settings['on_edit']) && $pn_settings['on_edit']==1){
-			if ( $new_status === $old_status) {
-			 	$this->send_notification($post);
-			 	$send_notification = true;
-			}
-		}
+		// if(isset($pn_settings['on_edit']) && $pn_settings['on_edit']==1){
+		// 	if ( $new_status === $old_status) {
+		// 	 	$this->send_notification($post);
+		// 	 	$send_notification = true;
+		// 	}
+		// }
 		//for publish
 		if(!$send_notification && isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1){
 			if ( $new_status !== $old_status) {
 			 	$this->send_notification($post);
 			}
 		}
-			
 
+		if(isset($pn_settings['on_category']) && $pn_settings['on_category']==1){
+			if ( $new_status === $old_status) {
+			 	$this->send_notification($post);
+			 	$send_notification = true;
+			}
+		}	
 	}
+
 	protected function send_notification($post){
 		$post_id = $post->ID;
 		$post_content = $post->post_content;
 		$post_title = $post->post_title;
 		$auth_settings = push_notification_auth_settings();
-
 		$push_notification_settings = push_notification_settings();
 		//API Data
 		$title = sanitize_text_field(wp_strip_all_tags($post_title, true) );
+		$category_detail = get_the_category($post->ID);//$post->ID
+		for($i=0; $i < count($category_detail); $i++) {
+			$category_name[] = $category_detail[$i]->slug;
+		}
+		if(!empty($category_name)){
+			$category = implode(',',$category_name);
+		} else{
+			$category = '';
+		}
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$link_url = esc_url_raw(get_permalink( $post_id ));
 		if(isset($push_notification_settings['utm_tracking_checkbox']) && $push_notification_settings['utm_tracking_checkbox']){
@@ -626,11 +751,35 @@ class Push_Notification_Admin{
 			$image_url = esc_url_raw(get_the_post_thumbnail_url($post_id));
 		}
 		$icon_url = $push_notification_settings['notification_icon'];
-		
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url );
-		}//auth token check 
-	
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category);
+		}//auth token check 	
+
+	}
+
+	public function pn_send_notification_on_category($post){
+		$pn_settings = push_notification_settings();
+		$auth_settings = push_notification_auth_settings();
+
+		if(!isset($pn_settings['posttypes'])){
+			$pn_settings['posttypes'] = array("post");
+		}
+		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
+			return;
+		}
+
+		$send_notification = false;
+		if(isset($pn_settings['on_category']) && $pn_settings['on_category']==1){
+			if ( $new_status === $old_status) {
+			 	$this->send_notification_on_cotegories($post);
+			 	$send_notification = true;
+			}
+		}
+	}
+
+	protected function send_notification_on_cotegories($post){
+		$categories = get_categories();
+		pushnotification_load_categories($categories);
 	}
 
 	/**
@@ -649,7 +798,7 @@ class Push_Notification_Admin{
 		$order = wc_get_order( $order_id );
 		$user_id = $order->get_user_id();
 		$token_ids = get_user_meta($user_id, 'pnwoo_notification_token',true);
-		
+
 		//Send notificarion to admin
 		if(isset($push_notification_settings['notification_on_order_change_to_admin']) && $push_notification_settings['notification_on_order_change_to_admin']==1){ 
 			$args = array(
@@ -669,7 +818,7 @@ class Push_Notification_Admin{
 
 		$token_ids = array_filter($token_ids);
 		$token_ids = array_unique($token_ids);
-		
+
 		$post_title = esc_html__('Order status changed', 'push-notification');
 		$post_content = esc_html__('Order id #'.$order_id.' changed from '.$status_from.' to '.$status_to);
 		$auth_settings = push_notification_auth_settings();
@@ -691,7 +840,7 @@ class Push_Notification_Admin{
 
 		$image_url = $push_notification_settings['notification_icon'];
 		$icon_url = $push_notification_settings['notification_icon'];
-		
+
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
 			$userid = 1;
 			if(function_exists('get_current_user_id')){
@@ -731,7 +880,7 @@ class Push_Notification_Admin{
 	      if($access_type === 'direct')
 	      {
 	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.('/assets/'.$filePath);
-	         $creds = request_filesystem_credentials($file, '', false, false, array());
+	        $creds = request_filesystem_credentials($file, '', false, false, array());
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
 	        }   
@@ -780,7 +929,6 @@ class Push_Notification_Admin{
 		    die;
 		}
 	}
-
 	
 }
 
@@ -801,9 +949,10 @@ function push_notification_settings(){
 	}
 	$default = array(
 		'notification_icon' => $icon,
-		'on_edit'=> 0,
+		// 'on_edit'=> 0,
 		'on_publish'=> 1,
 		'posttypes'=> array("post","page"),
+		'category'=> get_categories(),
 		'notification_position'=> 'bottom-left',
 		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
 		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
@@ -830,16 +979,18 @@ function push_notification_details_settings(){
 	return $push_notification_details_settings;
 }
 
-
 /** 
 * Server Side fields generation class
 */
 class PN_Field_Generator{
 	static $settingName = 'push_notification_settings';
-
 	public static function get_input($name, $id="", $class=""){
 		$settings = push_notification_settings();
 		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
+	}
+	public static function get_input_category($name, $id="", $class=""){
+		$settings = push_notification_settings();
+		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php echo $settings[$name]; ?>" hidden/><?php
 	}
 	public static function get_input_checkbox($name, $value, $id="", $class="", $label=''){
 		$settings = push_notification_settings();
@@ -869,6 +1020,29 @@ class PN_Field_Generator{
 			} ?>
 		</select><?php
 	}
+	public static function get_multi_input_checkbox($name, $value, $data, $id="", $class=""){
+		$settings = push_notification_settings();
+		$category = $settings['category'];
+		$catArray = array();
+		if(!empty($category)){
+			$catArray = explode(',', $category);
+		}
+		for ($i=0; $i < count($data); $i++) { 
+			$check = '';
+			if(in_array($data[$i]->name, $catArray)){
+				$check = 'checked';
+			}
+		?>
+			<div class="checkbox_wrapper">
+				<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" <?php echo esc_attr($check); ?> value="<?php echo esc_attr($data[$i]->name); ?>"/>
+				<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" value="<?php echo esc_attr($data[$i]->name); ?>" data-truevalue="<?php echo esc_attr($data[$i]->name); ?>"/>
+				<?php echo '<label style="display:inline-block" for="pn_push_category_checkbox'.$i.'">'.$data[$i]->name.'</label>';
+				?>
+			</div>
+		<?php
+		}
+	}
+
 	public static function get_input_select($name, $value, $options, $id="", $class=""){
 		$settings = push_notification_settings();
 		if( isset($settings[$name]) ){
@@ -894,4 +1068,40 @@ class PN_Field_Generator{
 		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>"><?php echo esc_html__($name) ?></button>
 	<?php
 	} 	
+}
+function pn_send_query_message(){   
+		$nonce = sanitize_text_field($_POST['nonce']);
+        if ( !wp_verify_nonce($nonce, 'pn_notification') ){
+            return; 
+        }
+        $authData = push_notification_auth_settings();
+        if ($authData['token_details']['validated']!=1 ){
+           return;  
+        }
+        $message    = sanitize_textarea_field($_POST['message']);        
+        $customer_type    = sanitize_text_field($_POST['customer_type']);        
+        $customer_type = empty($customer_type)? $customer_type : 'No';
+        $message .= "<table>
+        				<tr><td>Are you existing Premium Customer?</td><td>".$customer_type."</td></tr>
+        				<tr><td>Plugin</td><td> Push Notification </td></tr>
+        				<tr><td>Version</td><td>".PUSH_NOTIFICATION_PLUGIN_VERSION."</td></tr>
+        			</table>";
+        $user       = wp_get_current_user();
+        if($user){
+            $user_data  = $user->data;        
+            $user_email = $user_data->user_email;       
+            //php mailer variables
+            $to = 'team@magazine3.in';
+            $subject = "Push Notification Customer Query";
+            $headers = 'From: '. esc_attr($user_email) . "\r\n" .
+            'Reply-To: ' . esc_attr($user_email) . "\r\n";
+            // Load WP components, no themes.                      
+            $sent = wp_mail($to, $subject, strip_tags($message), $headers);                    
+            if($sent){
+            echo json_encode(array('status'=>'t'));            
+            }else{
+            echo json_encode(array('status'=>'f'));            
+            }            
+        }                        
+           wp_die();           
 }
