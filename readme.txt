@@ -49,7 +49,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
-= 1.24 (23 September 2022) =
+= 1.24 (24 September 2022) =
 * Improvement: Improvement In pushnotification #745
 
 = 1.23 (01 June 2022) =
