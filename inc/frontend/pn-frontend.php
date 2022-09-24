@@ -410,6 +410,7 @@ class Push_Notification_Frontend{
 		$category = $settings['category'];
 		$catArray = array();
 		if(!empty($category)){
+			if(!is_array($category))
 			$catArray = explode(',', $category);
 		}
 		switch ($position) {
@@ -535,7 +536,7 @@ class Push_Notification_Frontend{
 				   			</span>
 				   		</span>
 			   		</div>';
-			   		if($settings['on_category'] == 1){
+			   		if(!empty($settings['on_category']) && $settings['on_category'] == 1){
 				   		echo '<div id="pn-activate-permission-categories-text">
 			   				'.esc_html__('Which Notifications would you like to receive?', 'push-notification').'
 			   			</div>
