@@ -992,7 +992,7 @@ class PN_Field_Generator{
 	}
 	public static function get_input_category($name, $id="", $class=""){
 		$settings = push_notification_settings();
-		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php echo $settings[$name]; ?>" hidden/><?php
+		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if(isset($settings[$name]) && is_string($settings[$name])) echo $settings[$name]; ?>" hidden/><?php
 	}
 	public static function get_input_checkbox($name, $value, $id="", $class="", $label=''){
 		$settings = push_notification_settings();
@@ -1026,19 +1026,26 @@ class PN_Field_Generator{
 		$settings = push_notification_settings();
 		$category = $settings['category'];
 		$catArray = array();
-		if(!empty($category)){
+		if(!empty($category) && is_string($category)){
 			$catArray = explode(',', $category);
 		}
 		for ($i=0; $i < count($data); $i++) { 
 			$check = '';
-			if(in_array($data[$i]->name, $catArray)){
-				$check = 'checked';
+			if(isset($data[$i]) && !empty($catArray)){
+				if(in_array($data[$i]->name, $catArray)){
+					$check = 'checked';
+				}
 			}
 		?>
 			<div class="checkbox_wrapper">
-				<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" <?php echo esc_attr($check); ?> value="<?php echo esc_attr($data[$i]->name); ?>"/>
-				<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" value="<?php echo esc_attr($data[$i]->name); ?>" data-truevalue="<?php echo esc_attr($data[$i]->name); ?>"/>
-				<?php echo '<label style="display:inline-block" for="pn_push_category_checkbox'.$i.'">'.$data[$i]->name.'</label>';
+				<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" <?php echo esc_attr($check); ?> value="<?php echo isset($data[$i]->name)? esc_attr($data[$i]->name):''; ?>"/>
+				<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" value="<?php echo isset($data[$i]->name)?esc_attr($data[$i]->name):''; ?>" data-truevalue="<?php echo isset($data[$i]->name)?esc_attr($data[$i]->name):''; ?>"/>
+				<?php 
+				$label_text = '';
+				if(isset($data[$i]) && !empty($data[$i])){
+					$label_text = $data[$i]->name;
+				}
+				echo '<label style="display:inline-block" for="pn_push_category_checkbox'.$i.'">'.$label_text.'</label>';
 				?>
 			</div>
 		<?php
