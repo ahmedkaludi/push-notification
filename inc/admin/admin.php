@@ -460,7 +460,7 @@ class Push_Notification_Admin{
 				<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
 		echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Fetch Premium API', 'push-notification')."</button>";
-		echo "<br/><br/><div>Need help! Read the Complete <a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>Documentation</a>.</div><br/>";
+		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete', 'push-notification')."<a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
 	}//function closed
 
 	public function user_settings_notification_icon_callback(){
@@ -523,19 +523,19 @@ class Push_Notification_Admin{
 			$display="style='display:block;'";
 		}
 		echo "<div id='utm_tracking_wrapper' ".$display.">";
-			echo '<div class="pn-field_wrap"><label>UTM source</label>';
+			echo '<div class="pn-field_wrap"><label>'.esc_html__('UTM source', 'push-notification').'</label>';
 				PN_Field_Generator::get_input('notification_utm_source', 'notification_utm_source', '');
 			echo '</div>';
-			echo '<div class="pn-field_wrap"><label>UTM Medium</label>';
+			echo '<div class="pn-field_wrap"><label>'.esc_html__('UTM Medium', 'push-notification').'</label>';
 			PN_Field_Generator::get_input('notification_utm_medium', 'notification_utm_medium', '');
 			echo '</div>';
-			echo '<div class="pn-field_wrap"><label>UTM Campaign</label>';
+			echo '<div class="pn-field_wrap"><label>'.esc_html__('UTM Campaign', 'push-notification').'</label>';
 			PN_Field_Generator::get_input('notification_utm_campaign', 'notification_utm_campaign', '');
 			echo '</div>';
-			echo '<div class="pn-field_wrap"><label>UTM Term</label>';
+			echo '<div class="pn-field_wrap"><label>'.esc_html__('UTM Term', 'push-notification').'</label>';
 			PN_Field_Generator::get_input('notification_utm_term', 'notification_utm_term', '');
 			echo '</div>';
-			echo '<div class="pn-field_wrap" style="display:flex;"><label>UTM Content</label>';
+			echo '<div class="pn-field_wrap" style="display:flex;"><label>'.esc_html__('UTM Content', 'push-notification').'</label>';
 			PN_Field_Generator::get_input('notification_utm_content', 'notification_utm_content', '');
 			echo '</div>';
 		echo "</div>";
@@ -588,7 +588,7 @@ class Push_Notification_Admin{
 	public function pn_verify_user(){
 		$nonce = sanitize_text_field($_POST['nonce']);
 		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
 		}else{
 			$user_token = sanitize_text_field($_POST['user_token']);
 			$response = PN_Server_Request::varifyUser($user_token);
@@ -602,7 +602,7 @@ class Push_Notification_Admin{
 			echo json_encode($response);die;
 		}		
 
-		echo json_encode(array("status"=> 503, 'message'=>'Request not identified'));die;
+		echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not identified','push-notification')));die;
 	}
 	public function notification_refresh_api_key(){
 		$authData = push_notification_auth_settings();
@@ -620,24 +620,24 @@ class Push_Notification_Admin{
 	public function pn_revoke_keys(){
 		$nonce = sanitize_text_field($_POST['nonce']);
 		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
 		}else{
 			delete_option('push_notification_auth_settings');
-			echo json_encode(array("status"=> 200, 'message'=>'API key removed successfully'));die;
+			echo json_encode(array("status"=> 200, 'message'=>esc_html__('API key removed successfully', 'push-notification')));die;
 		}
 	}
 
 	public function pn_subscribers_data(){
 		$nonce = sanitize_text_field($_POST['nonce']);
 		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
 		}else{
 			$auth_settings = push_notification_auth_settings();
 			if( isset( $auth_settings['user_token'] ) ){
 				 PN_Server_Request::getsubscribersData( $auth_settings['user_token'] );
-				 echo json_encode(array("status"=> 200, 'message'=>'Data updated'));die;
+				 echo json_encode(array("status"=> 200, 'message'=>esc_html__('Data updated', 'push-notification')));die;
 			}else{
-				echo json_encode(array("status"=> 503, 'message'=>'User token not found'));die;	
+				echo json_encode(array("status"=> 503, 'message'=> esc_html__('User token not found', 'push-notification')));die;	
 			}
 
 		}
@@ -646,7 +646,7 @@ class Push_Notification_Admin{
 	public function pn_send_notification(){
 		$nonce = sanitize_text_field($_POST['nonce']);
 		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
 		}else{
 			$auth_settings = push_notification_auth_settings();
 			$notification_settings = push_notification_settings();
@@ -673,10 +673,10 @@ class Push_Notification_Admin{
 				if($response){
 				 echo json_encode($response);die;
 				}else{
-					echo json_encode(array("status"=> 403, 'message'=>'Request not completed'));die;
+					echo json_encode(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));die;
 				}
 			}else{
-				echo json_encode(array("status"=> 503, 'message'=>'User token not found'));die;	
+				echo json_encode(array("status"=> 503, 'message'=>esc_html__('User token not found', 'push-notification')));die;	
 			}			
 
 		}
@@ -822,7 +822,7 @@ class Push_Notification_Admin{
 		$token_ids = array_unique($token_ids);
 
 		$post_title = esc_html__('Order status changed', 'push-notification');
-		$post_content = esc_html__('Order id #'.$order_id.' changed from '.$status_from.' to '.$status_to);
+		$post_content = esc_html__('Order id #'.$order_id.' changed from '.$status_from.' to '.$status_to, 'push-notification');
 		$auth_settings = push_notification_auth_settings();
 
 		//API Data
@@ -864,7 +864,7 @@ class Push_Notification_Admin{
 			$remoteResponse = wp_remote_post($verifyUrl, $postdata);
 
 			if( is_wp_error( $remoteResponse ) ){
-				$remoteData = array('status'=>401, "response"=>"could not connect to server");
+				$remoteData = array('status'=>401, "response"=>esc_html__('could not connect to server', 'push-notification'));
 			}else{
 				$remoteData = wp_remote_retrieve_body($remoteResponse);
 				$remoteData = json_decode($remoteData, true);
@@ -916,7 +916,7 @@ class Push_Notification_Admin{
 	public function pn_subscribe_newsletter(){
 		$nonce = sanitize_text_field($_POST['nonce']);
 		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
 		}else{
 		    $api_url = 'http://magazine3.company/wp-json/api/central/email/subscribe';
 		    $api_params = array(
@@ -1002,7 +1002,7 @@ class PN_Field_Generator{
 			<input type="checkbox" class="regular-text checkbox_operator" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/>
 			<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text checkbox_target" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($settings[$name]); ?>" data-truevalue="<?php echo esc_attr($value); ?>"/>
 			<?php if(!empty($label)){
-				echo '<label style="display:inline-block" for="'.$id.'">'.$label.'</label>';
+				echo '<label style="display:inline-block" for="'.$id.'">'.esc_html__($label, 'push-notification').'</label>';
 			} ?>
 		</div>
 		<?php
@@ -1018,7 +1018,7 @@ class PN_Field_Generator{
 				if(isset($value) && in_array($key, $value)){
 					$sel = 'selected';
 				}
-				echo '<option value="'.$key.'" '.$sel.'>'.$opt.'</option>';
+				echo '<option value="'.$key.'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
 			} ?>
 		</select><?php
 	}
@@ -1043,7 +1043,7 @@ class PN_Field_Generator{
 				<?php 
 				$label_text = '';
 				if(isset($data[$i]) && !empty($data[$i])){
-					$label_text = $data[$i]->name;
+					$label_text = esc_html__($data[$i]->name, 'push-notification');
 				}
 				echo '<label style="display:inline-block" for="pn_push_category_checkbox'.$i.'">'.$label_text.'</label>';
 				?>
@@ -1063,7 +1063,7 @@ class PN_Field_Generator{
 				if(isset($value) && $key==$value){
 					$sel = 'selected';
 				}
-				echo '<option value="'.$key.'" '.$sel.'>'.$opt.'</option>';
+				echo '<option value="'.$key.'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
 			} ?>
 		</select><?php
 	}
@@ -1091,17 +1091,17 @@ function pn_send_query_message(){
         $customer_type    = sanitize_text_field($_POST['customer_type']);        
         $customer_type = empty($customer_type)? $customer_type : 'No';
         $message .= "<table>
-        				<tr><td>Are you existing Premium Customer?</td><td>".$customer_type."</td></tr>
-        				<tr><td>Plugin</td><td> Push Notification </td></tr>
-        				<tr><td>Version</td><td>".PUSH_NOTIFICATION_PLUGIN_VERSION."</td></tr>
+        				<tr><td>".esc_html__('Are you existing Premium Customer?','push-notification')."</td><td>".esc_html__($customer_type, 'push-notification')."</td></tr>
+        				<tr><td>Plugin</td><td> ". esc_html__('Push Notification', 'push-notification') ."</td></tr>
+        				<tr><td>Version</td><td>".esc_html__(PUSH_NOTIFICATION_PLUGIN_VERSION, 'push-notification')."</td></tr>
         			</table>";
         $user       = wp_get_current_user();
         if($user){
             $user_data  = $user->data;        
             $user_email = $user_data->user_email;       
             //php mailer variables
-            $to = 'team@magazine3.in';
-            $subject = "Push Notification Customer Query";
+            $to = esc_html__('team@magazine3.in', 'push-notification');
+            $subject = esc_html__("Push Notification Customer Query", 'push-notification');
             $headers = 'From: '. esc_attr($user_email) . "\r\n" .
             'Reply-To: ' . esc_attr($user_email) . "\r\n";
             // Load WP components, no themes.                      
