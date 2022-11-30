@@ -3,7 +3,7 @@ jQuery(document).ready(function($){
         
 	let activeTab = '#pn_connect';
 	activeTab = localStorage.getItem('activeTab');
-	if(activeTab === undefined){
+	if(activeTab === 'undefined'){
 		activeTab = '#pn_connect';
 	}
 	if(activeTab){

@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 6.0
-Stable tag: 1.24
+Tested up to: 6.1.1
+Stable tag: 1.25
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,15 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.25 (30 November 2022) =
+* Enhancement: Tested with WordPress 6.1.1 and update in change log #33
+* Bug Fixed: Fixed escaping issue #34
+* Bug Fixed: When we refresh the current tab it will redirect to the first tab #35
+* Added: Feedback form on plugin deactivation #36
+* Bug Fixed: Resolved warnings showed in Query Monitor Array to string conversion #37
+* Bug Fixed: PHP error array to string issue resolved #38
+
 
 = 1.24 (24 September 2022) =
 * Improvement: Improvement In pushnotification #745

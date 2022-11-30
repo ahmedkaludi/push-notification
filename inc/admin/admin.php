@@ -992,7 +992,7 @@ class PN_Field_Generator{
 	}
 	public static function get_input_category($name, $id="", $class=""){
 		$settings = push_notification_settings();
-		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if(isset($settings[$name]) && is_string($settings[$name])) echo $settings[$name]; ?>" hidden/><?php
+		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if(isset($settings[$name]) && is_string($settings[$name])) echo esc_attr($settings[$name]); ?>" hidden/><?php
 	}
 	public static function get_input_checkbox($name, $value, $id="", $class="", $label=''){
 		$settings = push_notification_settings();
@@ -1002,7 +1002,7 @@ class PN_Field_Generator{
 			<input type="checkbox" class="regular-text checkbox_operator" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/>
 			<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text checkbox_target" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($settings[$name]); ?>" data-truevalue="<?php echo esc_attr($value); ?>"/>
 			<?php if(!empty($label)){
-				echo '<label style="display:inline-block" for="'.$id.'">'.esc_html__($label, 'push-notification').'</label>';
+				echo '<label style="display:inline-block" for="'.esc_attr($id).'">'.esc_html__($label, 'push-notification').'</label>';
 			} ?>
 		</div>
 		<?php
@@ -1018,7 +1018,7 @@ class PN_Field_Generator{
 				if(isset($value) && in_array($key, $value)){
 					$sel = 'selected';
 				}
-				echo '<option value="'.$key.'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
+				echo '<option value="'.esc_attr($key).'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
 			} ?>
 		</select><?php
 	}
@@ -1045,7 +1045,7 @@ class PN_Field_Generator{
 				if(isset($data[$i]) && !empty($data[$i])){
 					$label_text = esc_html__($data[$i]->name, 'push-notification');
 				}
-				echo '<label style="display:inline-block" for="pn_push_category_checkbox'.$i.'">'.$label_text.'</label>';
+				echo '<label style="display:inline-block" for="pn_push_category_checkbox'.esc_attr($i).'">'.$label_text.'</label>';
 				?>
 			</div>
 		<?php
@@ -1063,7 +1063,7 @@ class PN_Field_Generator{
 				if(isset($value) && $key==$value){
 					$sel = 'selected';
 				}
-				echo '<option value="'.$key.'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
+				echo '<option value="'.esc_attr($key).'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
 			} ?>
 		</select><?php
 	}
