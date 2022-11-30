@@ -171,7 +171,7 @@ class Push_Notification_Admin{
 						settings_fields( 'push_notification_setting_dashboard_group' );
 						echo "<div class='push_notification-dashboard'>";
 							// Status
-							echo "<div id='pn_connect'>";
+							echo "<div id='pn_connect' class='pn-tabs'>";
 								do_settings_sections( 'push_notification_dashboard_section' );	// Page slug
 							echo "</div>";
 							$authData = push_notification_auth_settings();
@@ -355,7 +355,7 @@ class Push_Notification_Admin{
 		}
 		$subscriber_count = 0;
 		if(isset($detail_settings['subscriber_count'])){ $subscriber_count = $detail_settings['subscriber_count']; }
-		echo '<div id="pn_dashboard" style="display:none;">
+		echo '<div id="pn_dashboard" style="display:none;" class="pn-tabs">
 		<section class="pn_general_wrapper">
 				<div class="action-wrapper"> '.esc_html__($updated_at, 'push-notification').' <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update">'.esc_html__('Refresh data', 'push-notification').'</button>
 				</div>
@@ -376,7 +376,7 @@ class Push_Notification_Admin{
 			</div>
 			';
 
-		echo '<div id="pn_segmentation" style="display:none">
+		echo '<div id="pn_segmentation" style="display:none" class="pn-tabs">
 		<section class="pn_general_wrapper">';
 				do_settings_sections( 'push_notification_segment_settings_section' );
 		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
@@ -384,14 +384,14 @@ class Push_Notification_Admin{
 			</div>
 			';
 		if ( class_exists( 'WooCommerce' ) ) {
-			echo '<div id="pn_wc_settings_section" style="display:none;">
+			echo '<div id="pn_wc_settings_section" style="display:none;" class="pn-tabs">
 				<section style="margin-top:20px"><div class="postbox" style="padding:20px">';
 					do_settings_sections( 'push_notification_user_wc_settings_section' );
 					echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">';
 				echo '</div></section>
 			</div>';
 		}
-		echo '<br/><br/><div id="pn_notification_bell" class="pn-other-settings-options" style="display:none">
+		echo '<br/><br/><div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
 					<div id="dashboard_right_now" class="postbox " >
 						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
 						<div class="inside">
@@ -419,7 +419,7 @@ class Push_Notification_Admin{
 					</div>
 				</div>
 
-				<div id="pn_help" style="display:none;">
+				<div id="pn_help" style="display:none;" class="pn-tabs">
 					<h3>'.esc_html__('Documentation', 'push-notification').'</h3>
 					<a target="_blank" class="button pn-submit-button" href="https://pushnotifications.helpscoutdocs.com/">'.esc_html__('View Setup Documentation', 'push-notification').'</a>
 
@@ -1114,3 +1114,4 @@ function pn_send_query_message(){
         }                        
            wp_die();           
 }
+

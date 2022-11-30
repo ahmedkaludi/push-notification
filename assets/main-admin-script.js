@@ -1,6 +1,15 @@
 jQuery(document).ready(function($){
 	/* Newletters js starts here */      
         
+	let activeTab = '#pn_connect';
+	activeTab = localStorage.getItem('activeTab');
+	if(activeTab){
+		$('.pn-tabs').hide();
+		$(activeTab).show();
+		$(".push-notification-tabs a").removeClass('nav-tab-active');
+		$('a[href="' + activeTab + '"]').addClass('nav-tab-active');
+	}
+        
             if(pn_setings.do_tour){
                 
                 var content = '<h3>You are awesome for using Push Notification!</h3>';
@@ -315,6 +324,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").hide();
 	        }
 	        
+	        localStorage.setItem('activeTab', $(e.target).attr('href'));
 	});
 
 	jQuery(".pn_push_segment_category_checkbox").click(function(){
