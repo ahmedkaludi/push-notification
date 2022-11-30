@@ -3,11 +3,15 @@ jQuery(document).ready(function($){
         
 	let activeTab = '#pn_connect';
 	activeTab = localStorage.getItem('activeTab');
+	if(activeTab === undefined){
+		activeTab = '#pn_connect';
+	}
 	if(activeTab){
 		$('.pn-tabs').hide();
 		$(activeTab).show();
 		$(".push-notification-tabs a").removeClass('nav-tab-active');
 		$('a[href="' + activeTab + '"]').addClass('nav-tab-active');
+		localStorage.setItem('activeTab', activeTab);
 	}
         
             if(pn_setings.do_tour){
