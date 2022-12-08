@@ -56,11 +56,11 @@ class Push_Notification_Admin{
 	}
 
 	function add_pn_config($firebaseconfig){
-		$firebaseconfig   = 'var config = pnScriptSetting.pn_config;'
-                            .'if (!firebase.app._apps.size) {firebase.app.initializeApp(config);}
-                            const messaging = firebase.messaging;';
-		return $firebaseconfig;
-	}
+    	$firebaseconfig   = 'var config = pnScriptSetting.pn_config;'
+                            .'if (!firebase.apps.length) {firebase.initializeApp(config);}  
+                            if(!messaging){const messaging = firebase.messaging;}';
+    	return $firebaseconfig;
+  	}
 
 	function add_pn_use_sw($useserviceworker){
 		 $useserviceworker = 'messaging.useServiceWorker(reg); pushnotification_load_messaging();';
@@ -99,8 +99,8 @@ class Push_Notification_Admin{
 
 	function load_admin_scripts($hook_suffix){
 		if($hook_suffix=='toplevel_page_push-notification'){
-			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/main-admin-script.js', array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL.'/assets/main-admin-style.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
+			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL.'assets/main-admin-script.js', array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL.'assets/main-admin-style.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
 			 if ( is_multisite() ) {
 	            $link = get_site_url();              
 	        }
@@ -873,7 +873,7 @@ class Push_Notification_Admin{
 	}
 
 	public function pn_get_layout_files($filePath){
-	    $fileContentResponse = @wp_remote_get(esc_url_raw(PUSH_NOTIFICATION_PLUGIN_URL.'/assets/'.$filePath));
+	    $fileContentResponse = @wp_remote_get(esc_url_raw(PUSH_NOTIFICATION_PLUGIN_URL.'assets/'.$filePath));
 	    if(wp_remote_retrieve_response_code($fileContentResponse)!=200){
 	      if(!function_exists('get_filesystem_method')){
 	        require_once( ABSPATH . 'wp-admin/includes/file.php' );
@@ -881,7 +881,7 @@ class Push_Notification_Admin{
 	      $access_type = get_filesystem_method();
 	      if($access_type === 'direct')
 	      {
-	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.('/assets/'.$filePath);
+	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.('assets/'.$filePath);
 	        $creds = request_filesystem_credentials($file, '', false, false, array());
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
@@ -944,7 +944,7 @@ add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send
 
 function push_notification_settings(){
 	$push_notification_settings = get_option( 'push_notification_settings', array() ); 
-	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'/assets/image/bell-icon.png';
+	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/bell-icon.png';
 	if(function_exists('pwaforwp_defaultSettings')){
 		$pwaforwpSettings = pwaforwp_defaultSettings();
 		$icon = $pwaforwpSettings['icon'];
