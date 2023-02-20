@@ -64,7 +64,7 @@ function pushnotification_load_messaging(){
 	return return_var;
 }
 	
-  	if(pnreadCookie("pn_notification_block")==null){
+  	if(PWAforwpreadCookie("pn_notification_block")==null){
 		const pageAccessedByReload = window.history.length;
 		if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
 			return false;
