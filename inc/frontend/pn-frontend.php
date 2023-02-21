@@ -34,7 +34,7 @@ class Push_Notification_Frontend{
 				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			}
 		}elseif(function_exists('amp_is_enabled') && amp_is_enabled()){
-			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
+			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
 			//add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 
 			add_action("wp_footer", array($this, 'header_content'));
@@ -395,7 +395,7 @@ class Push_Notification_Frontend{
         }
 		?>
 		<div class="pushnotification-class">
-			<a class="" target="_blank" href="<?php echo esc_url_raw($link."/subscribe/pushnotification")?>">
+			<a class="" target="_blank" href="<?php echo esc_url_raw($link."/subscribe/pushnotification?noamp=available")?>">
 				<span><?php
 			echo esc_html__('Subscribe for notification', 'push-notification');
 			?></span></a>
