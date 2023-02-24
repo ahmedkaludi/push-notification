@@ -33,10 +33,10 @@ class Push_Notification_Frontend{
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
 				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			}
-		}elseif(function_exists('amp_is_enabled') && amp_is_enabled()){
+		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){
 			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
 			//add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
-
+			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			add_action("wp_footer", array($this, 'header_content'));
 			add_action("wp_footer", array($this, 'amp_header_button_css'));
 		}else{
@@ -64,11 +64,12 @@ class Push_Notification_Frontend{
 		add_action( 'wp_ajax_nopriv_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) );
 		//AMP Connect
 		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
-		if( function_exists('ampforwp_get_setting') && ampforwp_get_setting('amp-mobile-redirection') && wp_is_mobile() ){
-			add_action('template_redirect', array($this, 'page_redirect'), 9);
-		}else{
-			add_filter('template_include', array($this, 'page_include'), 1, 1);
-		}
+
+		 if( function_exists('ampforwp_get_setting') && ampforwp_get_setting('amp-mobile-redirection') && wp_is_mobile() ){
+		 	add_action('template_redirect', array($this, 'page_redirect'), 9);
+		 }else{
+		 	add_filter('template_include', array($this, 'page_include'), 1, 1);
+		 }
 
 		//Woocommerce order status Compatibility
 		//Store token ID
@@ -319,7 +320,7 @@ class Push_Notification_Frontend{
 	function page_include($template){
 		global $wp_query;
     	if((isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification') || (isset($wp_query->query['subscribe_pushnotification']) && $wp_query->query['subscribe_pushnotification']==1) ||(isset($wp_query->query['attachment']) && $wp_query->query['attachment']=="pushnotification")){
-    		$template = PUSH_NOTIFICATION_PLUGIN_DIR.'/inc/frontend/amp-pn-subscribe.php';
+    		$template = PUSH_NOTIFICATION_PLUGIN_DIR.'inc/frontend/amp-pn-subscribe.php';
     	}
     	return $template;
 	}
