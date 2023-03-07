@@ -175,11 +175,10 @@ class Push_Notification_Frontend{
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
 		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		//wp_enqueue_script('pn-script-gtag', 'https://www.googletagmanager.com/gtag/js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$data = "window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());";
-		wp_add_inline_script('pn-script-gtag', $data, 'after');
+		wp_add_inline_script('pn-script-analytics', $data, 'after');
 
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
@@ -190,9 +189,8 @@ class Push_Notification_Frontend{
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
 		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		//wp_enqueue_script('pn-script-gtag', 'https://www.googletagmanager.com/gtag/js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
-		wp_add_inline_script('pn-script-gtag', $data, 'after');
+		wp_add_inline_script('pn-script-analytics', $data, 'after');
 
 		
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
@@ -544,7 +542,7 @@ class Push_Notification_Frontend{
 				   		<div class="categories-multiselect">
 				   			<div id="pn-categories-checkboxes">
 			   			 		<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />All</label>';
-			   			 		for ($i=0; $i < count($get_all_categories); $i++) {
+			   			 		for ($i=0; $i < count($get_all_categories)-1; $i++) {
 			   			 			if(in_array($get_all_categories[$i]->name, $catArray)){
 	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$get_all_categories[$i]->name.'" />'.$get_all_categories[$i]->name.'</label>';
 	   			 					}
