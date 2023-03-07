@@ -568,9 +568,9 @@ class Push_Notification_Frontend{
 	function store_user_registered_tokens($token_id, $response, $user_agent, $os, $ip_address){
 		$userData = wp_get_current_user();
 		if(is_object($userData) && isset($userData->ID)){
+			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
 		 	$token_ids = $token_ids? json_decode($token_ids): array();
-		 	$userid = $userData->ID;
 		 	$token_ids[] = $response['data']['id'];
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}
