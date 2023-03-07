@@ -49,8 +49,10 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
-= 1.26 (13 February 2023) =
+= 1.26 (07 March 2023) =
 * Bug Fixed: Subscribe to push notification appears again and again after subscribing it. #751
+* Bug Fixed: Need to speed up the Googletagmanager.js file in user end. #28
+* Bug Fixed: All Categories check box text not translatable. #43
 
 = 1.25.1 (05 December 2022) =
 * Bug Fixed: Fixed issue 'messaging' has already been declared With PWA for WP
