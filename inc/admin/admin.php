@@ -772,10 +772,8 @@ class Push_Notification_Admin{
 
 		$send_notification = false;
 		if(isset($pn_settings['on_category']) && $pn_settings['on_category']==1){
-			if ( $new_status === $old_status) {
 			 	$this->send_notification_on_cotegories($post);
 			 	$send_notification = true;
-			}
 		}
 	}
 
