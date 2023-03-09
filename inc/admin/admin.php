@@ -1027,26 +1027,28 @@ class PN_Field_Generator{
 		if(!empty($category) && is_string($category)){
 			$catArray = explode(',', $category);
 		}
-		for ($i=0; $i < count($data); $i++) { 
+		$i=0;
+		foreach ($data as $value) { 
 			$check = '';
-			if(isset($data[$i]) && !empty($catArray)){
-				if(in_array($data[$i]->name, $catArray)){
+			if(isset($value) && !empty($catArray)){
+				if(in_array($value->name, $catArray)){
 					$check = 'checked';
 				}
 			}
 		?>
 			<div class="checkbox_wrapper">
-				<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" <?php echo esc_attr($check); ?> value="<?php echo isset($data[$i]->name)? esc_attr($data[$i]->name):''; ?>"/>
-				<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" value="<?php echo isset($data[$i]->name)?esc_attr($data[$i]->name):''; ?>" data-truevalue="<?php echo isset($data[$i]->name)?esc_attr($data[$i]->name):''; ?>"/>
+				<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" <?php echo esc_attr($check); ?> value="<?php echo isset($value->name)? esc_attr($value->name):''; ?>"/>
+				<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" value="<?php echo isset($value->name)?esc_attr($value->name):''; ?>" data-truevalue="<?php echo isset($value->name)?esc_attr($value->name):''; ?>"/>
 				<?php 
 				$label_text = '';
-				if(isset($data[$i]) && !empty($data[$i])){
-					$label_text = esc_html__($data[$i]->name, 'push-notification');
+				if(isset($value) && !empty($value)){
+					$label_text = esc_html__($value->name, 'push-notification');
 				}
 				echo '<label style="display:inline-block" for="pn_push_category_checkbox'.esc_attr($i).'">'.$label_text.'</label>';
 				?>
 			</div>
 		<?php
+		$i++;
 		}
 	}
 
