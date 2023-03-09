@@ -540,12 +540,16 @@ class Push_Notification_Frontend{
 			   				'.esc_html__('Which Notifications would you like to receive?', 'push-notification').'
 			   			</div>
 				   		<div class="categories-multiselect">
-				   			<div id="pn-categories-checkboxes">
-			   			 		<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('ALL', 'push-notification').'</label>';
-			   			 		for ($i=0; $i < count($get_all_categories)-1; $i++) {
-			   			 			if(in_array($get_all_categories[$i]->name, $catArray)){
-	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$get_all_categories[$i]->name.'" />'.$get_all_categories[$i]->name.'</label>';
+				   			<div id="pn-categories-checkboxes">';
+							if(!empty($catArray) && in_array('All', $catArray)){
+			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All', 'push-notification').'</label>';
+							}
+							$i=0;
+			   			 		foreach ($get_all_categories as $key =>$value) {
+			   			 			if(in_array($value->name, $catArray)){
+	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$value->name.'" />'.$value->name.'</label>';
 	   			 					}
+									$i++;
 					      		}
 				   			echo '</div>
 			   			</div>';

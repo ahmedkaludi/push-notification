@@ -1027,7 +1027,16 @@ class PN_Field_Generator{
 		if(!empty($category) && is_string($category)){
 			$catArray = explode(',', $category);
 		}
-		$i=0;
+		$i=0; ?>
+<div class="checkbox_wrapper">
+	<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox_all'); ?>" <?php echo in_array('All', $catArray)?'checked':''; ?> value="<?php echo esc_attr__( 'All', 'push_notification') ?>"/>
+	<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'); ?>" value="<?php echo esc_attr__( 'All', 'push_notification') ?>" data-truevalue="<?php echo esc_attr__( 'All', 'push_notification') ?>"/>
+		<?php 
+	
+		echo '<label style="display:inline-block" for="pn_push_category_checkbox_all">'.esc_attr__( 'All', 'push_notification').'</label>';
+		?>
+</div>
+<?php	
 		foreach ($data as $value) { 
 			$check = '';
 			if(isset($value) && !empty($catArray)){
