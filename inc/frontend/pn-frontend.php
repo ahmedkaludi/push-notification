@@ -33,10 +33,10 @@ class Push_Notification_Frontend{
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
 				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			}
-		}elseif(function_exists('amp_is_enabled') && amp_is_enabled()){
-			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
+		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){
+			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
 			//add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
-
+			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			add_action("wp_footer", array($this, 'header_content'));
 			add_action("wp_footer", array($this, 'amp_header_button_css'));
 		}else{
@@ -64,11 +64,12 @@ class Push_Notification_Frontend{
 		add_action( 'wp_ajax_nopriv_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) );
 		//AMP Connect
 		add_action( "pre_amp_render_post", array($this, 'amp_entry_gate') );
-		if( function_exists('ampforwp_get_setting') && ampforwp_get_setting('amp-mobile-redirection') && wp_is_mobile() ){
-			add_action('template_redirect', array($this, 'page_redirect'), 9);
-		}else{
-			add_filter('template_include', array($this, 'page_include'), 1, 1);
-		}
+
+		 if( function_exists('ampforwp_get_setting') && ampforwp_get_setting('amp-mobile-redirection') && wp_is_mobile() ){
+		 	add_action('template_redirect', array($this, 'page_redirect'), 9);
+		 }else{
+		 	add_filter('template_include', array($this, 'page_include'), 1, 1);
+		 }
 
 		//Woocommerce order status Compatibility
 		//Store token ID
@@ -174,11 +175,10 @@ class Push_Notification_Frontend{
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
 		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-gtag', 'https://www.googletagmanager.com/gtag/js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$data = "window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());";
-		wp_add_inline_script('pn-script-gtag', $data, 'after');
+		wp_add_inline_script('pn-script-analytics', $data, 'after');
 
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
@@ -189,9 +189,8 @@ class Push_Notification_Frontend{
 		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
 		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-gtag', 'https://www.googletagmanager.com/gtag/js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
-		wp_add_inline_script('pn-script-gtag', $data, 'after');
+		wp_add_inline_script('pn-script-analytics', $data, 'after');
 
 		
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
@@ -318,8 +317,8 @@ class Push_Notification_Frontend{
 
 	function page_include($template){
 		global $wp_query;
-    	if((isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification') || (isset($wp_query->query['subscribe_pushnotification']) && $wp_query->query['subscribe_pushnotification']==1)){
-    		$template = PUSH_NOTIFICATION_PLUGIN_DIR.'/inc/frontend/amp-pn-subscribe.php';
+    	if((isset($wp_query->query['pagename']) && $wp_query->query['pagename']=='subscribe/pushnotification') || (isset($wp_query->query['subscribe_pushnotification']) && $wp_query->query['subscribe_pushnotification']==1) ||(isset($wp_query->query['attachment']) && $wp_query->query['attachment']=="pushnotification")){
+    		$template = PUSH_NOTIFICATION_PLUGIN_DIR.'inc/frontend/amp-pn-subscribe.php';
     	}
     	return $template;
 	}
@@ -395,7 +394,7 @@ class Push_Notification_Frontend{
         }
 		?>
 		<div class="pushnotification-class">
-			<a class="" target="_blank" href="<?php echo esc_url_raw($link."/subscribe/pushnotification")?>">
+			<a class="" target="_blank" href="<?php echo esc_url_raw($link."/subscribe/pushnotification?noamp=available")?>">
 				<span><?php
 			echo esc_html__('Subscribe for notification', 'push-notification');
 			?></span></a>
@@ -541,12 +540,16 @@ class Push_Notification_Frontend{
 			   				'.esc_html__('Which Notifications would you like to receive?', 'push-notification').'
 			   			</div>
 				   		<div class="categories-multiselect">
-				   			<div id="pn-categories-checkboxes">
-			   			 		<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />All</label>';
-			   			 		for ($i=0; $i < count($get_all_categories); $i++) {
-			   			 			if(in_array($get_all_categories[$i]->name, $catArray)){
-	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$get_all_categories[$i]->name.'" />'.$get_all_categories[$i]->name.'</label>';
+				   			<div id="pn-categories-checkboxes">';
+							if(!empty($catArray) && in_array('All', $catArray)){
+			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All', 'push-notification').'</label>';
+							}
+							$i=0;
+			   			 		foreach ($get_all_categories as $key =>$value) {
+			   			 			if(in_array($value->name, $catArray)){
+	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$value->name.'" />'.$value->name.'</label>';
 	   			 					}
+									$i++;
 					      		}
 				   			echo '</div>
 			   			</div>';
@@ -569,9 +572,9 @@ class Push_Notification_Frontend{
 	function store_user_registered_tokens($token_id, $response, $user_agent, $os, $ip_address){
 		$userData = wp_get_current_user();
 		if(is_object($userData) && isset($userData->ID)){
+			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
 		 	$token_ids = $token_ids? json_decode($token_ids): array();
-		 	$userid = $userData->ID;
 		 	$token_ids[] = $response['data']['id'];
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}

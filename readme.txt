@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 6.1.1
-Stable tag: 1.25.1
+Tested up to: 6.1
+Stable tag: 1.26
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,12 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.26 (10 March 2023) =
+* Bug Fixed: Redirect to a 404 page by clicking the "Subscribe for notification" button on the AMP page. #42
+* Bug Fixed: Need to speed up the Googletagmanager.js file in user end. #28
+* Bug Fixed: All Categories check box is not visible in the backend, but it is visible in the front end.. #43
+* Bug Fixed: Subcategories name are not displayed in category list #46
 
 = 1.25.1 (05 December 2022) =
 * Bug Fixed: Fixed issue 'messaging' has already been declared With PWA for WP
