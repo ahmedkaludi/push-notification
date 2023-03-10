@@ -49,7 +49,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
-= 1.26 (07 March 2023) =
+= 1.26 (10 March 2023) =
 * Bug Fixed: Redirect to a 404 page by clicking the "Subscribe for notification" button on the AMP page. #42
 * Bug Fixed: Need to speed up the Googletagmanager.js file in user end. #28
 * Bug Fixed: All Categories check box is not visible in the backend, but it is visible in the front end.. #43
