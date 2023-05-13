@@ -416,13 +416,18 @@ class Push_Notification_Admin{
 								<div class="form-group">
 									<label for="notification-imageurl">'.esc_html__('Image url', 'push-notification').'</label>
 									<input type="text" id="notification-imageurl" class="regular-text">
+									<button type="button" class="button upload_image_url" data-editor="content">
+										<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>Upload an image
+									</button>
 								</div>
 								<div class="form-group">
 									<label for="notification-message">'.esc_html__('Message', 'push-notification').'</label>
 									<textarea type="text" id="notification-message" class="regular-text"></textarea>
 								</div>
-								<input type="button" class="button pn-submit-button" id="pn-send-custom-notification" value="'.esc_html__('Send Notification', 'push-notification').'">
-								<div class="pn-send-messageDiv"></div>
+								<div class="submit inline-edit-save">
+									<input type="button" class="button pn-submit-button" id="pn-send-custom-notification" value="'.esc_html__('Send Notification', 'push-notification').'"><span class="spinner"></span>
+									<div class="pn-send-messageDiv"></div>
+								</div>
 							</div>
 						</div>
 					</div>

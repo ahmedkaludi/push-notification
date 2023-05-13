@@ -221,6 +221,7 @@ jQuery(document).ready(function($){
 		var image_url = jQuery('#notification-imageurl').val();
 		var message  = jQuery('#notification-message').val();
 		self.addClass('button updating-message');
+		jQuery('.spinner').addClass('is-active');
 		jQuery.ajax({
 			url: ajaxurl,
 			method: "post",
@@ -244,14 +245,17 @@ jQuery(document).ready(function($){
 					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"green"});
 				}
 				self.removeClass('updating-message');
+				jQuery('.spinner').removeClass('is-active');
 			},
 			error:function(response){
 				var messagediv = self.parents('fieldset').find(".resp_message")
 				messagediv.html(response.responseJSON.message)
 				messagediv.css({"color": "red"})
+				jQuery('.spinner').removeClass('is-active');
 
 			}
 		})
+		
 	})
 	jQuery('.checkbox_operator').click(function(e){
 		var value = 0;
@@ -421,4 +425,21 @@ jQuery(document).ready(function($){
 			});           
 	        
 	});
+
+	jQuery(".upload_image_url").click(function(e) {  // upload_image_url
+        e.preventDefault();
+        var pwaforwpMediaUploader = wp.media({
+            title: pwaforwp_obj.uploader_title,
+            button: {
+                text: pwaforwp_obj.uploader_button
+            },
+            multiple: false,  // Set this to true to allow multiple files to be selected
+                        library:{type : 'image'}
+        })
+        .on("select", function() {
+            var attachment = pwaforwpMediaUploader.state().get("selection").first().toJSON();
+            jQuery("#notification-imageurl").val(attachment.url);
+        })
+        .open();
+    });
 });
