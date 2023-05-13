@@ -293,6 +293,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_notification_bell").hide();
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").show();
+				jQuery("#pn_campaings").hide();
 	        }
 	        if(link == "pn_dashboard"){
 	        	jQuery("#pn_dashboard").show();
@@ -301,6 +302,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_notification_bell").hide();
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
+				jQuery("#pn_campaings").hide();
 	        } 
 	        if( link == "pn_segmentation") {
 	        	jQuery("#pn_dashboard").hide();
@@ -309,6 +311,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_notification_bell").hide();
 	        	jQuery("#pn_segmentation").show();
 	        	jQuery("#pn_connect").hide();
+				jQuery("#pn_campaings").hide();
 	        	
 	        }
 	        if( link == "pn_notification_bell") {
@@ -318,6 +321,16 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_notification_bell").show();
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
+				jQuery("#pn_campaings").hide();
+	        }
+	        if( link == "pn_campaings") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_connect").hide();
+	        	jQuery("#pn_campaings").show();
 	        }
 	        if( link == "pn_help") {
 	        	jQuery("#pn_dashboard").hide();
@@ -326,6 +339,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_notification_bell").hide();
 	        	jQuery("#pn_help").show();
 	        	jQuery("#pn_connect").hide();
+				jQuery("#pn_campaings").hide();
 	        }
 	        
 	        localStorage.setItem('activeTab', $(e.target).attr('href'));
@@ -387,6 +401,24 @@ jQuery(document).ready(function($){
 	            }
 	            
 	        }                   
+	        
+	});
+
+	jQuery("body").on("click",".js_custom_pagination", function(e){
+	        e.preventDefault();
+	        page = jQuery(this).attr('page');
+			jQuery.ajax({
+	        url: ajaxurl,
+			method: "post",
+			dataType: 'html',
+				data:{action:'pn_get_compaigns',page:page,nonce: pn_setings.remote_nonce},
+				success:function(response){                       
+					jQuery("#pn_campaings").html(response);
+				},
+				error: function(response){                    
+					console.log(response);
+				}
+			});           
 	        
 	});
 });
