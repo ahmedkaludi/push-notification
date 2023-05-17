@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 6.1
-Stable tag: 1.26
+Tested up to: 6.2
+Stable tag: 1.27
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,13 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+
+= 1.27 (17 May 2023) =
+* Added: We need to create a dashboard report in WordPress, the same as we get in the push notification. #52
+* Added: Needs to create an option where users are able to upload an image from the media library. #53
+* Bug Fixed: Clicks are not getting counted in the push notification dashboard. #51
+* Enhancement: Checkbox should be clickable on label click #54
 
 = 1.26 (10 March 2023) =
 * Bug Fixed: Redirect to a 404 page by clicking the "Subscribe for notification" button on the AMP page. #42

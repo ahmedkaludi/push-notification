@@ -111,7 +111,9 @@ class Push_Notification_Admin{
 	        $object = array(
 							"home_url"=>  esc_url_raw($link),
 							"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
-							"remote_nonce"=> wp_create_nonce("pn_notification")
+							"remote_nonce"=> wp_create_nonce("pn_notification"),
+							'uploader_title'            => esc_html__('Application Icon', 'push-notification'),
+            				'uploader_button'           => esc_html__('Select Icon', 'push-notification'),
 							);
 
 	        $object = apply_filters('pushnotification_localize_filter',$object, 'pn_setings');
@@ -155,7 +157,7 @@ class Push_Notification_Admin{
 					}
 					echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
 					echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
-					echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
+					echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
 					if( !empty($authData['token_details']) && !empty($authData['token_details']['user_payment']) ){
 						if( (isset($authData['token_details']) && $authData['token_details']['user_payment']==1) ){
 							echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
@@ -208,14 +210,19 @@ class Push_Notification_Admin{
 					 'push_notification_segment_settings_section');
 			add_settings_field(
 				'pn_key_segment_select',								// ID
-				esc_html__('Select segmentation for notification', 'push-notification'),// Title
+				__('<label for="pn_push_on_category_checkbox"><b>Select segmentation for notification</b></label>', 'push-notification'),// Title
 				array( $this, 'pn_key_segment_select_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
+			$notification = push_notification_settings();
+			$s_display="style='display:none;'";
+			if(isset($notification['on_category']) && $notification['on_category']){
+				$s_display="style='display:block;'";
+			}
 			add_settings_field(
 				'pn_key_segment_on_categories',								// ID
-				esc_html__('Segment on Categories', 'push-notification'),// Title
+				__('<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>Segment on Categories</b></label>', 'push-notification'),// Title
 				array( $this, 'pn_key_segment_on_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -430,7 +437,13 @@ class Push_Notification_Admin{
 					</div>
 				</div>
 				<div id="pn_campaings" style="display:none;" class="pn-tabs">
-					<h3>'.esc_html__('Campaings', 'push-notification').'</h3>
+					<div class="row">
+						<div class="action-wrapper" style="float:right; padding-bottom: -10px;">
+							<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="button dashicons-before pn-submit-button" style="margin-bottom:10px;" id="js_notification_button"> ' . esc_html__('Add Campaign','push-notification') . '</a>
+						</div>
+					</div>
+					<div class="row" id="pn_campaings_custom_div">
+					<h3>Campaings</h3>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
@@ -492,9 +505,10 @@ class Push_Notification_Admin{
 								echo'</tr>';
 							}
 						}else{
-							echo'<tr><td>No data found</td></tr>';
+							echo'<tr><td colspan="7">No data found</td></tr>';
 						}
 						echo'</tbody></table>';
+						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['next_page_url'])) {
 						if (empty($campaigns['campaigns']['prev_page_url'])) {
 							$pre_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
@@ -538,8 +552,9 @@ class Push_Notification_Admin{
 									</span>
 								</div>
 								<br class="clear">
-							</div>';                
-		        echo '</div>
+							</div>';
+					}                
+		        echo '</div></div>
 
 				<div id="pn_help" style="display:none;" class="pn-tabs">
 					<h3>'.esc_html__('Documentation', 'push-notification').'</h3>
@@ -916,53 +931,55 @@ class Push_Notification_Admin{
 								$campaigns_html.='</tr>';
 							}
 						}else{
-							$campaigns_html.='<tr><td>No data found</td></tr>';
+							$campaigns_html.='<tr><td colspan="7">No data found</td></tr>';
 						}
 						$campaigns_html.='</tbody></table>';
-						if (empty($campaigns['campaigns']['prev_page_url'])) {
-							$pre_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
-										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
-						}else{
-							$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($campaigns['campaigns']['first_page_url']).'">
-											<span class="screen-reader-text">First page</span>
-											<span aria-hidden="true">«</span>
-										</a>
-										<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_attr($campaigns['campaigns']['prev_page_url']).'">
-											<span class="screen-reader-text">Previous page</span>
-											<span aria-hidden="true">‹</span>
-										</a>';
-						}
-						if (empty($campaigns['campaigns']['next_page_url'])) {
-							$next_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
-										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
-						}else{
-							$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['next_page_url']).'">
-											<span class="screen-reader-text">Next page</span>
-											<span aria-hidden="true">›</span>
-										</a>
-										<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['last_page_url']).'">
-											<span class="screen-reader-text">Last page</span>
-											<span aria-hidden="true">»</span>
-										</a>';
-						}
+						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data'])) {
+							if (empty($campaigns['campaigns']['prev_page_url'])) {
+								$pre_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
+											<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
+							}else{
+								$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($campaigns['campaigns']['first_page_url']).'">
+												<span class="screen-reader-text">First page</span>
+												<span aria-hidden="true">«</span>
+											</a>
+											<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_attr($campaigns['campaigns']['prev_page_url']).'">
+												<span class="screen-reader-text">Previous page</span>
+												<span aria-hidden="true">‹</span>
+											</a>';
+							}
+							if (empty($campaigns['campaigns']['next_page_url'])) {
+								$next_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
+											<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
+							}else{
+								$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['next_page_url']).'">
+												<span class="screen-reader-text">Next page</span>
+												<span aria-hidden="true">›</span>
+											</a>
+											<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['last_page_url']).'">
+												<span class="screen-reader-text">Last page</span>
+												<span aria-hidden="true">»</span>
+											</a>';
+							}
 						// already used esc_html for $pre_html and $next_html
-						$campaigns_html.='<div class="tablenav bottom">
-								<div class="alignleft actions bulkactions">
-								</div>
-								<div class="alignleft actions">
-								</div>
-								<div class="tablenav-pages">
-									<span class="displaying-num">'.esc_html($campaigns['campaigns']['total']).' items</span>
-									<span class="pagination-links">'.$pre_html.'<span class="screen-reader-text">Current Page</span>
-										<span id="table-paging" class="paging-input">
-											<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' of
-												<span class="total-pages">'.esc_html($campaigns['campaigns']['last_page']).'</span>
-											</span>
-										</span>'.$next_html.'
-									</span>
-								</div>
-								<br class="clear">
-							</div>';
+							$campaigns_html.='<div class="tablenav bottom">
+									<div class="alignleft actions bulkactions">
+									</div>
+									<div class="alignleft actions">
+									</div>
+									<div class="tablenav-pages">
+										<span class="displaying-num">'.esc_html($campaigns['campaigns']['total']).' items</span>
+										<span class="pagination-links">'.$pre_html.'<span class="screen-reader-text">Current Page</span>
+											<span id="table-paging" class="paging-input">
+												<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' of
+													<span class="total-pages">'.esc_html($campaigns['campaigns']['last_page']).'</span>
+												</span>
+											</span>'.$next_html.'
+										</span>
+									</div>
+									<br class="clear">
+								</div>';
+						}
 		        $campaigns_html.='</div>';
 
 		echo $campaigns_html;

@@ -274,7 +274,11 @@ jQuery(document).ready(function($){
 	jQuery('#pn_push_on_category_checkbox').click(function(){
 		if(jQuery(this).prop("checked")==true){
 			jQuery("#category_selector_wrapper").show();
-		}else{jQuery("#category_selector_wrapper").hide();}
+			jQuery(".js_category_selector_wrapper").show();
+		}else{
+			jQuery("#category_selector_wrapper").hide();
+			jQuery(".js_category_selector_wrapper").hide();
+		}
 	});
 
 	jQuery('#pn_push_segment_on_category_checkbox').click(function(){
@@ -348,6 +352,22 @@ jQuery(document).ready(function($){
 	        localStorage.setItem('activeTab', $(e.target).attr('href'));
 	});
 
+	jQuery("#js_notification_button").click(function(e){
+		e.preventDefault();
+		jQuery(".push-notification-tabs").find('.nav-tab-active').removeClass("nav-tab-active");
+		jQuery(".push-notification-tabs").find('.js_notification').addClass("nav-tab-active");
+
+		jQuery("#pn_dashboard").hide();
+		jQuery("#pn_wc_settings_section").hide();
+		jQuery("#pn_segmentation").hide();
+		jQuery("#pn_notification_bell").show();
+		jQuery("#pn_help").hide();
+		jQuery("#pn_connect").hide();
+		jQuery("#pn_campaings").hide();
+		
+		localStorage.setItem('activeTab', $(e.target).attr('href'));
+});
+
 	jQuery(".pn_push_segment_category_checkbox").click(function(){
 		chkCategory();
 	});
@@ -416,7 +436,7 @@ jQuery(document).ready(function($){
 			dataType: 'html',
 				data:{action:'pn_get_compaigns',page:page,nonce: pn_setings.remote_nonce},
 				success:function(response){                       
-					jQuery("#pn_campaings").html(response);
+					jQuery("#pn_campaings_custom_div").html(response);
 				},
 				error: function(response){                    
 					console.log(response);
@@ -428,9 +448,9 @@ jQuery(document).ready(function($){
 	jQuery(".upload_image_url").click(function(e) {  // upload_image_url
         e.preventDefault();
         var pwaforwpMediaUploader = wp.media({
-            title: pwaforwp_obj.uploader_title,
+            title: pn_setings.uploader_title,
             button: {
-                text: pwaforwp_obj.uploader_button
+                text: pn_setings.uploader_button
             },
             multiple: false,  // Set this to true to allow multiple files to be selected
                         library:{type : 'image'}
