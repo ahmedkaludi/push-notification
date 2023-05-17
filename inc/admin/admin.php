@@ -100,6 +100,7 @@ class Push_Notification_Admin{
 
 	function load_admin_scripts($hook_suffix){
 		if($hook_suffix=='toplevel_page_push-notification'){
+			wp_enqueue_media();
 			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL.'assets/main-admin-script.js', array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL.'assets/main-admin-style.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
 			 if ( is_multisite() ) {
