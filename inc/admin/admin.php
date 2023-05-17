@@ -513,7 +513,7 @@ class Push_Notification_Admin{
 							$next_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
 						}else{
-							$next_html = '<a class="next-page button js_custom_pagination"  page="'.$campaigns['campaigns']['last_page'].'" href="'.esc_html($campaigns['campaigns']['next_page_url']).'">
+							$next_html = '<a class="next-page button js_custom_pagination"  page="'.($campaigns['campaigns']['current_page']+1).'" href="'.esc_html($campaigns['campaigns']['next_page_url']).'">
 											<span class="screen-reader-text">Next page</span>
 											<span aria-hidden="true">›</span>
 										</a>
@@ -938,7 +938,7 @@ class Push_Notification_Admin{
 							$next_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
 						}else{
-							$next_html = '<a class="next-page button js_custom_pagination"  page="'.$campaigns['campaigns']['last_page'].'" href="'.esc_html($campaigns['campaigns']['next_page_url']).'">
+							$next_html = '<a class="next-page button js_custom_pagination"  page="'.($campaigns['campaigns']['current_page']+1).'" href="'.esc_html($campaigns['campaigns']['next_page_url']).'">
 											<span class="screen-reader-text">Next page</span>
 											<span aria-hidden="true">›</span>
 										</a>
