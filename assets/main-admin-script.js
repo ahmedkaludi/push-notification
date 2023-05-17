@@ -287,7 +287,6 @@ jQuery(document).ready(function($){
 	jQuery(".push-notification-tabs a").click(function(e){
 	        e.preventDefault();
 	        var link = jQuery(this).attr("link");
-	        console.log(link);
 	        jQuery(this).siblings().removeClass("nav-tab-active");
 	        jQuery(this).addClass("nav-tab-active");
 	        if( link == "pn_connect") {
@@ -410,7 +409,7 @@ jQuery(document).ready(function($){
 
 	jQuery("body").on("click",".js_custom_pagination", function(e){
 	        e.preventDefault();
-	        page = jQuery(this).attr('page');
+	        var page = jQuery(this).attr('page');
 			jQuery.ajax({
 	        url: ajaxurl,
 			method: "post",

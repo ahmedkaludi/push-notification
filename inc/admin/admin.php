@@ -348,9 +348,6 @@ class Push_Notification_Admin{
 		}
 		if(isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
 			$campaigns = PN_Server_Request::getCompaignsData( $auth_settings['user_token'] );
-			
-			// echo"<pre>";
-			// print_r($campaigns);die;
 		}
 
 		$updated_at = '';
@@ -436,15 +433,17 @@ class Push_Notification_Admin{
 					<h3>'.esc_html__('Campaings', 'push-notification').'</h3>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
-                        <tr>
-                            <th width="20px">#</th>
-                            <th>Message title</th>
-                            <th>Sent on</th>
-                            <th>Status</th>
-                            <th>Subscribers</th>
-                            <th>Rate</th>
-                            <th>Clicks</th>
-                        </tr></thead><tbody>';
+							<tr>
+								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
+								<th>'.esc_html__('Message title', 'push-notification').'</th>
+								<th>'.esc_html__('Sent on', 'push-notification').'</th>
+								<th>'.esc_html__('Status', 'push-notification').'</th>
+								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
+								<th>'.esc_html__('Rate', 'push-notification').'</th>
+								<th>'.esc_html__('Clicks', 'push-notification').'</th>
+							</tr>
+						</thead>
+						<tbody>';
 						$current_count_start = 0;
 						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
@@ -476,18 +475,18 @@ class Push_Notification_Admin{
 	                                $success = isset($resposeData['success'])? $resposeData['success'] : 0;
 	                                $failed = isset($resposeData['failure'])? $resposeData['failure'] : 0;
 	                                $totalCount += ($success + $failed);
-	                                echo $totalCount;
+	                                echo esc_html($totalCount);
 	                                echo'</td><td>';
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										echo number_format($rate, 2, '.', ',')."%";
-										echo "<br/>(Success: ".$success. "<br/> Failed: ".$failed.")";
+										echo "<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
 									}else{
 										echo "0%";
-										echo "<br/>(Success: ".$success. "<br/> Failed: ".$failed.")";
+										echo "<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
 									}
 									echo'</td><td>';
-									echo $clickCount;
+									echo esc_html($clickCount);
 									echo'</td>';
 								
 								echo'</tr>';
@@ -500,11 +499,11 @@ class Push_Notification_Admin{
 							$pre_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
 						}else{
-							$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_html($campaigns['campaigns']['first_page_url']).'">
+							$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($campaigns['campaigns']['first_page_url']).'">
 											<span class="screen-reader-text">First page</span>
 											<span aria-hidden="true">«</span>
 										</a>
-										<a class="prev-page button js_custom_pagination" page="'.($campaigns['campaigns']['current_page']-1).'" href="'.esc_html($campaigns['campaigns']['prev_page_url']).'">
+										<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_attr($campaigns['campaigns']['prev_page_url']).'">
 											<span class="screen-reader-text">Previous page</span>
 											<span aria-hidden="true">‹</span>
 										</a>';
@@ -513,16 +512,16 @@ class Push_Notification_Admin{
 							$next_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
 						}else{
-							$next_html = '<a class="next-page button js_custom_pagination"  page="'.($campaigns['campaigns']['current_page']+1).'" href="'.esc_html($campaigns['campaigns']['next_page_url']).'">
+							$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['next_page_url']).'">
 											<span class="screen-reader-text">Next page</span>
 											<span aria-hidden="true">›</span>
 										</a>
-										<a class="last-page button js_custom_pagination"  page="'.($campaigns['campaigns']['current_page']+1).'" href="'.esc_html($campaigns['campaigns']['last_page_url']).'">
+										<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['last_page_url']).'">
 											<span class="screen-reader-text">Last page</span>
 											<span aria-hidden="true">»</span>
 										</a>';
 						}
-
+						// already used esc_html for $pre_html and $next_html variable
 						echo '<div class="tablenav bottom">
 								<div class="alignleft actions bulkactions">
 								</div>
@@ -539,8 +538,7 @@ class Push_Notification_Admin{
 									</span>
 								</div>
 								<br class="clear">
-							</div>';
-                   	          		                  
+							</div>';                
 		        echo '</div>
 
 				<div id="pn_help" style="display:none;" class="pn-tabs">
@@ -605,7 +603,6 @@ class Push_Notification_Admin{
 		$notification = push_notification_settings();
 		$data = get_post_types();
 		$data = array_merge(array('none'=>'None'), $data);
-		// print_r($data);
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
 	}
 	public function pn_key_segment_select_callback(){
@@ -861,15 +858,17 @@ class Push_Notification_Admin{
 		$campaigns_html = '<h3>'.esc_html__('Campaings', 'push-notification').'</h3>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
-                        <tr>
-                            <th width="20px">#</th>
-                            <th>Message title</th>
-                            <th>Sent on</th>
-                            <th>Status</th>
-                            <th>Subscribers</th>
-                            <th>Rate</th>
-                            <th>Clicks</th>
-                        </tr></thead><tbody>';
+							<tr>
+								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
+								<th>'.esc_html__('Message title', 'push-notification').'</th>
+								<th>'.esc_html__('Sent on', 'push-notification').'</th>
+								<th>'.esc_html__('Status', 'push-notification').'</th>
+								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
+								<th>'.esc_html__('Rate', 'push-notification').'</th>
+								<th>'.esc_html__('Clicks', 'push-notification').'</th>
+							</tr>
+						</thead>
+						<tbody>';
 						$current_count_start = 0;
 						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
@@ -901,20 +900,19 @@ class Push_Notification_Admin{
 	                                $success = isset($resposeData['success'])? $resposeData['success'] : 0;
 	                                $failed = isset($resposeData['failure'])? $resposeData['failure'] : 0;
 	                                $totalCount += ($success + $failed);
-	                                $campaigns_html.= $totalCount;
+	                                $campaigns_html.= esc_html($totalCount);
 	                                $campaigns_html.='</td><td>';
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										$campaigns_html.= number_format($rate, 2, '.', ',')."%";
-										$campaigns_html.="<br/>(Success: ".$success. "<br/> Failed: ".$failed.")";
+										$campaigns_html.="<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
 									}else{
 										$campaigns_html.="0%";
-										$campaigns_html.="<br/>(Success: ".$success. "<br/> Failed: ".$failed.")";
+										$campaigns_html.="<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
 									}
 									$campaigns_html.='</td><td>';
-									$campaigns_html.=$clickCount;
+									$campaigns_html.=esc_html($clickCount);
 									$campaigns_html.='</td>';
-								
 								$campaigns_html.='</tr>';
 							}
 						}else{
@@ -925,11 +923,11 @@ class Push_Notification_Admin{
 							$pre_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
 						}else{
-							$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_html($campaigns['campaigns']['first_page_url']).'">
+							$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($campaigns['campaigns']['first_page_url']).'">
 											<span class="screen-reader-text">First page</span>
 											<span aria-hidden="true">«</span>
 										</a>
-										<a class="prev-page button js_custom_pagination" page="'.($campaigns['campaigns']['current_page']-1).'" href="'.esc_html($campaigns['campaigns']['prev_page_url']).'">
+										<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_attr($campaigns['campaigns']['prev_page_url']).'">
 											<span class="screen-reader-text">Previous page</span>
 											<span aria-hidden="true">‹</span>
 										</a>';
@@ -938,16 +936,16 @@ class Push_Notification_Admin{
 							$next_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
 						}else{
-							$next_html = '<a class="next-page button js_custom_pagination"  page="'.($campaigns['campaigns']['current_page']+1).'" href="'.esc_html($campaigns['campaigns']['next_page_url']).'">
+							$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['next_page_url']).'">
 											<span class="screen-reader-text">Next page</span>
 											<span aria-hidden="true">›</span>
 										</a>
-										<a class="last-page button js_custom_pagination"  page="'.($campaigns['campaigns']['current_page']+1).'" href="'.esc_html($campaigns['campaigns']['last_page_url']).'">
+										<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['last_page_url']).'">
 											<span class="screen-reader-text">Last page</span>
 											<span aria-hidden="true">»</span>
 										</a>';
 						}
-
+						// already used esc_html for $pre_html and $next_html
 						$campaigns_html.='<div class="tablenav bottom">
 								<div class="alignleft actions bulkactions">
 								</div>
@@ -965,11 +963,10 @@ class Push_Notification_Admin{
 								</div>
 								<br class="clear">
 							</div>';
-                   	          		                  
 		        $campaigns_html.='</div>';
 
-		echo $campaigns_html;die;
-			wp_die();           
+		echo $campaigns_html;
+		wp_die();           
 	}
 
 	protected function send_notification($post){
@@ -1377,6 +1374,3 @@ function pn_send_query_message(){
         }                        
            wp_die();           
 }
-
-
-
