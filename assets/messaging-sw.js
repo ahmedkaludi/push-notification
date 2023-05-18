@@ -22,7 +22,8 @@ const notificationOptions = {
 				}
 				messageCount += 1;
 				setBadge(messageCount);
-	return self.registration.showNotification(notificationTitle, notificationOptions); 
+			return self.registration.showNotification(notificationTitle, notificationOptions);
+	
 
 });
 
@@ -35,12 +36,11 @@ var primarykey = notification.data.primarykey;
 	}else{
 		clearBadge();
 	}
-console.log("Closed notification: " + primarykey);
+	console.log("Closed notification: " + primarykey);
 });
 
 self.addEventListener("notificationclick", function(e) {
 var notification = e.notification;
-var primarykey = notification.data.primarykey;
 var action = e.action;
 if (action === "close") {
   notification.close();

@@ -255,6 +255,9 @@ class Push_Notification_Frontend{
 			if(empty($os)){
 				echo json_encode(array("status"=> 503, 'message'=>'os is blank'));die;
 			}
+			if ($user_agent == 'undefined') {
+				$user_agent = $this->check_browser_type();
+			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
 			echo json_encode($response);die;
