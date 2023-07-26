@@ -153,9 +153,18 @@ class Push_Notification_Frontend{
         $auth_settings = push_notification_auth_settings();
 		$pn_Settings = push_notification_settings();
 		$messageConfig = '';
+		$pn_token_exists = 1;
         if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
         	$messageConfig = json_decode($auth_settings['messageManager'], true);
         }
+		$pn_current_user_id=get_current_user_id()?get_current_user_id():0;
+		if($pn_current_user_id>0){
+			$pn_user_token = get_user_meta($pn_current_user_id, 'pnwoo_notification_token',true);
+			if(!$pn_user_token || (is_array($pn_user_token) && empty($pn_user_token)))
+			{
+				$pn_token_exists=0;
+			}
+		}
         $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
 					'pn_config'=> $messageConfig,
@@ -166,6 +175,7 @@ class Push_Notification_Frontend{
 					'notification_popup_show_again'=>$pn_Settings['notification_popup_show_again'],
 					'popup_show_afternseconds'=> $pn_Settings['notification_popup_show_afternseconds'],
 					'popup_show_afternpageview'=> $pn_Settings['notification_popup_show_afternpageview'],
+					'pn_token_exists' =>$pn_token_exists,
 					);
         return $settings;
 	}
@@ -577,7 +587,7 @@ class Push_Notification_Frontend{
 		if(is_object($userData) && isset($userData->ID)){
 			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
-		 	$token_ids = $token_ids? json_decode($token_ids): array();
+		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): array();
 		 	$token_ids[] = $response['data']['id'];
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}

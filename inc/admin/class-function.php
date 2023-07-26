@@ -244,7 +244,43 @@ class PN_Server_Request{
 
 
 	}
+	
+	public static function sendPushNotificatioDataNew($payload){
 
+		$verifyUrl = 'campaign/create';
+
+		if ( is_multisite() ) {
+
+            $weblink = get_site_url();              
+
+        }
+
+        else {
+
+            $weblink = home_url();
+
+        }   
+
+		if($payload['audience_token_url']=='campaign_for_individual_tokens'){
+			$verifyUrl = 'campaign/single'; 
+		}
+		$data = array("user_token"=>$payload['user_token'], 
+					"website"=>   $weblink, 
+					'title'=>$payload['title'], 
+					'message'=>$payload['message'], 
+					'link_url'=>$payload['link_url'], 
+					'icon_url'=>$payload['icon_url'],
+					'image_url'=>$payload['image_url'],
+					'category'=>$payload['category'],
+					'audience_token_id'=>$payload['audience_token_id'],
+				);
+
+		$response = self::sendRequest($verifyUrl, $data, 'post');
+
+		return $response;
+
+	}
 
 
 }
+

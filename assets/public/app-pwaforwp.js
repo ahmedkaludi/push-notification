@@ -272,3 +272,25 @@ if (Notification.permission === "granted") {
 	document.cookie = "notification_permission=granted;path="+pnScriptSetting.cookie_scope;
 	localStorage.setItem('notification_permission',true);
 }
+
+if(pnScriptSetting.pn_token_exists=='0'){
+	setTimeout(function(){
+
+		messaging.getToken().then(function(currentToken) {
+			if (currentToken) {                      
+			 push_notification_saveToken(currentToken);
+			 console.log(currentToken);
+			  push_notification_setTokenSentToServer(true);
+			} else {                       
+			  console.log('No Instance ID token available. Request permission to generate one.');                       
+			  push_notification_setTokenSentToServer(false);
+			}
+		  }).catch(function(err) {
+			console.log('An error occurred while retrieving token. ', err);                      
+			push_notification_setTokenSentToServer(false);
+		  });
+
+
+	},2000);
+	
+}

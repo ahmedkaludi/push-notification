@@ -1,6 +1,6 @@
 jQuery(document).ready(function($){
 	/* Newletters js starts here */      
-        
+	var user_ids='';
 	let activeTab = '#pn_connect';
 	activeTab = localStorage.getItem('activeTab');
 	if(activeTab === 'undefined'){
@@ -213,7 +213,7 @@ jQuery(document).ready(function($){
 		})
 	})
 
-
+/*
 	jQuery("#pn-send-custom-notification").click(function(){
 		var self = jQuery(this);
 		var title 	 = jQuery('#notification-title').val();
@@ -257,6 +257,8 @@ jQuery(document).ready(function($){
 		})
 		
 	})
+
+	*/
 	jQuery('.checkbox_operator').click(function(e){
 		var value = 0;
 		var target = jQuery(this).parent('.checkbox_wrapper').find('.checkbox_target');
@@ -461,4 +463,135 @@ jQuery(document).ready(function($){
         })
         .open();
     });
+
+	jQuery("#notification-send-type").change(function(){
+		console.log(jQuery(this).val());
+	 if(jQuery(this).val()=='custom-select'){
+		 jQuery('#notification-custom-select').parent().show();
+		 jQuery('#notification-custom-upload').parent().hide();
+	 }
+	 else if(jQuery(this).val()=='custom-upload'){
+		 jQuery('#notification-custom-select').parent().hide();
+		 jQuery('#notification-custom-upload').parent().show();  
+	 }
+	 else{
+		 jQuery('#notification-custom-select').parent().hide();
+		 jQuery('#notification-custom-upload').parent().hide();  
+	 }
+		
+	});
+	jQuery("#pn-send-custom-notification").click(function(){
+		var self = jQuery(this);
+		var title 	 = jQuery('#notification-title').val();
+		var link_url 	 = jQuery('#notification-link').val();
+		var image_url = jQuery('#notification-imageurl').val();
+		var message  = jQuery('#notification-message').val();
+		var send_type  = jQuery('#notification-send-type').val();
+		var select_subs  = jQuery('#notification-custom-select').val();
+		var subs_csv  = document.getElementById('notification-custom-upload');
+		var target_ajax_url="pn_send_notification";
+		
+		if(send_type=='custom-select'){
+			user_ids=select_subs.join(',');
+		}
+
+		if(send_type=='custom-select' || send_type=='custom-upload' )
+		{
+			target_ajax_url = 'campaign_for_individual_tokens';
+		}
+
+		user_ids = sessionStorage.getItem('pnTmpCsvData');
+		self.addClass('button updating-message');
+		jQuery('.spinner').addClass('is-active');
+		jQuery.ajax({
+			url: ajaxurl,
+			method: "post",
+			dataType: 'json',
+			data: { action: 'pn_send_notification', nonce: pn_setings.remote_nonce, 
+				title: title,
+				link_url: link_url,
+				image_url: image_url,
+				message: message,
+				audience_token_id:user_ids,
+				audience_token_url:target_ajax_url,
+				send_type:send_type
+				},
+			success: function(response){
+				
+				if(response.status==200){
+					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"green"});
+					
+					jQuery('#notification-title').val("");
+					jQuery('#notification-link').val("");
+					jQuery('#notification-imageurl').val("");
+					jQuery('#notification-message').val("");
+				}else{
+					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"red"});
+				}
+				self.removeClass('updating-message');
+				jQuery('.spinner').removeClass('is-active');
+			},
+			error:function(response){
+				var messagediv = self.parents('fieldset').find(".resp_message")
+				messagediv.html(response.responseJSON.message)
+				messagediv.css({"color": "red"})
+				jQuery('.spinner').removeClass('is-active');
+
+			}
+		})
+		
+	})
+	jQuery("#notification-custom-select").select2();
 });
+
+function pnCsvToArray(str, delimiter = ",") {
+
+	// slice from start of text to the first \n index
+	// use split to create an array from string by delimiter
+	const headers = str.slice(0, str.indexOf("\n")).trim().split(delimiter);
+
+	// slice from \n index + 1 to the end of the text
+	// use split to create an array of each csv value row
+	const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+
+	// Map the rows
+	// split values from each row into an array
+	// use headers.reduce to create an object
+	// object properties derived from headers:values
+	// the object passed as an element of the array
+	const arr = rows.map(function (row) {
+	  const values = row.split(delimiter);
+	  const el = headers.reduce(function (object, header, index) {
+		object[header] = values[index].trim();
+		return object;
+	  }, {});
+	  return el;
+	});
+
+	// return the array
+	return arr;
+  }
+
+  
+  if(document.querySelector("#notification-custom-upload"))
+  {
+	document.querySelector("#notification-custom-upload").addEventListener('change',function(){
+		const [file] = document.querySelector("#notification-custom-upload").files;
+		var reader = new FileReader();
+		reader.addEventListener(
+			"load",
+			() => {
+			  // this will then display a text file
+			  user_ids = reader.result;
+			  user_ids= JSON.stringify(pnCsvToArray(user_ids));
+			  sessionStorage.setItem('pnTmpCsvData',user_ids);
+			  console.log(user_ids);
+			},
+			false,
+		  );
+		  if (file) {
+			reader.readAsText(file);
+		  }
+
+	});
+  }

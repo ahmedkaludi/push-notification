@@ -103,6 +103,9 @@ class Push_Notification_Admin{
 			wp_enqueue_media();
 			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL.'assets/main-admin-script.js', array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL.'assets/main-admin-style.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
+			wp_enqueue_style('push-notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all' );
+		    wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array(),PUSH_NOTIFICATION_PLUGIN_VERSION );
+	
 			 if ( is_multisite() ) {
 	            $link = get_site_url();              
 	        }
@@ -119,6 +122,9 @@ class Push_Notification_Admin{
 
 	        $object = apply_filters('pushnotification_localize_filter',$object, 'pn_setings');
 			wp_localize_script("push_notification_script", 'pn_setings', $object);
+			
+			
+
 		}
 	}
 
@@ -409,8 +415,9 @@ class Push_Notification_Admin{
 					<div id="dashboard_right_now" class="postbox " >
 						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
 						<div class="inside">
-							<div class="main">
-								<div class="form-group">
+							<div class="main">';
+							do_action('push_notification_pro_notifyform_before');
+							echo '<div class="form-group">
 									<label for="notification-title">'.esc_html__('Title','push-notification').'</label>
 									<input type="text" id="notification-title" class="regular-text">
 								</div>
@@ -430,7 +437,7 @@ class Push_Notification_Admin{
 									<textarea type="text" id="notification-message" class="regular-text"></textarea>
 								</div>
 								<div class="submit inline-edit-save">
-									<input type="button" class="button pn-submit-button" id="pn-send-custom-notification" value="'.esc_html__('Send Notification', 'push-notification').'"><span class="spinner"></span>
+									<input type="button" class="button pn-submit-button" id="'.apply_filters('push_notification_submit_id','pn-send-custom-notification').'" value="'.esc_html__('Send Notification', 'push-notification').'"><span class="spinner"></span>
 									<div class="pn-send-messageDiv"></div>
 								</div>
 							</div>
@@ -793,7 +800,16 @@ class Push_Notification_Admin{
 			$link_url = esc_url_raw($_POST['link_url']);
 			$image_url = esc_url_raw($_POST['image_url']);
 			$icon_url = $notification_settings['notification_icon'];
-
+			$audience_token_id = sanitize_text_field($_POST['audience_token_id']);
+			$audience_token_url = sanitize_text_field($_POST['audience_token_url']);
+			$send_type = sanitize_text_field($_POST['send_type']);
+			if($send_type=='custom-select'){
+				$audience_token_id = isset($audience_token_id)?explode(',',$audience_token_id):'';
+			}else if($send_type=='custom-upload'){
+				$audience_token_id = str_replace('\\','',$audience_token_id );
+				$audience_token_id = json_decode($audience_token_id,true);
+			}
+			
 			if(isset($notification_settings['utm_tracking_checkbox']) && $notification_settings['utm_tracking_checkbox']){
 				$utm_details = array(
 				    'utm_source'=> $notification_settings['notification_utm_source'],
@@ -806,7 +822,49 @@ class Push_Notification_Admin{
 			}
 
 			if( isset( $auth_settings['user_token'] ) ){
-				$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title,$message, $link_url, $icon_url, $image_url, '' );
+				$push_notify_token=[];
+				if(isset($audience_token_id) && !empty($audience_token_id) && is_array($audience_token_id))
+				{
+					foreach($audience_token_id as $token_id){
+						
+						if($send_type=='custom-select'){
+							$token_ids = get_user_meta($token_id, 'pnwoo_notification_token',true);
+						}else if($send_type=='custom-upload'){
+							if(!empty($token_id['email']))
+							{	
+								$user = get_user_by( 'email', trim($token_id['email']) );
+								if(!$user){
+									$user = get_user_by( 'login', trim($token_id['username']) );
+								}
+							}
+							if($user && isset($user->ID)){
+								$token_ids = get_user_meta($user->ID, 'pnwoo_notification_token',true);
+							}
+							
+						}
+						
+						if(is_array($token_ids) && !empty($token_ids)){
+							$push_notify_token = array_merge($push_notify_token,$token_ids);
+						}
+						else if($token_ids){
+							$push_notify_token[]=$token_ids;
+						}
+
+					}
+				
+				}
+				$payload =array(
+					'user_token'=>$auth_settings['user_token'],
+					'title'=>$title,
+					'message'=>$message,
+					'link_url'=>$link_url,
+					'icon_url'=>$icon_url,
+					'image_url'=>$image_url,
+					'category'=>'',
+					'audience_token_id'=>$push_notify_token,
+					'audience_token_url'=>$audience_token_url
+				);
+				$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
 				if($response){
 				 echo json_encode($response);die;
 				}else{
@@ -1016,6 +1074,11 @@ class Push_Notification_Admin{
 			    );
 			$link_url = add_query_arg( array_filter($utm_details), $link_url  );
 		}
+		$userid_arr= [];
+		$userd_ids = sanitize_text_field($_POST['user_ids']);
+			if($userd_ids){
+				$userid_arr = explode(',',$userd_ids);
+			}
 
 		$image_url = '';
 		if(has_post_thumbnail($post_id)){
@@ -1023,7 +1086,7 @@ class Push_Notification_Admin{
 		}
 		$icon_url = $push_notification_settings['notification_icon'];
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category);
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category,$userd_ids);
 		}//auth token check 	
 
 	}
@@ -1391,4 +1454,37 @@ function pn_send_query_message(){
             }            
         }                        
            wp_die();           
+}
+
+add_action('push_notification_pro_notifyform_before','push_notification_pro_notifyform_before');
+function push_notification_pro_notifyform_before(){
+	
+	echo '<div class="form-group">
+			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
+			<select id="notification-send-type" class="regular-text">
+				<option value="">All Subscribers</option>
+				<option value="custom-select">Select subscribers</option>
+				<option value="custom-upload">Upload subscribers list</option>			
+			</select>
+		  </div>';
+		  
+		  $users = get_users(array(
+			'meta_key'     => 'pnwoo_notification_token',
+		));
+
+		echo '<div class="form-group" style="display:none">
+			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
+			<select id="notification-custom-select" class="regular-text" placeholder="Select Subscribers" multiple>';
+			foreach($users as $user){
+				echo '<option value="'.$user->ID.'">('.$user->user_email.')</option>';			
+			}			
+		echo' </select>
+		  </div>';
+		  
+		echo '<div class="form-group" style="display:none">
+				<label for="notification-custom-upload">'.esc_html__('Upload subscriber list', 'push-notification').'</label>
+				<input type="file" id="notification-custom-upload" accept=".csv">
+				<p><b>Note : CSV should contain user email separated by commas ( , ) notification will be send to only emails that has subscribed to push notification <a target="_blank" href="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv"
+				>Sample CSV File</a></b></p>
+			</div>';
 }
