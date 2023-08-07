@@ -108,3 +108,20 @@ function push_notification_older_version_compatibility(){
 		}
 	}
 }
+
+
+function push_notification_pro_checker(){
+   
+	$_pro_checker      = get_transient('push_notification_pro_checker');
+
+	if(!$_pro_checker)
+	{
+		$auth_settings = push_notification_auth_settings();
+		if(!empty($auth_settings['user_token'])){
+			PN_Server_Request::getProStatus(true);
+			set_transient('push_notification_pro_checker',true,86400);
+		}
+	}      
+}
+
+add_action( 'admin_init', 'push_notification_pro_checker', 0);

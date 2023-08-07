@@ -281,6 +281,29 @@ class PN_Server_Request{
 
 	}
 
+	public static function getProStatus($fetch_from_api=false){
+
+		$auth_settings = push_notification_auth_settings();
+		if($fetch_from_api)
+		{
+			if(!empty($auth_settings['user_token']))
+			{
+				$auth_settings = self::varifyUser($auth_settings['user_token']);
+			}
+		}
+		
+		$return = 'inactive';
+		if(!empty($auth_settings['user_token']) && isset($auth_settings['token_details']['user_pro']) && isset($auth_settings['token_details']['user_pro_status']))
+		{
+			if($auth_settings['token_details']['user_pro']=='1' && $auth_settings['token_details']['user_pro_status']=='active'){
+				$return = 'active';
+			}
+		}
+
+		return $return;
+
+	}
+
 
 }
 

@@ -158,6 +158,40 @@ jQuery(document).ready(function($){
 		})
 	})
 
+	jQuery("#pn-refresh-apikey").click(function(){
+		var self = jQuery(this);
+		self.addClass('button updating-message');
+		var messagediv = self.parents('fieldset').find(".resp_message")
+		messagediv.html("");
+		jQuery.ajax({
+			url: ajaxurl,
+			method: "post",
+			dataType: 'json',
+			data: {  action: "pn_refresh_user", nonce: pn_setings.remote_nonce },
+			success: function(response){
+				
+				if(response.status==200){
+					messagediv.html(response.message);
+					messagediv.css({"color": "green"})
+
+					window.location.reload();
+				}else{
+					messagediv.html(response.message);
+					messagediv.css({"color": "red"})
+				}
+				self.removeClass('updating-message');
+			},
+			error:function(response){
+				var messagediv = self.parents('fieldset').find(".resp_message")
+				messagediv.html(response.responseJSON.message)
+				messagediv.css({"color": "red"})
+
+			}
+		})
+	})
+
+	
+
 	jQuery("#pn-remove-apikey").click(function(){
 		var self = jQuery(this);
 		self.addClass('button updating-message');
@@ -503,6 +537,20 @@ jQuery(document).ready(function($){
 		user_ids = sessionStorage.getItem('pnTmpCsvData');
 		self.addClass('button updating-message');
 		jQuery('.spinner').addClass('is-active');
+		var data_send = {};
+		data_send.title=title;
+		data_send.link_url=link_url;
+		data_send.image_url=image_url;
+		data_send.message=message;
+		if(user_ids){
+			data_send.audience_token_id=user_ids;	
+		}
+		if(target_ajax_url){
+			data_send.target_ajax_url=target_ajax_url;	
+		}
+		if(send_type){
+			data_send.send_type=send_type;	
+		}
 		jQuery.ajax({
 			url: ajaxurl,
 			method: "post",
@@ -581,7 +629,6 @@ function pnCsvToArray(str, delimiter = ",") {
 		reader.addEventListener(
 			"load",
 			() => {
-			  // this will then display a text file
 			  user_ids = reader.result;
 			  user_ids= JSON.stringify(pnCsvToArray(user_ids));
 			  sessionStorage.setItem('pnTmpCsvData',user_ids);

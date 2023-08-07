@@ -16,6 +16,7 @@ class Push_Notification_Admin{
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ) );
 
 		add_action( 'wp_ajax_pn_verify_user', array( $this, 'pn_verify_user' ) ); 
+		add_action( 'wp_ajax_pn_refresh_user', array( $this, 'pn_refresh_api_key' ) ); 
 		add_action( 'wp_ajax_pn_revoke_keys', array( $this, 'pn_revoke_keys' ) ); 
 		add_action( 'wp_ajax_pn_subscribers_data', array( $this, 'pn_subscribers_data' ) ); 
 		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 
@@ -165,8 +166,8 @@ class Push_Notification_Admin{
 					echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
 					echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
 					echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
-					if( !empty($authData['token_details']) && !empty($authData['token_details']['user_payment']) ){
-						if( (isset($authData['token_details']) && $authData['token_details']['user_payment']==1) ){
+					if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
+						if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
 							echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
 						}
 					}
@@ -600,11 +601,20 @@ class Push_Notification_Admin{
 			echo '<span class="resp_message"></span></fieldset>
 			<p>'.esc_html__('This plugin requires a free API key form PushNotification.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
 		}else{
-			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>
-				<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>
-				<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
+			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>";
+			if(PN_Server_Request::getProStatus()=='active'){
+				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('Premium API Activated', 'push-notification')."</span>";
+			}
+			else{
+				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>";
+			}
+		
+			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
-		echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Fetch Premium API', 'push-notification')."</button>";
+		if(!empty($authData['token_details']['validated']) && $authData['token_details']['validated']=='1'){
+			echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Refresh', 'push-notification')."</button>";
+		}
+
 		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete', 'push-notification')."<a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
 	}//function closed
 
@@ -748,7 +758,7 @@ class Push_Notification_Admin{
 
 		echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not identified','push-notification')));die;
 	}
-	public function notification_refresh_api_key(){
+	public function pn_refresh_api_key(){
 		$authData = push_notification_auth_settings();
 		$verifyUrl = 'validate/user';
 		if ( is_multisite() ) {
@@ -759,7 +769,7 @@ class Push_Notification_Admin{
         }    
 		$data = array("user_token"=>$authData['user_token'], "website"=>   $weblink);
 		$response = PN_Server_Request::varifyUser($authData['user_token']);
-		echo json_encode($response);
+		echo json_encode($response);die();
 	}
 	public function pn_revoke_keys(){
 		$nonce = sanitize_text_field($_POST['nonce']);
@@ -1458,7 +1468,9 @@ function pn_send_query_message(){
 
 add_action('push_notification_pro_notifyform_before','push_notification_pro_notifyform_before');
 function push_notification_pro_notifyform_before(){
-	
+	if(PN_Server_Request::getProStatus()=='inactive'){
+		return;
+	}
 	echo '<div class="form-group">
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
 			<select id="notification-send-type" class="regular-text">
