@@ -597,7 +597,7 @@ class Push_Notification_Frontend{
 		$this->header_button_css();
 		$css = ob_get_contents();
 		ob_clean();
-		echo "<style>".$css."</style>";
+		echo esc_attr("<style>".$css."</style>");
 	}
 }
 

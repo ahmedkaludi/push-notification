@@ -87,7 +87,8 @@ function push_notification_on_activate(){
  */
 function push_notification_after_activation_redirect( $plugin ) {
     if( $plugin == plugin_basename( PUSH_NOTIFICATION_PLUGIN_FILE ) ) {
-        exit( wp_redirect( admin_url( 'admin.php?page=push-notification' ) ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=push-notification' ) );
+        exit();
     }
 }
 add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );

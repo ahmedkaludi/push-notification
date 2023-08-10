@@ -163,7 +163,7 @@ class Push_Notification_Admin{
 					}else{
 						$plugin_icon_color = "#000;";
 					}
-					echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
+					echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.esc_attr($plugin_icon_color).'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
 					echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
 					echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
 					if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
@@ -1281,15 +1281,23 @@ class Push_Notification_Admin{
 			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
 		}
 		    $api_url = 'http://magazine3.company/wp-json/api/central/email/subscribe';
+			$name =  isset($_POST['name'])?$_POST['name']:'';
+			$email =  isset($_POST['name'])?$_POST['name']:'';
+			$website =  isset($_POST['name'])?$_POST['name']:'';
 		    $api_params = array(
-		        'name' => sanitize_text_field($_POST['name']),
-		        'email'=> sanitize_text_field($_POST['email']),
-		        'website'=> sanitize_text_field($_POST['website']),
+		        'name' => sanitize_text_field($name),
+		        'email'=> sanitize_text_field($email),
+		        'website'=> sanitize_text_field($website),
 		        'type'=> 'notification'
 		    );
 		    $response = wp_remote_post( $api_url, array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
-		    $response = wp_remote_retrieve_body( $response );
-		    echo $response;
+			if ( ! is_wp_error( $response ) ) {
+				$response = wp_remote_retrieve_body( $response );
+		        echo $response;
+			}else{
+				$error_message = $response->get_error_message();
+				throw new Exception( $error_message );
+			} 
 		    die;
 		
 	}
