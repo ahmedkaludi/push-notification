@@ -247,52 +247,6 @@ jQuery(document).ready(function($){
 		})
 	})
 
-/*
-	jQuery("#pn-send-custom-notification").click(function(){
-		var self = jQuery(this);
-		var title 	 = jQuery('#notification-title').val();
-		var link_url 	 = jQuery('#notification-link').val();
-		var image_url = jQuery('#notification-imageurl').val();
-		var message  = jQuery('#notification-message').val();
-		self.addClass('button updating-message');
-		jQuery('.spinner').addClass('is-active');
-		jQuery.ajax({
-			url: ajaxurl,
-			method: "post",
-			dataType: 'json',
-			data: { action: "pn_send_notification", nonce: pn_setings.remote_nonce, 
-				title: title,
-				link_url: link_url,
-				image_url: image_url,
-				message: message
-				},
-			success: function(response){
-				
-				if(response.status==200){
-					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"green"});
-					
-					jQuery('#notification-title').val("");
-					jQuery('#notification-link').val("");
-					jQuery('#notification-imageurl').val("");
-					jQuery('#notification-message').val("");
-				}else{
-					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"green"});
-				}
-				self.removeClass('updating-message');
-				jQuery('.spinner').removeClass('is-active');
-			},
-			error:function(response){
-				var messagediv = self.parents('fieldset').find(".resp_message")
-				messagediv.html(response.responseJSON.message)
-				messagediv.css({"color": "red"})
-				jQuery('.spinner').removeClass('is-active');
-
-			}
-		})
-		
-	})
-
-	*/
 	jQuery('.checkbox_operator').click(function(e){
 		var value = 0;
 		var target = jQuery(this).parent('.checkbox_wrapper').find('.checkbox_target');
@@ -533,24 +487,8 @@ jQuery(document).ready(function($){
 		{
 			target_ajax_url = 'campaign_for_individual_tokens';
 		}
-
-		user_ids = sessionStorage.getItem('pnTmpCsvData');
 		self.addClass('button updating-message');
 		jQuery('.spinner').addClass('is-active');
-		var data_send = {};
-		data_send.title=title;
-		data_send.link_url=link_url;
-		data_send.image_url=image_url;
-		data_send.message=message;
-		if(user_ids){
-			data_send.audience_token_id=user_ids;	
-		}
-		if(target_ajax_url){
-			data_send.target_ajax_url=target_ajax_url;	
-		}
-		if(send_type){
-			data_send.send_type=send_type;	
-		}
 		jQuery.ajax({
 			url: ajaxurl,
 			method: "post",

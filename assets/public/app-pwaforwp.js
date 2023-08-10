@@ -177,11 +177,11 @@ function push_notification_saveToken(currentToken){
 	var grabOs = pushnotificationFCMGetOS();
 	var browserClient = pushnotificationFCMbrowserclientDetector();
 	const optioArr = [];
-  const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
-	for (var i=0; i <=  optElm.length - 1 ; i++) {
-		optioArr.push(optElm[i].attributes.value.value);
-	}
-	var catArraystr = [...optioArr].join(',');
+	const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
+	  for (var i=0; i <=  optElm.length - 1 ; i++) {
+		  optioArr.push(optElm[i].value);
+	  }
+    var catArraystr = [...optioArr].join(',');
 	xhttp.open("POST", pnScriptSetting.ajax_url, true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');

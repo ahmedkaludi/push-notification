@@ -1,4 +1,4 @@
-var config=pnScriptSetting.pn_config;                     
+var config=pnScriptSetting.pn_config;                 
 if (!firebase.apps.length) {
 	firebase.initializeApp(config);	
 }                    		  		  	
@@ -183,6 +183,12 @@ function sendTokenToServer(currentToken) {
 
 }
 
+function pn_get_checket_cats(item, index){
+	if(item.checked){
+		pn_cat_value.push(item.checked);
+	}	
+}
+
 function push_notification_saveToken(currentToken){
   var xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
@@ -193,12 +199,17 @@ function push_notification_saveToken(currentToken){
 		console.log(this.responseText);
 	  }
 	};
-	console.log(currentToken);
+	const optioArr = [];
+	const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
+	  for (var i=0; i <=  optElm.length - 1 ; i++) {
+		  optioArr.push(optElm[i].value);
+	  }
+    var catArraystr = [...optioArr].join(',');
 	var grabOs = pushnotificationFCMGetOS();
 	var browserClient = pushnotificationFCMbrowserclientDetector();
 	xhttp.open("POST", pnScriptSetting.ajax_url, true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhttp.send('token_id='+currentToken+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
+	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
 }              
 
 
