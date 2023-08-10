@@ -177,11 +177,11 @@ function push_notification_saveToken(currentToken){
 	var grabOs = pushnotificationFCMGetOS();
 	var browserClient = pushnotificationFCMbrowserclientDetector();
 	const optioArr = [];
-  const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
-	for (var i=0; i <=  optElm.length - 1 ; i++) {
-		optioArr.push(optElm[i].attributes.value.value);
-	}
-	var catArraystr = [...optioArr].join(',');
+	const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
+	  for (var i=0; i <=  optElm.length - 1 ; i++) {
+		  optioArr.push(optElm[i].value);
+	  }
+    var catArraystr = [...optioArr].join(',');
 	xhttp.open("POST", pnScriptSetting.ajax_url, true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
@@ -271,4 +271,26 @@ var pushnotificationFCMGetOS = function() {
 if (Notification.permission === "granted") {
 	document.cookie = "notification_permission=granted;path="+pnScriptSetting.cookie_scope;
 	localStorage.setItem('notification_permission',true);
+}
+
+if(pnScriptSetting.pn_token_exists=='0'){
+	setTimeout(function(){
+
+		messaging.getToken().then(function(currentToken) {
+			if (currentToken) {                      
+			 push_notification_saveToken(currentToken);
+			 console.log(currentToken);
+			  push_notification_setTokenSentToServer(true);
+			} else {                       
+			  console.log('No Instance ID token available. Request permission to generate one.');                       
+			  push_notification_setTokenSentToServer(false);
+			}
+		  }).catch(function(err) {
+			console.log('An error occurred while retrieving token. ', err);                      
+			push_notification_setTokenSentToServer(false);
+		  });
+
+
+	},2000);
+	
 }

@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 6.2
-Stable tag: 1.27
+Tested up to: 6.3
+Stable tag: 1.28
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -49,6 +49,11 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
+= 1.28 (10 Aug 2023) =
+* Added: Feature which send custom notification to users.(Pro API) #58
+* Added: Push Notification support in Web Apps for iOS (Pro API) #56
+* Added: Category Segmentation for push notification (Pro API)
+* Improvement : Test with WordPress 6.3 and update readme.txt #60
 
 = 1.27 (17 May 2023) =
 * Added: We need to create a dashboard report in WordPress, the same as we get in the push notification. #52

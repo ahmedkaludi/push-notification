@@ -4,7 +4,7 @@ Plugin Name: Push Notification
 Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
-Version: 1.27
+Version: 1.28
 Author URI: http://pushnotifications.io/
 Text Domain: push-notification
 Domain Path: /languages
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define('PUSH_NOTIFICATION_PLUGIN_FILE',  __FILE__ );
 define('PUSH_NOTIFICATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('PUSH_NOTIFICATION_PLUGIN_URL', plugin_dir_url( __FILE__ ));
-define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.27');
+define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.27.dev.2');
 define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 /**
@@ -87,7 +87,8 @@ function push_notification_on_activate(){
  */
 function push_notification_after_activation_redirect( $plugin ) {
     if( $plugin == plugin_basename( PUSH_NOTIFICATION_PLUGIN_FILE ) ) {
-        exit( wp_redirect( admin_url( 'admin.php?page=push-notification' ) ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=push-notification' ) );
+        exit();
     }
 }
 add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
@@ -108,3 +109,20 @@ function push_notification_older_version_compatibility(){
 		}
 	}
 }
+
+
+function push_notification_pro_checker(){
+   
+	$_pro_checker      = get_transient('push_notification_pro_checker');
+
+	if(!$_pro_checker)
+	{
+		$auth_settings = push_notification_auth_settings();
+		if(!empty($auth_settings['user_token'])){
+			PN_Server_Request::getProStatus(true);
+			set_transient('push_notification_pro_checker',true,86400);
+		}
+	}      
+}
+
+add_action( 'admin_init', 'push_notification_pro_checker', 0);

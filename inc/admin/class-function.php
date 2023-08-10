@@ -244,7 +244,63 @@ class PN_Server_Request{
 
 
 	}
+	
+	public static function sendPushNotificatioDataNew($payload){
 
+		$verifyUrl = 'campaign/create';
 
+		if ( is_multisite() ) {
 
+            $weblink = get_site_url();              
+
+        }
+
+        else {
+
+            $weblink = home_url();
+
+        }   
+
+		if($payload['audience_token_url']=='campaign_for_individual_tokens'){
+			$verifyUrl = 'campaign/single'; 
+		}
+		$data = array("user_token"=>$payload['user_token'], 
+					"website"=>   $weblink, 
+					'title'=>$payload['title'], 
+					'message'=>$payload['message'], 
+					'link_url'=>$payload['link_url'], 
+					'icon_url'=>$payload['icon_url'],
+					'image_url'=>$payload['image_url'],
+					'category'=>$payload['category'],
+					'audience_token_id'=>$payload['audience_token_id'],
+				);
+
+		$response = self::sendRequest($verifyUrl, $data, 'post');
+
+		return $response;
+
+	}
+
+	public static function getProStatus($fetch_from_api=false){
+
+		$auth_settings = push_notification_auth_settings();
+		if($fetch_from_api)
+		{
+			if(!empty($auth_settings['user_token']))
+			{
+				$auth_settings = self::varifyUser($auth_settings['user_token']);
+			}
+		}
+		
+		$return = 'inactive';
+		if(!empty($auth_settings['user_token']) && isset($auth_settings['token_details']['user_pro']) && isset($auth_settings['token_details']['user_pro_status']))
+		{
+			if($auth_settings['token_details']['user_pro']=='1' && $auth_settings['token_details']['user_pro_status']=='active'){
+				$return = 'active';
+			}
+		}
+
+		return $return;
+
+	}
 }

@@ -153,9 +153,18 @@ class Push_Notification_Frontend{
         $auth_settings = push_notification_auth_settings();
 		$pn_Settings = push_notification_settings();
 		$messageConfig = '';
+		$pn_token_exists = 1;
         if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
         	$messageConfig = json_decode($auth_settings['messageManager'], true);
         }
+		$pn_current_user_id=get_current_user_id()?get_current_user_id():0;
+		if($pn_current_user_id>0){
+			$pn_user_token = get_user_meta($pn_current_user_id, 'pnwoo_notification_token',true);
+			if(!$pn_user_token || (is_array($pn_user_token) && empty($pn_user_token)))
+			{
+				$pn_token_exists=0;
+			}
+		}
         $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
 					'pn_config'=> $messageConfig,
@@ -166,6 +175,7 @@ class Push_Notification_Frontend{
 					'notification_popup_show_again'=>$pn_Settings['notification_popup_show_again'],
 					'popup_show_afternseconds'=> $pn_Settings['notification_popup_show_afternseconds'],
 					'popup_show_afternpageview'=> $pn_Settings['notification_popup_show_afternpageview'],
+					'pn_token_exists' =>$pn_token_exists,
 					);
         return $settings;
 	}
@@ -237,10 +247,13 @@ class Push_Notification_Frontend{
     }
 
     public function pn_register_subscribers(){
-		$nonce = sanitize_text_field($_POST['nonce']);
-		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
-		}else{
+
+		if(empty( $_POST['nonce'])){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
 			$token_id = sanitize_text_field($_POST['token_id']);
 			$user_agent = sanitize_text_field($_POST['user_agent']);
 			$category = sanitize_text_field($_POST['category']);
@@ -261,21 +274,23 @@ class Push_Notification_Frontend{
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
 			echo json_encode($response);die;
-		}
+		
 	}
 
 	public function pn_noteclick_subscribers(){
-		$nonce = sanitize_text_field($_POST['nonce']);
-		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
-		}else{
+		if(empty( $_POST['nonce'])){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
 			$campaign = sanitize_text_field($_POST['campaign']);
 			if(empty($campaign)){
 				echo json_encode(array("status"=> 503, 'message'=>'Campaign is blank'));die;
 			}
 			$response = PN_Server_Request::sendPushNotificatioClickData($campaign);
 			echo json_encode($response);die;
-		}
+		
 	}
 
 	public function get_the_user_ip() {
@@ -550,7 +565,7 @@ class Push_Notification_Frontend{
 							$i=0;
 			   			 		foreach ($get_all_categories as $key =>$value) {
 			   			 			if(in_array($value->name, $catArray)){
-	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$value->name.'" />'.$value->name.'</label>';
+	   			 						echo '<label for="pn_category_checkbox'.esc_attr($i).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($i).'" value="'.esc_attr($value->name).'" />'.esc_attr($value->name).'</label>';
 	   			 					}
 									$i++;
 					      		}
@@ -577,8 +592,8 @@ class Push_Notification_Frontend{
 		if(is_object($userData) && isset($userData->ID)){
 			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
-		 	$token_ids = $token_ids? json_decode($token_ids): array();
-		 	$token_ids[] = $response['data']['id'];
+		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): array();
+		 	$token_ids[] = esc_attr($response['data']['id']);
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}
 	}
@@ -587,7 +602,7 @@ class Push_Notification_Frontend{
 		$this->header_button_css();
 		$css = ob_get_contents();
 		ob_clean();
-		echo "<style>".$css."</style>";
+		echo "<style>".esc_attr($css)."</style>";
 	}
 }
 
