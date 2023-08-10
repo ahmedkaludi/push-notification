@@ -833,7 +833,7 @@ class Push_Notification_Admin{
 			$audience_token_id = isset($_POST['audience_token_id'])?$_POST['audience_token_id']:'';
 			$audience_token_id = sanitize_text_field($audience_token_id);
 			$audience_token_url = isset($_POST['audience_token_url'])?$_POST['audience_token_url']:'';
-			$audience_token_url = sanitize_text_field(audience_token_url);
+			$audience_token_url = sanitize_text_field($audience_token_url);
 			$send_type = isset($_POST['send_type'])?$_POST['send_type']:'';
 			$send_type = sanitize_text_field($send_type);
 			if($send_type=='custom-select'){
