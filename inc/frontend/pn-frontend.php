@@ -588,7 +588,7 @@ class Push_Notification_Frontend{
 			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
 		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): array();
-		 	$token_ids[] = $response['data']['id'];
+		 	$token_ids[] = esc_attr($response['data']['id']);
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}
 	}
