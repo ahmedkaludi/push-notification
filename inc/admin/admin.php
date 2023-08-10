@@ -830,9 +830,12 @@ class Push_Notification_Admin{
 			$link_url = esc_url_raw($_POST['link_url']);
 			$image_url = esc_url_raw($_POST['image_url']);
 			$icon_url = $notification_settings['notification_icon'];
-			$audience_token_id = sanitize_text_field($_POST['audience_token_id']);
-			$audience_token_url = sanitize_text_field($_POST['audience_token_url']);
-			$send_type = sanitize_text_field($_POST['send_type']);
+			$audience_token_id = isset($_POST['audience_token_id'])?$_POST['audience_token_id']:'';
+			$audience_token_id = sanitize_text_field($audience_token_id);
+			$audience_token_url = isset($_POST['audience_token_url'])?$_POST['audience_token_url']:'';
+			$audience_token_url = sanitize_text_field(audience_token_url);
+			$send_type = isset($_POST['send_type'])?$_POST['send_type']:'';
+			$send_type = sanitize_text_field($send_type);
 			if($send_type=='custom-select'){
 				$audience_token_id = isset($audience_token_id)?explode(',',$audience_token_id):'';
 			}else if($send_type=='custom-upload'){
@@ -1102,7 +1105,8 @@ class Push_Notification_Admin{
 			$link_url = add_query_arg( array_filter($utm_details), $link_url  );
 		}
 		$userid_arr= [];
-		$userd_ids = sanitize_text_field($_POST['user_ids']);
+		$userd_ids = isset($_POST['user_ids'])?$_POST['user_ids']:'';
+		$userd_ids = sanitize_text_field($userd_ids);
 			if($userd_ids){
 				$userid_arr = explode(',',$userd_ids);
 			}
