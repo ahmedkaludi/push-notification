@@ -43,4 +43,3 @@ class Push_Notification_Newsletter {
        
 }
 $push_notification_newsletter = new Push_Notification_Newsletter();
-?>

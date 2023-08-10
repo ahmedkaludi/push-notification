@@ -303,7 +303,4 @@ class PN_Server_Request{
 		return $return;
 
 	}
-
-
 }
-

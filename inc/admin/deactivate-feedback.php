@@ -22,12 +22,12 @@ shuffle($reasons);
 	    <ul>
                 <?php 
                 foreach ($reasons as $reason){
-                    echo $reason;
+                    echo esc_attr($reason);
                 }
                 ?>
 	    </ul>
 	    <?php if ($email) : ?>
-    	    <input type="hidden" name="pn_disable_from" value="<?php echo $email; ?>"/>
+    	    <input type="hidden" name="pn_disable_from" value="<?php echo esc_attr($email); ?>"/>
 	    <?php endif; ?>
 	    <input id="pn-reloaded-feedback-submit" class="button button-primary" type="submit" name="pn_disable_submit" value="<?php echo esc_html__('Submit & Deactivate', 'push-notification'); ?>"/>
 	    <a class="button"><?php echo esc_html__('Only Deactivate', 'push-notification'); ?></a>

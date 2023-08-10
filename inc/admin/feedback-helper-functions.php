@@ -111,5 +111,3 @@ function pn_enqueue_makebetter_email_js(){
 if( is_admin() && pn_is_plugins_page()) {
     add_filter('admin_footer', 'pn_add_deactivation_feedback_modal');
 }
-
-

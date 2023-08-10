@@ -41,7 +41,7 @@ class PN_Ultimate_Member{
 		$token_ids = array_filter($token_ids);
 		$token_ids = array_unique($token_ids);
 
-		$title = sanitize_text_field(esc_html__('you have new message', 'push-notification') );
+		$title = esc_html__('you have new message', 'push-notification');
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($content), true), 20);
 		$link_url = esc_url_raw( get_home_url() );
 		if(isset($push_notification_settings['utm_tracking_checkbox']) && $push_notification_settings['utm_tracking_checkbox']){

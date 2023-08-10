@@ -480,7 +480,7 @@ class Push_Notification_Frontend{
 		    z-index:99999;
 		    text-align: left;
 		    position: fixed;
-		    '.$cssPosition.'
+		    '.esc_attr($cssPosition).'
 		}
 .pn-wrapper .pn-txt-wrap {
     display: flex;
@@ -560,7 +560,7 @@ class Push_Notification_Frontend{
 							$i=0;
 			   			 		foreach ($get_all_categories as $key =>$value) {
 			   			 			if(in_array($value->name, $catArray)){
-	   			 						echo '<label for="pn_category_checkbox'.$i.'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.$i.'" value="'.$value->name.'" />'.$value->name.'</label>';
+	   			 						echo '<label for="pn_category_checkbox'.esc_attr($i).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($i).'" value="'.esc_attr($value->name).'" />'.esc_attr($value->name).'</label>';
 	   			 					}
 									$i++;
 					      		}
