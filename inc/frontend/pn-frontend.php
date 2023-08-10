@@ -247,10 +247,13 @@ class Push_Notification_Frontend{
     }
 
     public function pn_register_subscribers(){
-		$nonce = sanitize_text_field($_POST['nonce']);
-		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
-		}else{
+
+		if(empty( $_POST['nonce'])){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
 			$token_id = sanitize_text_field($_POST['token_id']);
 			$user_agent = sanitize_text_field($_POST['user_agent']);
 			$category = sanitize_text_field($_POST['category']);
@@ -271,21 +274,23 @@ class Push_Notification_Frontend{
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
 			echo json_encode($response);die;
-		}
+		
 	}
 
 	public function pn_noteclick_subscribers(){
-		$nonce = sanitize_text_field($_POST['nonce']);
-		if( !wp_verify_nonce($nonce, 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>'Request not authorized'));die;
-		}else{
+		if(empty( $_POST['nonce'])){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+		}
 			$campaign = sanitize_text_field($_POST['campaign']);
 			if(empty($campaign)){
 				echo json_encode(array("status"=> 503, 'message'=>'Campaign is blank'));die;
 			}
 			$response = PN_Server_Request::sendPushNotificatioClickData($campaign);
 			echo json_encode($response);die;
-		}
+		
 	}
 
 	public function get_the_user_ip() {
@@ -480,7 +485,7 @@ class Push_Notification_Frontend{
 		    z-index:99999;
 		    text-align: left;
 		    position: fixed;
-		    '.esc_attr($cssPosition).'
+		    '.$cssPosition.'
 		}
 .pn-wrapper .pn-txt-wrap {
     display: flex;
