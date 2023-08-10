@@ -53,6 +53,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 * Added: Feature which send custom notification to users.(Pro API) #58
 * Added: Push Notification support in Web Apps for iOS (Pro API) #56
 * Added: Category Segmentation for push notification (Pro API)
+* Improvement : Test with WordPress 6.3 and update readme.txt #60
 
 = 1.27 (17 May 2023) =
 * Added: We need to create a dashboard report in WordPress, the same as we get in the push notification. #52
