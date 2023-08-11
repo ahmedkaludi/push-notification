@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.3
-Stable tag: 1.28
+Stable tag: 1.28.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.28.1 (11 Aug 2023) =
+* Bug Fixed: Fixed an escaping issue.
 
 = 1.28 (10 Aug 2023) =
 * Added: Feature which send custom notification to users.(Pro API) #58
