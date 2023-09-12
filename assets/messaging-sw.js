@@ -6,6 +6,7 @@ var config=pnScriptSetting.pn_config;
 if (!firebase.apps.length) {firebase.initializeApp(config);}		  		  		  
 const messaging = firebase.messaging();
 var messageCount = 0;
+var unreadCount = 0;
 
 messaging.setBackgroundMessageHandler(function(payload) {  
 const notificationTitle = payload.data.title;
@@ -31,6 +32,7 @@ self.addEventListener("notificationclose", function(e) {
 var notification = e.notification;
 var primarykey = notification.data.primarykey;
 	messageCount -= 1;
+	unreadCount -= 1;
 	if(messageCount>0){
 		setBadge(messageCount);
 	}else{
@@ -49,6 +51,7 @@ if (action === "close") {
   notification.close();
 }
 	messageCount -= 1;
+	unreadCount -= 1;
 	if(messageCount>0){
 		setBadge(messageCount);
 	}else{
@@ -77,3 +80,15 @@ function clearBadge() {
     window.ExperimentalBadge.clear();
   }
 }
+
+self.addEventListener("push", (event) => {
+	unreadCount += 1;
+	// Set or clear the badge.
+	if (navigator.setAppBadge) {
+		if (unreadCount && unreadCount > 0) {
+			navigator.setAppBadge(unreadCount);
+		} else {
+			navigator.clearAppBadge();
+		}
+	}
+});
