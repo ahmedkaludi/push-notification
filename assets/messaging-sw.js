@@ -33,7 +33,7 @@ var notification = e.notification;
 var primarykey = notification.data.primarykey;
 	messageCount -= 1;
 	unreadCount -= 1;
-	if(messageCount>0){
+	if(messageCount>0 && unreadCount > 0){
 		setBadge(messageCount);
 	}else{
 		clearBadge();
@@ -52,7 +52,7 @@ if (action === "close") {
 }
 	messageCount -= 1;
 	unreadCount -= 1;
-	if(messageCount>0){
+	if(messageCount>0 && unreadCount > 0){
 		setBadge(messageCount);
 	}else{
 		clearBadge();
