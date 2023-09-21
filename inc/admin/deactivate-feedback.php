@@ -22,7 +22,7 @@ shuffle($reasons);
 	    <ul>
                 <?php 
                 foreach ($reasons as $reason){
-                    echo esc_attr($reason);
+                    echo $reason;
                 }
                 ?>
 	    </ul>
