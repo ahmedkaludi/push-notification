@@ -126,3 +126,6 @@ function push_notification_pro_checker(){
 }
 
 add_action( 'admin_init', 'push_notification_pro_checker', 0);
+
+
+var_dump(home_url('?amp'));

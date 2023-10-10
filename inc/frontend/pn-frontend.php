@@ -33,6 +33,11 @@ class Push_Notification_Frontend{
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
 				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
 			}
+		}elseif(function_exists('superpwa_addons_status')){
+			add_filter( 'superpwa_manifest', array($this, 'manifest_add_gcm_id') );
+			add_action("wp_enqueue_scripts", array($this, 'superpwa_enqueue_pn_scripts'), 34 );
+			add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+			add_filter( "superpwa_sw_template", array($this, 'superpwa_add_pn_swcode'),10,1);
 		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){
 			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
 			//add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
@@ -201,14 +206,22 @@ class Push_Notification_Frontend{
 		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
 		wp_add_inline_script('pn-script-analytics', $data, 'after');
-
-		
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
 		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
 	}
 
+	
+	public function superpwa_enqueue_pn_scripts(){
+		wp_enqueue_script('pn-script-app-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js', array(), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-analytics', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/analytics.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
+		wp_add_inline_script('pn-script-analytics', $data, 'after');
+		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app-pwaforwp.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		$settings = $this->json_settings();
+		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
+	}
 	public function manifest_add_homescreen(){
 		echo '<link rel="manifest" href="'. esc_url( $this->urls_https( rest_url( 'push-notification/v2/pn-manifest-json' ) ) ).'">';
 	}
@@ -603,6 +616,17 @@ class Push_Notification_Frontend{
 		$css = ob_get_contents();
 		ob_clean();
 		echo "<style>".esc_attr($css)."</style>";
+	}
+/*
+
+*/
+	public function superpwa_add_pn_swcode($swJsContent)
+	{
+			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
+			$settings = $this->json_settings();
+			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+			$swJsContent .= PHP_EOL.$messageSw;
+		    return $swJsContent;
 	}
 }
 

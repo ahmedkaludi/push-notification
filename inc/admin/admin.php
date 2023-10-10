@@ -14,7 +14,6 @@ class Push_Notification_Admin{
 		add_action( 'admin_menu', array( $this, 'add_menu_links') );
 		add_action( 'admin_init', array( $this, 'settings_init') );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ) );
-
 		add_action( 'wp_ajax_pn_verify_user', array( $this, 'pn_verify_user' ) ); 
 		add_action( 'wp_ajax_pn_refresh_user', array( $this, 'pn_refresh_api_key' ) ); 
 		add_action( 'wp_ajax_pn_revoke_keys', array( $this, 'pn_revoke_keys' ) ); 
@@ -43,7 +42,6 @@ class Push_Notification_Admin{
 			}
 		}
 	}
-
 	/*
 	* This function will Messaging functions in service worker
 	* 
@@ -60,7 +58,7 @@ class Push_Notification_Admin{
 	function add_pn_config($firebaseconfig){
     	$firebaseconfig   = 'var config = pnScriptSetting.pn_config;'
                             .'if (!firebase.apps.length) {firebase.initializeApp(config);}  
-                            if(!messaging){const messaging = firebase.messaging;}';
+                            if(!messaging){const messaging = firebase.messaging();}';
     	return $firebaseconfig;
   	}
 
@@ -1461,7 +1459,7 @@ class PN_Field_Generator{
 		?>
 		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>"><?php echo esc_html__($name) ?></button>
 	<?php
-	} 	
+	}  
 }
 function pn_send_query_message(){   
 	if(empty( $_POST['nonce'])){
