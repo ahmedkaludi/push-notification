@@ -1075,7 +1075,7 @@ class Push_Notification_Admin{
 
 	protected function send_notification($post){
 		$post_id = $post->ID;
-		$post_content = $post->post_content;
+		$post_content = get_the_excerpt($post->ID);
 		$post_title = $post->post_title;
 		$auth_settings = push_notification_auth_settings();
 		$push_notification_settings = push_notification_settings();
@@ -1090,6 +1090,7 @@ class Push_Notification_Admin{
 		} else{
 			$category = '';
 		}
+		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$link_url = esc_url_raw(get_permalink( $post_id ));
 		if(isset($push_notification_settings['utm_tracking_checkbox']) && $push_notification_settings['utm_tracking_checkbox']){

@@ -138,6 +138,14 @@ function pushnotification_load_messaging(){
 			  notification.close();
 			  }
 	  });
+
+	  if (navigator.clearAppBadge) {
+		navigator.clearAppBadge();
+	  } else if (navigator.clearExperimentalAppBadge) {
+		navigator.clearExperimentalAppBadge();
+	  } else if (window.ExperimentalBadge) {
+		window.ExperimentalBadge.clear();
+	  }
   }
   
   function push_notification_getRegToken(argument){
