@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.3
-Stable tag: 1.29
+Stable tag: 1.30
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -48,6 +48,10 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.30 (18 October 2023) =
+* Added: Added Notification badge on the PWA icon #212.
+* Bug Fixed: Push notification is not working on IOS. #468
 
 = 1.29 (14 September 2023) =
 * Added: Need to add support to display badge on mobile PWA icon #821.
