@@ -161,16 +161,18 @@ class Push_Notification_Admin{
 					}else{
 						$plugin_icon_color = "#000;";
 					}
-					echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
-					echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
-					echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
-					if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
-						if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
-							echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+					if(isset($authData['token_details']['validated']) && $authData['token_details']['validated']==1){
+						echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
+						if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
+							if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
+								echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+							}
 						}
+						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaings','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
-					echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaings','push-notification') . '</a>';
-					echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					?>
 				</h2>
 			</div>
@@ -184,7 +186,6 @@ class Push_Notification_Admin{
 							echo "<div id='pn_connect' class='pn-tabs'>";
 								do_settings_sections( 'push_notification_dashboard_section' );	// Page slug
 							echo "</div>";
-							$authData = push_notification_auth_settings();
 							if(isset($authData['token_details']['validated']) && $authData['token_details']['validated']==1){
 								$this->shownotificationData();
 							}
