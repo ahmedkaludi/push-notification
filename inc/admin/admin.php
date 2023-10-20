@@ -591,7 +591,6 @@ class Push_Notification_Admin{
 
 	public function pn_key_validate_status_callback(){
 		$authData = push_notification_auth_settings();
-		// var_dump($authData); die;
 		if( !isset($authData['token_details']['validated']) 
 			|| (isset($authData['token_details']) && $authData['token_details']['validated']!=1) ){
 			echo "<fieldset>";
