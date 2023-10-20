@@ -144,6 +144,12 @@ class Push_Notification_Admin{
 	                'push-notification',
 	                array($this, 'admin_interface_render')
 	            );
+
+			if(PN_Server_Request::getProStatus() != 'active'){
+				global $submenu;
+				$permalink = 'javasctipt:void(0);';
+				$submenu['push-notification'][] = array( '<div style="color:#fff176;" onclick="window.open(\'https://pushnotifications.io/pricing\')">'.esc_html__( 'Upgrade To Premium', 'push-notification' ).'</div>', 'manage_options', $permalink);
+			}
 	}
 	function admin_interface_render(){
 		// Authentication
