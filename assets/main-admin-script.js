@@ -512,6 +512,17 @@ jQuery(document).ready(function($){
 					jQuery('#notification-imageurl').val("");
 					jQuery('#notification-message').val("");
 				}else{
+					jQuery.each(response.response, function( key, value ) {						
+						if (key == 'title') {
+							jQuery("#notification-title").after('<p style="color:red">The title field is required</p>');
+						}
+						if (key == 'message') {
+							jQuery("#notification-message").after('<p style="color:red">The message field is required</p>');
+						}
+						if (key == 'link_url') {
+							jQuery("#notification-link").after('<p style="color:red">The link url field is required</p>');
+						}
+					})
 					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"red"});
 				}
 				self.removeClass('updating-message');
