@@ -591,6 +591,7 @@ class Push_Notification_Admin{
 
 	public function pn_key_validate_status_callback(){
 		$authData = push_notification_auth_settings();
+		// var_dump($authData); die;
 		if( !isset($authData['token_details']['validated']) 
 			|| (isset($authData['token_details']) && $authData['token_details']['validated']!=1) ){
 			echo "<fieldset>";
@@ -602,12 +603,22 @@ class Push_Notification_Admin{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>";
 			if(PN_Server_Request::getProStatus()=='active'){
 				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('Premium API Activated', 'push-notification')."</span>";
+				echo "<div><b>".esc_html__('Plan Type : ', 'push-notification')."</b>";
+				if(isset($authData['token_details']['plan'])){
+					echo $authData['token_details']['plan'];
+				}
+				echo "</div><br/>";
+				echo "<div><b>".esc_html__('Plan Expiry Date : ', 'push-notification')."</b>";
+				if(isset($authData['token_details']['plan_end_date'])){
+					echo $authData['token_details']['plan_end_date'];
+				}
+				echo "</div><br/>";
 			}
 			else{
-				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>";
+				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span><br/><br/>";				
 			}
 		
-			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
+			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' >".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
 		if(!empty($authData['token_details']['validated']) && $authData['token_details']['validated']=='1'){
 			echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Refresh', 'push-notification')."</button>";
