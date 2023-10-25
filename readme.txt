@@ -21,6 +21,11 @@ Send push notifications automatically when a post is published or updated. You c
 * Publishing a post will trigger push notifications.
 * Update a post a draft will not trigger push notifications.
 
+= Pro Features: =
+* Send Notification as per Segmentation
+* Send Notification as per Categories
+* Send notification to iOS users
+
 * <strong>Continuous Development</strong>: We will be working hard to continuously develop this Push Notification solution and release updates constantly so that your forms can continue to work flawlessly.
 * Dashboard System Status which helps you understand the setup status of the Push Notification.
 * More Push Notification Features Coming soon.
