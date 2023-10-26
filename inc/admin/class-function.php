@@ -303,4 +303,10 @@ class PN_Server_Request{
 		return $return;
 
 	}
+
+	public static function pnSendPushNotificatioinFilter($payload){
+		$verifyUrl = 'campaign/pn_send_push_filter';
+		$response = self::sendRequest($verifyUrl, $payload, 'post');
+		return $response;
+	}
 }

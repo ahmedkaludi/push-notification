@@ -126,3 +126,48 @@ function push_notification_pro_checker(){
 }
 
 add_action( 'admin_init', 'push_notification_pro_checker', 0);
+
+
+/* 
+Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
+ 
+$user_id => your meta_user_id required
+$title => Message title required
+$link_url => your website url required
+$message => text message required
+$image_url => png image link url optional
+$icon_url => icon link url optional
+
+*/
+
+function pn_send_push_notificatioin_filter($user_id=null, $title="", $message="", $link_url="", $icon_url="", $image_url=""){
+	if (!empty($user_id) && !empty($title) && !empty($message) && !empty($link_url)) {
+		$verifyUrl = 'campaign/pn_send_push_filter';
+		$audience_token_id = get_user_meta($user_id, 'pnwoo_notification_token',true);
+		if ( is_multisite() ) {
+			$weblink = get_site_url();
+		}else{
+			$weblink = home_url();
+		}
+		$auth_settings = push_notification_auth_settings();
+		if( isset($auth_settings['user_token']) && isset($audience_token_id[0]) ){
+			$data = array(
+						"user_token"		=>$auth_settings['user_token'],
+						"audience_token_id"	=>$audience_token_id[0],
+						"website"	=>$weblink,
+						'title'		=>$title,
+						'message'	=>$message,
+						'link_url'	=>$link_url,
+						'icon_url'	=>$icon_url,
+						'image_url'	=>$image_url
+					);		
+			$response = PN_Server_Request::pnSendPushNotificatioinFilter($data);
+		}
+	}else{
+		$response['status'] = false;
+		$response['message'] = 'User id, title, link_url and message field are required';
+	}
+	return $response;
+
+}
+add_filter( 'admin_init', 'pn_send_push_notificatioin_filter', 6);
