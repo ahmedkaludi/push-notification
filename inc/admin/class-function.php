@@ -277,6 +277,9 @@ class PN_Server_Request{
 					'image_url'=>$payload['image_url'],
 					'category'=>$payload['category'],
 					'audience_token_id'=>$payload['audience_token_id'],
+					'notification_schedule'=>$payload['notification_schedule'],
+					'notification_time'=>$payload['notification_time'],
+					'notification_date'=>$payload['notification_date'],
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
