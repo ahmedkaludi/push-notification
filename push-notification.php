@@ -165,9 +165,7 @@ function pn_send_push_notificatioin_filter($user_id=null, $title="", $message=""
 		}
 	}else{
 		$response['status'] = false;
-		$response['message'] = 'User id, title, link_url and message field are required';
+		$response['message'] = esc_html__('User id, title, link_url and message field are required','push-notification');
 	}
 	return $response;
-
 }
-add_filter( 'admin_init', 'pn_send_push_notificatioin_filter', 6);

@@ -849,12 +849,13 @@ class Push_Notification_Admin{
 			$audience_token_id = sanitize_text_field($audience_token_id);
 			$audience_token_url = isset($_POST['audience_token_url'])?$_POST['audience_token_url']:'';
 			$audience_token_url = sanitize_text_field($audience_token_url);
-			$send_type = isset($_POST['send_type'])?$_POST['send_type']:'';
-			$send_type = sanitize_text_field($send_type);
-			$notification_schedule = isset($_POST['notification_schedule'])?$_POST['notification_schedule']:'';
-			$notification_schedule = sanitize_text_field($notification_schedule);
-			$notification_date = isset($_POST['notification_date'])?$_POST['notification_date']:'';
-			$notification_time = isset($_POST['notification_time'])?$_POST['notification_time']:'';
+			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
+
+			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field($_POST['notification_schedule']):'';
+
+			$notification_date = isset($_POST['notification_date'])?sanitize_text_field($_POST['notification_date']):'';
+
+			$notification_time = isset($_POST['notification_time'])?sanitize_text_field($_POST['notification_time']):'';
 			if($send_type=='custom-select'){
 				$audience_token_id = isset($audience_token_id)?explode(',',$audience_token_id):'';
 			}else if($send_type=='custom-upload'){
@@ -1545,7 +1546,7 @@ function push_notification_pro_notifyform_before(){
 		  $users = get_users(array(
 			'meta_key'     => 'pnwoo_notification_token',
 		));
-		$today_date = date('Y-m-d');
+		$today_date = date('Y-m-d', strtotime("+1 day"));
 
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
@@ -1572,7 +1573,7 @@ function push_notification_pro_notifyform_before(){
 			</div>';
 		echo '<div class="form-group" style="display:none" >
 			<label for="notification-date">'.esc_html__('Schedule Date Time', 'push-notification').'</label>
-			<input class="regular-text" type="date" id="notification-date" min="'.$today_date.'">
+			<input class="regular-text" type="date" id="notification-date" min="'.esc_attr($today_date).'">
 			<input type="time" id="notification-time">
 		</div>';
 
