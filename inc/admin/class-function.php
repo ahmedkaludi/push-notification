@@ -213,23 +213,27 @@ class PN_Server_Request{
 
 	protected static function sendRequest($suffixUrl, $data, $method="post"){
 
-
-
 		if($method==='post'){
-
 				$url = self::$notificationServerUrl.$suffixUrl;
 
 				$postdata = array('body'=> $data);
 
 				$remoteResponse = wp_remote_post($url, $postdata);
-
 		}
 
-		// print_r($remoteResponse);
-
 		if( is_wp_error( $remoteResponse ) ){
-
-			$remoteData = array('status'=>401, "response"=>"could not connect to server");
+			if(!empty($remoteResponse->get_error_message()) ) {       
+				$error_message = strtolower($remoteResponse->get_error_message());
+				$error_pos = strpos($error_message, 'operation timed out');
+				if($error_pos !== false){
+					$message = __('Request timed out, please try again');
+				}else{
+					$message = esc_html($remoteResponse->get_error_message());
+				}
+			}else{
+				$message = "could not connect to server";
+			}
+			$remoteData = array('status'=>401, "response"=>$message);
 
 		}else{
 
@@ -273,6 +277,9 @@ class PN_Server_Request{
 					'image_url'=>$payload['image_url'],
 					'category'=>$payload['category'],
 					'audience_token_id'=>$payload['audience_token_id'],
+					'notification_schedule'=>$payload['notification_schedule'],
+					'notification_time'=>$payload['notification_time'],
+					'notification_date'=>$payload['notification_date'],
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
@@ -302,5 +309,11 @@ class PN_Server_Request{
 
 		return $return;
 
+	}
+
+	public static function pnSendPushNotificatioinFilter($payload){
+		$verifyUrl = 'campaign/pn_send_push_filter';
+		$response = self::sendRequest($verifyUrl, $payload, 'post');
+		return $response;
 	}
 }

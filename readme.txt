@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.3
-Stable tag: 1.30
+Stable tag: 1.31
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -20,6 +20,11 @@ Send push notifications automatically when a post is published or updated. You c
 * <strong>Notifications </strong>: Notifications appear as message alerts.
 * Publishing a post will trigger push notifications.
 * Update a post a draft will not trigger push notifications.
+
+= Pro Features: =
+* Send Notification as per Segmentation
+* Send Notification as per Categories
+* Send notification to iOS users
 
 * <strong>Continuous Development</strong>: We will be working hard to continuously develop this Push Notification solution and release updates constantly so that your forms can continue to work flawlessly.
 * Dashboard System Status which helps you understand the setup status of the Push Notification.
@@ -48,6 +53,11 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.31 (30 October 2023) =
+* Added: Added Option to export Users from User's section in push notification #57.
+* Added: Added a filter/ function to send a push notification to specific users. #67.
+* Added: Added an option to schedule push notifications. #64.
 
 = 1.30 (18 October 2023) =
 * Added: Added Notification badge on the PWA icon #212.

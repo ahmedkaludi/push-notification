@@ -4,7 +4,7 @@ Plugin Name: Push Notification
 Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
-Version: 1.30
+Version: 1.31
 Author URI: http://pushnotifications.io/
 Text Domain: push-notification
 Domain Path: /languages
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define('PUSH_NOTIFICATION_PLUGIN_FILE',  __FILE__ );
 define('PUSH_NOTIFICATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('PUSH_NOTIFICATION_PLUGIN_URL', plugin_dir_url( __FILE__ ));
-define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.30');
+define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.31');
 define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 /**
@@ -126,3 +126,46 @@ function push_notification_pro_checker(){
 }
 
 add_action( 'admin_init', 'push_notification_pro_checker', 0);
+
+
+/* 
+Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
+ 
+$user_id => your meta_user_id required
+$title => Message title required
+$link_url => your website url required
+$message => text message required
+$image_url => png image link url optional
+$icon_url => icon link url optional
+
+*/
+
+function pn_send_push_notificatioin_filter($user_id=null, $title="", $message="", $link_url="", $icon_url="", $image_url=""){
+	if (!empty($user_id) && !empty($title) && !empty($message) && !empty($link_url)) {
+		$verifyUrl = 'campaign/pn_send_push_filter';
+		$audience_token_id = get_user_meta($user_id, 'pnwoo_notification_token',true);
+		if ( is_multisite() ) {
+			$weblink = get_site_url();
+		}else{
+			$weblink = home_url();
+		}
+		$auth_settings = push_notification_auth_settings();
+		if( isset($auth_settings['user_token']) && isset($audience_token_id[0]) ){
+			$data = array(
+						"user_token"		=>$auth_settings['user_token'],
+						"audience_token_id"	=>$audience_token_id[0],
+						"website"	=>$weblink,
+						'title'		=>$title,
+						'message'	=>$message,
+						'link_url'	=>$link_url,
+						'icon_url'	=>$icon_url,
+						'image_url'	=>$image_url
+					);		
+			$response = PN_Server_Request::pnSendPushNotificatioinFilter($data);
+		}
+	}else{
+		$response['status'] = false;
+		$response['message'] = esc_html__('User id, title, link_url and message field are required','push-notification');
+	}
+	return $response;
+}

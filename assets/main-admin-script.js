@@ -478,6 +478,13 @@ jQuery(document).ready(function($){
 		var select_subs  = jQuery('#notification-custom-select').val();
 		var subs_csv  = document.getElementById('notification-custom-upload');
 		var target_ajax_url="pn_send_notification";
+		var notification_schedule  = jQuery('#notification-schedule').val();
+		var notification_date = null;
+		var notification_time = null;
+		if (notification_schedule == 'yes') {
+			var notification_date  = jQuery('#notification-date').val();
+			var notification_time  = jQuery('#notification-time').val();
+		}
 		
 		if(send_type=='custom-select'){
 			user_ids=select_subs.join(',');
@@ -489,6 +496,7 @@ jQuery(document).ready(function($){
 		}
 		self.addClass('button updating-message');
 		jQuery('.spinner').addClass('is-active');
+		jQuery('.js_error').html('');
 		jQuery.ajax({
 			url: ajaxurl,
 			method: "post",
@@ -500,7 +508,10 @@ jQuery(document).ready(function($){
 				message: message,
 				audience_token_id:user_ids,
 				audience_token_url:target_ajax_url,
-				send_type:send_type
+				send_type:send_type,
+				notification_schedule:notification_schedule,
+				notification_date:notification_date,
+				notification_time:notification_time,
 				},
 			success: function(response){
 				
@@ -511,7 +522,26 @@ jQuery(document).ready(function($){
 					jQuery('#notification-link').val("");
 					jQuery('#notification-imageurl').val("");
 					jQuery('#notification-message').val("");
+					jQuery('#notification-date').val();
+					jQuery('#notification-time').val();
 				}else{
+					jQuery.each(response.response, function( key, value ) {						
+						if (key == 'title') {
+							jQuery("#notification-title").after('<p class="js_error" style="color:red">The title field is required</p>');
+						}
+						if (key == 'message') {
+							jQuery("#notification-message").after('<p class="js_error" style="color:red">The message field is required</p>');
+						}
+						if (key == 'link_url') {
+							jQuery("#notification-link").after('<p class="js_error" style="color:red">The link url field is required</p>');
+						}
+						if (key == 'notification_date') {
+							jQuery("#notification-date").after('<p class="js_error" style="color:red">The notification date field is required</p>');
+						}
+						if (key == 'notification_time') {
+							jQuery("#notification-time").after('<p class="js_error" style="color:red">The notification time field is required</p>');
+						}
+					})
 					jQuery(".pn-send-messageDiv").html("&nbsp; "+response.message).css({"color":"red"});
 				}
 				self.removeClass('updating-message');
@@ -580,3 +610,11 @@ function pnCsvToArray(str, delimiter = ",") {
 
 	});
   }
+
+jQuery("#notification-schedule").change(function(){
+	if(jQuery(this).val()=='yes'){
+		jQuery('#notification-date').parent().show();
+	}else{
+		jQuery('#notification-date').parent().hide();
+	}	
+});

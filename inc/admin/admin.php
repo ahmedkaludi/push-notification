@@ -144,6 +144,12 @@ class Push_Notification_Admin{
 	                'push-notification',
 	                array($this, 'admin_interface_render')
 	            );
+
+			if(PN_Server_Request::getProStatus() != 'active'){
+				global $submenu;
+				$permalink = 'javasctipt:void(0);';
+				$submenu['push-notification'][] = array( '<div style="color:#fff176;" onclick="window.open(\'https://pushnotifications.io/pricing\')">'.esc_html__( 'Upgrade To Premium', 'push-notification' ).'</div>', 'manage_options', $permalink);
+			}
 	}
 	function admin_interface_render(){
 		// Authentication
@@ -161,16 +167,18 @@ class Push_Notification_Admin{
 					}else{
 						$plugin_icon_color = "#000;";
 					}
-					echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
-					echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
-					echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
-					if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
-						if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
-							echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+					if(isset($authData['token_details']['validated']) && $authData['token_details']['validated']==1){
+						echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.$plugin_icon_color.'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
+						if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
+							if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
+								echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+							}
 						}
+						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaings','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
-					echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaings','push-notification') . '</a>';
-					echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					?>
 				</h2>
 			</div>
@@ -184,7 +192,6 @@ class Push_Notification_Admin{
 							echo "<div id='pn_connect' class='pn-tabs'>";
 								do_settings_sections( 'push_notification_dashboard_section' );	// Page slug
 							echo "</div>";
-							$authData = push_notification_auth_settings();
 							if(isset($authData['token_details']['validated']) && $authData['token_details']['validated']==1){
 								$this->shownotificationData();
 							}
@@ -595,18 +602,28 @@ class Push_Notification_Admin{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>";
 			if(PN_Server_Request::getProStatus()=='active'){
 				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('Premium API Activated', 'push-notification')."</span>";
+				echo "<div><b>".esc_html__('Plan Type : ', 'push-notification')."</b>";
+				if(isset($authData['token_details']['plan'])){
+					echo $authData['token_details']['plan'];
+				}
+				echo "</div><br/>";
+				echo "<div><b>".esc_html__('Plan Expiry Date : ', 'push-notification')."</b>";
+				if(isset($authData['token_details']['plan_end_date'])){
+					echo $authData['token_details']['plan_end_date'];
+				}
+				echo "</div><br/>";
 			}
 			else{
-				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span>";
+				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span><br/><br/>";				
 			}
 		
-			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='margin-left:10%; line-height: 1.4;'>".esc_html__('Revoke key', 'push-notification')."</button>";
+			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' >".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
 		if(!empty($authData['token_details']['validated']) && $authData['token_details']['validated']=='1'){
 			echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Refresh', 'push-notification')."</button>";
 		}
 
-		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete', 'push-notification')."<a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
+		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete ', 'push-notification')."<a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
 	}//function closed
 
 	public function user_settings_notification_icon_callback(){
@@ -832,8 +849,13 @@ class Push_Notification_Admin{
 			$audience_token_id = sanitize_text_field($audience_token_id);
 			$audience_token_url = isset($_POST['audience_token_url'])?$_POST['audience_token_url']:'';
 			$audience_token_url = sanitize_text_field($audience_token_url);
-			$send_type = isset($_POST['send_type'])?$_POST['send_type']:'';
-			$send_type = sanitize_text_field($send_type);
+			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
+
+			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field($_POST['notification_schedule']):'';
+
+			$notification_date = isset($_POST['notification_date'])?sanitize_text_field($_POST['notification_date']):'';
+
+			$notification_time = isset($_POST['notification_time'])?sanitize_text_field($_POST['notification_time']):'';
 			if($send_type=='custom-select'){
 				$audience_token_id = isset($audience_token_id)?explode(',',$audience_token_id):'';
 			}else if($send_type=='custom-upload'){
@@ -893,7 +915,10 @@ class Push_Notification_Admin{
 					'image_url'=>$image_url,
 					'category'=>'',
 					'audience_token_id'=>$push_notify_token,
-					'audience_token_url'=>$audience_token_url
+					'audience_token_url'=>$audience_token_url,
+					'notification_schedule'=>$notification_schedule,
+					'notification_time'=>$notification_time,
+					'notification_date'=>$notification_date,
 				);
 				$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
 				if($response){
@@ -1521,6 +1546,7 @@ function push_notification_pro_notifyform_before(){
 		  $users = get_users(array(
 			'meta_key'     => 'pnwoo_notification_token',
 		));
+		$today_date = date('Y-m-d', strtotime("+1 day"));
 
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
@@ -1537,4 +1563,18 @@ function push_notification_pro_notifyform_before(){
 				<p><b>Note : CSV should contain user email separated by commas ( , ) notification will be send to only emails that has subscribed to push notification <a target="_blank" href="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv"
 				>Sample CSV File</a></b></p>
 			</div>';
+
+		echo '<div class="form-group">
+				<label for="notification-schedule">'.esc_html__('Schedule Notification','push-notification').'</label>
+				<select id="notification-schedule" class="regular-text">
+					<option value="no">No</option>
+					<option value="yes">Yes</option>
+				</select>
+			</div>';
+		echo '<div class="form-group" style="display:none" >
+			<label for="notification-date">'.esc_html__('Schedule Date Time', 'push-notification').'</label>
+			<input class="regular-text" type="date" id="notification-date" min="'.esc_attr($today_date).'">
+			<input type="time" id="notification-time">
+		</div>';
+
 }
