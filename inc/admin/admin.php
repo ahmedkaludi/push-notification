@@ -1203,6 +1203,14 @@ class Push_Notification_Admin{
 			}
 		}
 
+		if (empty($token_ids)) {
+			return;
+		}else{
+			if(!is_array($token_ids)){
+				$token_ids[] = $token_ids;
+			}
+		}
+
 		$token_ids = array_filter($token_ids);
 		$token_ids = array_unique($token_ids);
 
