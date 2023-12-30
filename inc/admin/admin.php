@@ -373,7 +373,11 @@ class Push_Notification_Admin{
 
 		}
 		$subscriber_count = 0;
+		$active_count = 0;
+		$expired_count = 0;
 		if(isset($detail_settings['subscriber_count'])){ $subscriber_count = $detail_settings['subscriber_count']; }
+		if(isset($detail_settings['active_count'])){ $active_count = $detail_settings['active_count']; }
+		if(isset($detail_settings['expired_count'])){ $expired_count = $detail_settings['expired_count']; }
 		echo '<div id="pn_dashboard" style="display:none;" class="pn-tabs">
 		<section class="pn_general_wrapper">
 				<div class="action-wrapper"> '.esc_html__($updated_at, 'push-notification').' <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update">'.esc_html__('Refresh data', 'push-notification').'</button>
@@ -384,6 +388,18 @@ class Push_Notification_Admin{
 							<div class="title-name">'.esc_html__('Total Subscribers', 'push-notification').':</div>
 							<div class="desc column-description">
 								'.esc_html($subscriber_count).'
+							</div>
+						</div>
+						<div class="pn-card">
+							<div class="title-name">'.esc_html__('Active Subscribers', 'push-notification').':</div>
+							<div class="desc column-description" style="color:green;">
+								'.esc_html($active_count).'
+							</div>
+						</div>
+						<div class="pn-card">
+							<div class="title-name">'.esc_html__('Expired Subscribers', 'push-notification').':</div>
+							<div class="desc column-description" style="color:red;">
+								'.esc_html($expired_count).'
 							</div>
 						</div>
 					</div>

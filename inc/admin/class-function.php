@@ -129,6 +129,8 @@ class PN_Server_Request{
 		if($response['status']==200){
 
 			$push_notification_auth_settings['subscriber_count'] = sanitize_text_field($response['subscriber_count']);
+			$push_notification_auth_settings['active_count'] = sanitize_text_field($response['active_count']);
+			$push_notification_auth_settings['expired_count'] = sanitize_text_field($response['expired_count']);
 
 			$push_notification_auth_settings['updated_at'] = date('Y-m-d H:i:s');
 
