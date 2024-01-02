@@ -963,8 +963,9 @@ class Push_Notification_Admin{
 		}		
 
 		$send_notification = false;
+		$post_meta = $_POST;
 	
-		if(!$send_notification && isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1){
+		if(!$send_notification && isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && isset($post_meta['pn_send_notification_on_post']) && $post_meta['pn_send_notification_on_post'] == 1){
 			if ( $new_status !== $old_status) {
 			 	$this->send_notification($post);
 			}
