@@ -586,6 +586,9 @@ class Push_Notification_Admin{
                    	<h3>'.esc_html__('Ask for Technical Support', 'push-notification') .'</h3>
                    	<p>'.esc_html__('We are always available to help you with anything', 'push-notification').'</p>
 		            <ul>
+					<li>
+					<input type="text" id="pn_query_email" name="pn_query_email" placeholder="email">
+				 	</li>
 		                <li><label for="pn_help_query_customer">'.esc_html__('Are you existing Premium Customer?', 'push-notification').'</label>
 		                    <select class="regular-select" rows="5" cols="60" id="pn_help_query_customer" name="pn_help_query_customer">
 		                    	<option value="">Select</option>
@@ -1528,6 +1531,7 @@ function pn_send_query_message(){
         }
         $message    = sanitize_textarea_field($_POST['message']);        
         $customer_type    = sanitize_text_field($_POST['customer_type']);        
+        $email    = sanitize_email($_POST['email']);        
         $customer_type = empty($customer_type)? $customer_type : 'No';
         $message .= "<table>
         				<tr><td>".esc_html__('Are you existing Premium Customer?','push-notification')."</td><td>".esc_html__($customer_type, 'push-notification')."</td></tr>
@@ -1538,7 +1542,9 @@ function pn_send_query_message(){
         if($user){
             $user_data  = $user->data;        
             $user_email = $user_data->user_email;       
-            //php mailer variables
+            if($email){
+                $user_email = $email;
+            } 
             $to = esc_html__('team@magazine3.in', 'push-notification');
             $subject = esc_html__("Push Notification Customer Query", 'push-notification');
             $headers = 'From: '. esc_attr($user_email) . "\r\n" .

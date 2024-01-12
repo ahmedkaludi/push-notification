@@ -375,17 +375,24 @@ jQuery(document).ready(function($){
 		jQuery("#pn_push_segment_category_input").val(category);
 	}
 
+	function IsEmail(email) {
+        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
+	}
+
 	//Help Query
 	jQuery(".pn_help-send-query").on("click", function(e){
-	        e.preventDefault();   
+	        e.preventDefault();
+			$('.error_js').remove();   
+	        var email = jQuery("#pn_query_email").val();           
 	        var message = jQuery("#pn_help_query_message").val();           
 	        var customer = jQuery("#pn_help_query_customer").val();    
-	        if(jQuery.trim(message) !='' && customer){       
+	        if(jQuery.trim(message) !='' && customer && IsEmail(email) == true){       
 	                    jQuery.ajax({
 	                        type: "POST",    
 	                        url: ajaxurl,                    
 	                        dataType: "json",
-	                        data:{action:"pn_send_query_message", customer_type: customer, message:message, nonce: pn_setings.remote_nonce},
+	                        data:{action:"pn_send_query_message", customer_type: customer, message:message, nonce: pn_setings.remote_nonce,email:email},
 	                        success:function(response){                       
 	                          if(response['status'] =='t'){
 	                            jQuery(".pn_help-query-success").show();
@@ -400,19 +407,17 @@ jQuery(document).ready(function($){
 	                        }
 	                        });
 	        }else{
-	            if(jQuery.trim(message) =='' && customer ==''){
-	                alert('Please enter the message and select customer type');
-	            }else{
-	            
+	            if(jQuery.trim(email) ==''){
+					jQuery("#pn_query_email").after('<p  class="error_js" style="color:red;"> Pleas enter email<p/>');
+	            }else if(IsEmail(email) == false){
+					jQuery("#pn_query_email").after('<p  class="error_js" style="color:red;">Please enter a valid email<p/>');
+                }
 	            if(customer ==''){
-	                alert('Select Customer type');
+					jQuery("#pn_help_query_customer").after('<p  class="error_js" style="color:red;">Please select customer type<p/>');
 	            }
 	            if(jQuery.trim(message) == ''){
-	                alert('Please enter the message');
+					jQuery("#pn_help_query_message").after('<p  class="error_js" style="color:red;">Please enter the message<p/>');
 	            }
-	                
-	            }
-	            
 	        }                   
 	        
 	});
