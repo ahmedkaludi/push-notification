@@ -2,6 +2,10 @@
 /*
  *  Metabox displays in admin sidebar to send notification on particular post
  */
+if ( ! defined( 'ABSPATH' ) ) exit;
+if(file_exists(PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/commonFunction.php")){
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/commonFunction.php";
+}
 class PnMetaBox {
     
 	private $screen = array(
@@ -9,8 +13,9 @@ class PnMetaBox {
 	);
 	private $meta_fields = array(
 		array(
-			'label' => 'Send notification on post?',
+			'label' => 'Disable?',
 			'id'    => 'pn_send_notification_on_post',
+			'type'  => 'checkbox',
 			'type'  => 'checkbox',
 		),
 	);
@@ -19,10 +24,14 @@ class PnMetaBox {
 		add_action( 'save_post', array( $this, 'pn_save_fields' ) );
 	}
 	public function pn_add_meta_boxes() {
+		$settings = push_notification_settings();
+		if (isset($settings['posttypes']) && !empty($settings['posttypes'])) {
+			$this->screen = $settings['posttypes'];
+		}
 		foreach ( $this->screen as $single_screen ) {
 			add_meta_box(
 				'send_push_on_current_post',
-				esc_html__( 'Send push notification on current post?', 'push-notification' ),
+				esc_html__( 'Disable push notification on current post?', 'push-notification' ),
 				array( $this, 'pn_meta_box_callback' ),
 				$single_screen,
 				'side',
@@ -47,7 +56,7 @@ class PnMetaBox {
 			switch ( $meta_field['type'] ) {
                 case 'checkbox':
 					$input = sprintf(
-						'<input %s id="%s" name="% s" type="checkbox" value="1">',
+						'<input %s id="%s" name="% s" type="checkbox" value="1">'.esc_html($meta_field['label']),
 						$meta_value === '1' ? 'checked' : '',
 						esc_attr($meta_field['id']),
 						esc_attr($meta_field['id'])
@@ -65,7 +74,9 @@ class PnMetaBox {
 			}
 			$output .= $this->pn_format_rows($input );
 		}
-		echo '<table class="form-table"><tbody>' . $output . '</tbody></table>';
+		$common_function = new commonFunction();
+		$allowed_html = $common_function->pn_expanded_allowed_tags();
+		echo '<table class="form-table"><tbody>' . wp_kses($output, $allowed_html) . '</tbody></table>';
 	}
 	public function pn_format_rows($input) {
 		return '<tr><td style="padding:0px;">'.$input.'</td></tr>';
@@ -100,6 +111,7 @@ class PnMetaBox {
 			}
         }
 	}
+	
 }
 if (class_exists('PnMetaBox')) {
 	new PnMetaBox;
