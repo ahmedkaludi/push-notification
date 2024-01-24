@@ -29,6 +29,7 @@ shuffle($reasons);
 	    <?php if ($email) : ?>
     	    <input type="hidden" name="pn_disable_from" value="<?php echo esc_attr($email); ?>"/>
 	    <?php endif; ?>
+		<input type="hidden" name="nonce" value="<?php echo wp_create_nonce('push_notification_feedback'); ?>">
 	    <input id="pn-reloaded-feedback-submit" class="button button-primary" type="submit" name="pn_disable_submit" value="<?php echo esc_html__('Submit & Deactivate', 'push-notification'); ?>"/>
 	    <a class="button"><?php echo esc_html__('Only Deactivate', 'push-notification'); ?></a>
 	    <a class="pn-for-wp-feedback-not-deactivate" href="#"><?php echo esc_html__('Don\'t deactivate', 'push-notification'); ?></a>

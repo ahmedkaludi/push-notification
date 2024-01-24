@@ -56,44 +56,52 @@ function pn_add_deactivation_feedback_modal() {
  * @since 1.4.0
  */
 function pn_send_feedback() {
+    
 
     if( isset( $_POST['data'] ) ) {
         parse_str( $_POST['data'], $form );
     }
+    if(isset($form['nonce'])){
 
-    $text = '';
-    if( isset( $form['pn_disable_text'] ) ) {
-        $text = implode( "\n\r", $form['pn_disable_text'] );
+        if ( ! wp_verify_nonce( $form['nonce'], 'push_notification_feedback' ) ) {
+            die(); 
+        }
+
+        $text = '';
+        if( isset( $form['pn_disable_text'] ) ) {
+            $text = implode( "\n\r", $form['pn_disable_text'] );
+        }
+
+        $headers = array();
+
+        $from = isset( $form['pn_disable_from'] ) ? $form['pn_disable_from'] : '';
+        if( $from ) {
+            $headers[] = "From: $from";
+            $headers[] = "Reply-To: $from";
+        }
+
+        $subject = isset( $form['pn_disable_reason'] ) ? $form['pn_disable_reason'] : '(no reason given)';
+
+        $subject = $subject.' - Push Notifications';
+
+        if($subject == 'technical - Push Notifications'){
+
+            $text = trim($text);
+
+            if(!empty($text)){
+
+                $text = 'technical issue description: '.$text;
+
+            }else{
+
+                $text = 'no description: '.$text;
+            }
+        
+        }
+
+        $success = wp_mail( 'team@magazine3.in', $subject, $text, $headers );
+
     }
-
-    $headers = array();
-
-    $from = isset( $form['pn_disable_from'] ) ? $form['pn_disable_from'] : '';
-    if( $from ) {
-        $headers[] = "From: $from";
-        $headers[] = "Reply-To: $from";
-    }
-
-    $subject = isset( $form['pn_disable_reason'] ) ? $form['pn_disable_reason'] : '(no reason given)';
-
-    $subject = $subject.' - Push Notifications';
-
-    if($subject == 'technical - Push Notifications'){
-
-          $text = trim($text);
-
-          if(!empty($text)){
-
-            $text = 'technical issue description: '.$text;
-
-          }else{
-
-            $text = 'no description: '.$text;
-          }
-      
-    }
-
-    $success = wp_mail( 'team@magazine3.in', $subject, $text, $headers );
 
     die();
 }
