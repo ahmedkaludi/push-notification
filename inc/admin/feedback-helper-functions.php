@@ -33,20 +33,19 @@ function pn_is_plugins_page() {
 
 
 function pn_add_deactivation_feedback_modal() {
-    
-  
-    if( !is_admin() && !pn_is_plugins_page()) {
-        return;
-    }
 
-    $current_user = wp_get_current_user();
-    if( !($current_user instanceof WP_User) ) {
-        $email = '';
-    } else {
-        $email = trim( $current_user->user_email );
-    }
+    if( is_admin() && pn_is_plugins_page()) {
 
-    require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/deactivate-feedback.php";
+        $current_user = wp_get_current_user();
+        if( !($current_user instanceof WP_User) ) {
+            $email = '';
+        } else {
+            $email = trim( $current_user->user_email );
+        }
+
+        require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/deactivate-feedback.php";
+
+    }    
     
 }
 
@@ -113,15 +112,13 @@ add_action( 'admin_enqueue_scripts', 'pn_enqueue_makebetter_email_js' );
 
 function pn_enqueue_makebetter_email_js(){
  
-    if( !is_admin() && !pn_is_plugins_page()) {
-        return;
+    if( is_admin() && pn_is_plugins_page()) {
+
+        wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . 'assets/feedback-admin.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
+
+        wp_enqueue_style( 'pn-make-better-css', PUSH_NOTIFICATION_PLUGIN_URL . 'assets/feedback-admin.css', false , PUSH_NOTIFICATION_PLUGIN_VERSION);
+
     }
-
-    wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . 'assets/feedback-admin.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
-
-    wp_enqueue_style( 'pn-make-better-css', PUSH_NOTIFICATION_PLUGIN_URL . 'assets/feedback-admin.css', false , PUSH_NOTIFICATION_PLUGIN_VERSION);
+    
 }
-
-if( is_admin() && pn_is_plugins_page()) {
-    add_filter('admin_footer', 'pn_add_deactivation_feedback_modal');
-}
+add_filter('admin_footer', 'pn_add_deactivation_feedback_modal');
