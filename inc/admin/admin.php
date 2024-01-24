@@ -223,7 +223,7 @@ class Push_Notification_Admin{
 					 'push_notification_segment_settings_section');
 			add_settings_field(
 				'pn_key_segment_select',								// ID
-				__('<label for="pn_push_on_category_checkbox"><b>Select segmentation for notification</b></label>', 'push-notification'),// Title
+				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Select segmentation for notification', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_segment_select_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -235,7 +235,7 @@ class Push_Notification_Admin{
 			}
 			add_settings_field(
 				'pn_key_segment_on_categories',								// ID
-				__('<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>Segment on Categories</b></label>', 'push-notification'),// Title
+				'<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>'.esc_html__('Segment on Categories', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_segment_on_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
