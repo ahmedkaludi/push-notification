@@ -516,10 +516,10 @@ class Push_Notification_Admin{
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										echo number_format($rate, 2, '.', ',')."%";
-										echo "<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
+										echo "<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
 									}else{
 										echo "0%";
-										echo "<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
+										echo "<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
 									}
 									echo'</td><td>';
 									echo esc_html($clickCount);
@@ -528,7 +528,7 @@ class Push_Notification_Admin{
 								echo'</tr>';
 							}
 						}else{
-							echo'<tr><td colspan="7">No data found</td></tr>';
+							echo'<tr><td colspan="7">'.esc_html__('No data found', 'push-notification').'</td></tr>';
 						}
 						echo'</tbody></table>';
 						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['next_page_url'])) {
@@ -537,11 +537,11 @@ class Push_Notification_Admin{
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
 						}else{
 							$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($campaigns['campaigns']['first_page_url']).'">
-											<span class="screen-reader-text">First page</span>
+											<span class="screen-reader-text">'.esc_html__('First page', 'push-notification').'</span>
 											<span aria-hidden="true">«</span>
 										</a>
 										<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_attr($campaigns['campaigns']['prev_page_url']).'">
-											<span class="screen-reader-text">Previous page</span>
+											<span class="screen-reader-text">'.esc_html__('Previous page', 'push-notification').'</span>
 											<span aria-hidden="true">‹</span>
 										</a>';
 						}
@@ -550,11 +550,11 @@ class Push_Notification_Admin{
 										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
 						}else{
 							$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['next_page_url']).'">
-											<span class="screen-reader-text">Next page</span>
+											<span class="screen-reader-text">'.esc_html__('Next page', 'push-notification').'</span>
 											<span aria-hidden="true">›</span>
 										</a>
 										<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['last_page_url']).'">
-											<span class="screen-reader-text">Last page</span>
+											<span class="screen-reader-text">'.esc_html__('Last page', 'push-notification').'</span>
 											<span aria-hidden="true">»</span>
 										</a>';
 						}
@@ -565,10 +565,10 @@ class Push_Notification_Admin{
 								<div class="alignleft actions">
 								</div>
 								<div class="tablenav-pages">
-									<span class="displaying-num">'.esc_html($campaigns['campaigns']['total']).' items</span>
-									<span class="pagination-links">'.$pre_html.'<span class="screen-reader-text">Current Page</span>
+									<span class="displaying-num">'.esc_html($campaigns['campaigns']['total']).' '.esc_html__('items', 'push-notification').'</span>
+									<span class="pagination-links">'.$pre_html.'<span class="screen-reader-text">'.esc_html__('Current Page', 'push-notification').'</span>
 										<span id="table-paging" class="paging-input">
-											<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' of
+											<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' '.esc_html__('of', 'push-notification').'
 												<span class="total-pages">'.esc_html($campaigns['campaigns']['last_page']).'</span>
 											</span>
 										</span>'.$next_html.'
@@ -623,12 +623,12 @@ class Push_Notification_Admin{
 				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('Premium API Activated', 'push-notification')."</span>";
 				echo "<div><b>".esc_html__('Plan Type : ', 'push-notification')."</b>";
 				if(isset($authData['token_details']['plan'])){
-					echo $authData['token_details']['plan'];
+					echo esc_html($authData['token_details']['plan']);
 				}
 				echo "</div><br/>";
 				echo "<div><b>".esc_html__('Plan Expiry Date : ', 'push-notification')."</b>";
 				if(isset($authData['token_details']['plan_end_date'])){
-					echo $authData['token_details']['plan_end_date'];
+					echo esc_html($authData['token_details']['plan_end_date']);
 				}
 				echo "</div><br/>";
 			}
@@ -1052,10 +1052,10 @@ class Push_Notification_Admin{
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										$campaigns_html.= number_format($rate, 2, '.', ',')."%";
-										$campaigns_html.="<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
+										$campaigns_html.="<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
 									}else{
 										$campaigns_html.="0%";
-										$campaigns_html.="<br/>(Success: ".esc_html($success). "<br/> Failed: ".esc_html($failed).")";
+										$campaigns_html.="<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
 									}
 									$campaigns_html.='</td><td>';
 									$campaigns_html.=esc_html($clickCount);
@@ -1063,7 +1063,7 @@ class Push_Notification_Admin{
 								$campaigns_html.='</tr>';
 							}
 						}else{
-							$campaigns_html.='<tr><td colspan="7">No data found</td></tr>';
+							$campaigns_html.='<tr><td colspan="7">'.esc_html__('No data found', 'push-notification').'</td></tr>';
 						}
 						$campaigns_html.='</tbody></table>';
 						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data'])) {
@@ -1072,11 +1072,11 @@ class Push_Notification_Admin{
 											<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
 							}else{
 								$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($campaigns['campaigns']['first_page_url']).'">
-												<span class="screen-reader-text">First page</span>
+												<span class="screen-reader-text">'.esc_html__('First page', 'push-notification').'</span>
 												<span aria-hidden="true">«</span>
 											</a>
 											<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_attr($campaigns['campaigns']['prev_page_url']).'">
-												<span class="screen-reader-text">Previous page</span>
+												<span class="screen-reader-text">'.esc_html__('Previous page', 'push-notification').'</span>
 												<span aria-hidden="true">‹</span>
 											</a>';
 							}
@@ -1085,11 +1085,11 @@ class Push_Notification_Admin{
 											<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
 							}else{
 								$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['next_page_url']).'">
-												<span class="screen-reader-text">Next page</span>
+												<span class="screen-reader-text">'.esc_html__('Next page', 'push-notification').'</span>
 												<span aria-hidden="true">›</span>
 											</a>
 											<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['last_page_url']).'">
-												<span class="screen-reader-text">Last page</span>
+												<span class="screen-reader-text">'.esc_html__('Last page', 'push-notification').'</span>
 												<span aria-hidden="true">»</span>
 											</a>';
 							}
@@ -1103,7 +1103,7 @@ class Push_Notification_Admin{
 										<span class="displaying-num">'.esc_html($campaigns['campaigns']['total']).' items</span>
 										<span class="pagination-links">'.$pre_html.'<span class="screen-reader-text">Current Page</span>
 											<span id="table-paging" class="paging-input">
-												<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' of
+												<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' '.esc_html__('of', 'push-notification').'
 													<span class="total-pages">'.esc_html($campaigns['campaigns']['last_page']).'</span>
 												</span>
 											</span>'.$next_html.'
@@ -1535,8 +1535,8 @@ function pn_send_query_message(){
         $customer_type = empty($customer_type)? $customer_type : 'No';
         $message .= "<table>
         				<tr><td>".esc_html__('Are you existing Premium Customer?','push-notification')."</td><td>".esc_html__($customer_type, 'push-notification')."</td></tr>
-        				<tr><td>Plugin</td><td> ". esc_html__('Push Notification', 'push-notification') ."</td></tr>
-        				<tr><td>Version</td><td>".esc_html__(PUSH_NOTIFICATION_PLUGIN_VERSION, 'push-notification')."</td></tr>
+        				<tr><td>".esc_html__('Plugin','push-notification')."</td><td> ". esc_html__('Push Notification', 'push-notification') ."</td></tr>
+        				<tr><td>".esc_html__('Version','push-notification')."</td><td>".esc_html__(PUSH_NOTIFICATION_PLUGIN_VERSION, 'push-notification')."</td></tr>
         			</table>";
         $user       = wp_get_current_user();
         if($user){
@@ -1568,9 +1568,9 @@ function push_notification_pro_notifyform_before(){
 	echo '<div class="form-group">
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
 			<select id="notification-send-type" class="regular-text">
-				<option value="">All Subscribers</option>
-				<option value="custom-select">Select subscribers</option>
-				<option value="custom-upload">Upload subscribers list</option>			
+				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
+				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
+				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>			
 			</select>
 		  </div>';
 		  
@@ -1581,7 +1581,7 @@ function push_notification_pro_notifyform_before(){
 
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
-			<select id="notification-custom-select" class="regular-text" placeholder="Select Subscribers" multiple>';
+			<select id="notification-custom-select" class="regular-text" placeholder="'.esc_html__('Select Subscribers','push-notification').'" multiple>';
 			foreach($users as $user){
 				echo '<option value="'.esc_attr($user->ID).'">('.esc_attr($user->user_email).')</option>';			
 			}			
@@ -1591,15 +1591,15 @@ function push_notification_pro_notifyform_before(){
 		echo '<div class="form-group" style="display:none">
 				<label for="notification-custom-upload">'.esc_html__('Upload subscriber list', 'push-notification').'</label>
 				<input type="file" id="notification-custom-upload" accept=".csv">
-				<p><b>Note : CSV should contain user email separated by commas ( , ) notification will be send to only emails that has subscribed to push notification <a target="_blank" href="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv"
-				>Sample CSV File</a></b></p>
+				<p><b>'.esc_html__('Note : CSV should contain user email separated by commas ( , ) notification will be send to only emails that has subscribed to push notification','push-notification').' <a target="_blank" href="'.esc_url(PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv').'"
+				>'.esc_html__('Sample CSV File','push-notification').'</a></b></p>
 			</div>';
 
 		echo '<div class="form-group">
 				<label for="notification-schedule">'.esc_html__('Schedule Notification','push-notification').'</label>
 				<select id="notification-schedule" class="regular-text">
-					<option value="no">No</option>
-					<option value="yes">Yes</option>
+					<option value="no">'.esc_html__('No','push-notification').'</option>
+					<option value="yes">'.esc_html__('Yes','push-notification').'</option>
 				</select>
 			</div>';
 		echo '<div class="form-group" style="display:none" >
