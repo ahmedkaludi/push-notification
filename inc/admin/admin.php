@@ -177,7 +177,7 @@ class Push_Notification_Admin{
 								echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
 							}
 						}
-						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaings','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
 					?>
@@ -466,7 +466,7 @@ class Push_Notification_Admin{
 						</div>
 					</div>
 					<div class="row" id="pn_campaings_custom_div">
-					<h3>Campaings</h3>
+					<h3>'.esc_html__('Campaigns', 'push-notification').'</h3>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
@@ -1002,7 +1002,7 @@ class Push_Notification_Admin{
 			$campaigns = PN_Server_Request::getCompaignsData( $authData['user_token'],$page);
 		}
 
-		$campaigns_html = '<h3>'.esc_html__('Campaings', 'push-notification').'</h3>
+		$campaigns_html = '<h3>'.esc_html__('Campaigns', 'push-notification').'</h3>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
