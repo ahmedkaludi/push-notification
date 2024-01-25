@@ -478,6 +478,7 @@ jQuery(document).ready(function($){
 		var title 	 = jQuery('#notification-title').val();
 		var link_url 	 = jQuery('#notification-link').val();
 		var image_url = jQuery('#notification-imageurl').val();
+		var icon_url = jQuery('#notification-icon').val();
 		var message  = jQuery('#notification-message').val();
 		var send_type  = jQuery('#notification-send-type').val();
 		var select_subs  = jQuery('#notification-custom-select').val();
@@ -510,6 +511,7 @@ jQuery(document).ready(function($){
 				title: title,
 				link_url: link_url,
 				image_url: image_url,
+				icon_url:icon_url,
 				message: message,
 				audience_token_id:user_ids,
 				audience_token_url:target_ajax_url,

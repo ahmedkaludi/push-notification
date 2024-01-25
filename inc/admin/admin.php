@@ -355,6 +355,7 @@ class Push_Notification_Admin{
 	function shownotificationData(){
 		$auth_settings = push_notification_auth_settings();
 		$detail_settings = push_notification_details_settings();
+		$notification_settings = push_notification_settings();
 		$campaigns = [];
 		if( !$detail_settings && isset( $auth_settings['user_token'] ) ){
 			 PN_Server_Request::getsubscribersData( $auth_settings['user_token'] );
@@ -441,7 +442,12 @@ class Push_Notification_Admin{
 									<input type="text" id="notification-link" class="regular-text">
 								</div>
 								<div class="form-group">
-									<label for="notification-imageurl">'.esc_html__('Image url', 'push-notification').'</label>
+									<label for="notification-link">'.esc_html__('Icon url', 'push-notification').'</label>
+									<input type="text" id="notification-icon" class="regular-text"  value="'.esc_url_raw($notification_settings['notification_icon']).'">
+								</div>
+
+								<div class="form-group">
+									<label for="notification-imageurl">'.esc_html__('Banner url', 'push-notification').'</label>
 									<input type="text" id="notification-imageurl" class="regular-text">
 									<button type="button" class="button upload_image_url" data-editor="content">
 										<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>Upload an image
@@ -866,7 +872,7 @@ class Push_Notification_Admin{
 			$message = sanitize_textarea_field(stripcslashes($_POST['message']));
 			$link_url = esc_url_raw($_POST['link_url']);
 			$image_url = esc_url_raw($_POST['image_url']);
-			$icon_url = $notification_settings['notification_icon'];
+			$icon_url = isset($_POST['icon_url'])?esc_url_raw($_POST['icon_url']):$notification_settings['notification_icon'];
 			$audience_token_id = isset($_POST['audience_token_id'])?sanitize_text_field($_POST['audience_token_id']):'';
 			$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
 			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
