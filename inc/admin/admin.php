@@ -1234,7 +1234,7 @@ class Push_Notification_Admin{
 		$token_ids = array_unique($token_ids);
 
 		$post_title = esc_html__('Order status changed', 'push-notification');
-		$post_content = esc_html__('Order id #'.$order_id.' changed from '.$status_from.' to '.$status_to, 'push-notification');
+		$post_content = esc_html__('Order id #', 'push-notification').esc_html($order_id).esc_html__(' changed from ', 'push-notification').esc_html($status_from).esc_html__(' to ', 'push-notification').esc_html($status_to);
 		$auth_settings = push_notification_auth_settings();
 
 		//API Data
@@ -1337,8 +1337,8 @@ class Push_Notification_Admin{
 		}
 		    $api_url = 'http://magazine3.company/wp-json/api/central/email/subscribe';
 			$name =  isset($_POST['name'])?sanitize_text_field($_POST['name']):'';
-			$email =  isset($_POST['name'])?sanitize_text_field($_POST['name']):'';
-			$website =  isset($_POST['name'])?sanitize_text_field($_POST['name']):'';
+			$email =  isset($_POST['email'])?sanitize_email($_POST['email']):'';
+			$website =  isset($_POST['website'])?sanitize_url($_POST['website']):'';
 		    $api_params = array(
 		        'name' => $name,
 		        'email'=> $email,
