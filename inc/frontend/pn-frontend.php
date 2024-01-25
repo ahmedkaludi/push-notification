@@ -264,10 +264,10 @@ class Push_Notification_Frontend{
     public function pn_register_subscribers(){
 
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 			$token_id = sanitize_text_field($_POST['token_id']);
 			$user_agent = sanitize_text_field($_POST['user_agent']);
@@ -275,36 +275,36 @@ class Push_Notification_Frontend{
 			$os = sanitize_text_field($_POST['os']);
 			$ip_address = $this->get_the_user_ip();
 			if(empty($token_id)){
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('token_id is blank', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('token_id is blank', 'push-notification')));
 			}
 			if(empty($user_agent)){
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('user_agent is blank', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('user_agent is blank', 'push-notification')));
 			}
 			if(empty($os)){
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('OS is blank', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('OS is blank', 'push-notification')));
 			}
 			if ($user_agent == 'undefined') {
 				$user_agent = $this->check_browser_type();
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
-			echo wp_send_json($response);
+			wp_send_json($response);
 		
 	}
 
 	public function pn_noteclick_subscribers(){
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 			$campaign = sanitize_text_field($_POST['campaign']);
 			if(empty($campaign)){
-				echo wp_send_json(array("status"=> 503, 'message'=>'Campaign is blank'));
+				wp_send_json(array("status"=> 503, 'message'=>'Campaign is blank'));
 			}
 			$response = PN_Server_Request::sendPushNotificatioClickData($campaign);
-			echo wp_send_json($response);
+			wp_send_json($response);
 		
 	}
 

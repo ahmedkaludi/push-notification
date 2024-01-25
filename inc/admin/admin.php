@@ -764,13 +764,13 @@ class Push_Notification_Admin{
 
 	public function pn_verify_user(){
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			$user_token = sanitize_text_field($_POST['user_token']);
 			$response = PN_Server_Request::varifyUser($user_token);
@@ -781,20 +781,20 @@ class Push_Notification_Admin{
 				}
 			}
 
-			echo wp_send_json($response);
+			wp_send_json($response);
 		}		
 
-		echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not identified','push-notification')));
+		wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not identified','push-notification')));
 	}
 	public function pn_refresh_api_key(){
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			$authData = push_notification_auth_settings();
 		$verifyUrl = 'validate/user';
@@ -806,42 +806,42 @@ class Push_Notification_Admin{
         }    
 		$data = array("user_token"=>$authData['user_token'], "website"=>   $weblink);
 		$response = PN_Server_Request::varifyUser($authData['user_token']);
-		echo wp_send_json($response);
+		wp_send_json($response);
 		}
 		
 	}
 	public function pn_revoke_keys(){
 		$nonce = sanitize_text_field($_POST['nonce']);
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			delete_option('push_notification_auth_settings');
-			echo wp_send_json(array("status"=> 200, 'message'=>esc_html__('API key removed successfully', 'push-notification')));
+			wp_send_json(array("status"=> 200, 'message'=>esc_html__('API key removed successfully', 'push-notification')));
 		}
 	}
 
 	public function pn_subscribers_data(){
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			$auth_settings = push_notification_auth_settings();
 			if( isset( $auth_settings['user_token'] ) ){
 				 PN_Server_Request::getsubscribersData( $auth_settings['user_token'] );
-				 echo wp_send_json(array("status"=> 200, 'message'=>esc_html__('Data updated', 'push-notification')));
+				 wp_send_json(array("status"=> 200, 'message'=>esc_html__('Data updated', 'push-notification')));
 			}else{
-				echo wp_send_json(array("status"=> 503, 'message'=> esc_html__('User token not found', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=> esc_html__('User token not found', 'push-notification')));
 			}
 
 		}
@@ -849,13 +849,13 @@ class Push_Notification_Admin{
 	}
 	public function pn_send_notification(){
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			$auth_settings = push_notification_auth_settings();
 			$notification_settings = push_notification_settings();
@@ -940,12 +940,12 @@ class Push_Notification_Admin{
 				);
 				$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
 				if($response){
-				 echo wp_send_json($response);
+				 wp_send_json($response);
 				}else{
-					echo wp_send_json(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));
+					wp_send_json(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));
 				}
 			}else{
-				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('User token not found', 'push-notification')));	
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('User token not found', 'push-notification')));	
 			}			
 
 		}
@@ -1327,13 +1327,13 @@ class Push_Notification_Admin{
 
 	public function pn_subscribe_newsletter(){
 		if(empty( $_POST['nonce'])){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if ( ! current_user_can( 'manage_options' ) ) {
-			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		    $api_url = 'http://magazine3.company/wp-json/api/central/email/subscribe';
 			$name =  isset($_POST['name'])?sanitize_text_field($_POST['name']):'';
@@ -1555,9 +1555,9 @@ function pn_send_query_message(){
             // Load WP components, no themes.                      
             $sent = wp_mail($to, $subject, strip_tags($message), $headers);                    
             if($sent){
-            echo wp_send_json(array('status'=>'t'));            
+            wp_send_json(array('status'=>'t'));            
             }else{
-            echo wp_send_json(array('status'=>'f'));            
+            wp_send_json(array('status'=>'f'));            
             }            
         }                        
            wp_die();           
