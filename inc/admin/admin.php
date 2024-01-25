@@ -862,8 +862,8 @@ class Push_Notification_Admin{
 			$auth_settings = push_notification_auth_settings();
 			$notification_settings = push_notification_settings();
 
-			$title = sanitize_text_field($_POST['title']);
-			$message = sanitize_textarea_field($_POST['message']);
+			$title = sanitize_text_field(stripcslashes($_POST['title']));
+			$message = sanitize_textarea_field(stripcslashes($_POST['message']));
 			$link_url = esc_url_raw($_POST['link_url']);
 			$image_url = esc_url_raw($_POST['image_url']);
 			$icon_url = $notification_settings['notification_icon'];
