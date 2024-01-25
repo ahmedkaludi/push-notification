@@ -53,7 +53,7 @@ function push_notification_add_action_links($actions, $plugin_file, $plugin_data
     $mylinks = array('<a href="' . esc_url_raw(admin_url( 'admin.php?page=push-notification' )) . '">'.esc_html__( 'Settings', 'push-notification' ).'</a>',
     	'<a href="https://pushnotifications.io/documentation/" target="_blank">'.esc_html__( 'Documentation', 'push-notification' ).'</a>',
 					);
-    return array_merge( $actions, $mylinks );
+    return array_merge( $actions, $mylinks ); // no validation check since $mylinks will always be non-empty array
 }
 
 register_activation_hook( PUSH_NOTIFICATION_PLUGIN_FILE, 'push_notification_on_activate' );

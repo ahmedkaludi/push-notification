@@ -657,7 +657,9 @@ class Push_Notification_Admin{
 	public function pn_key_posttype_select_callback(){
 		$notification = push_notification_settings();
 		$data = get_post_types();
-		$data = array_merge(array('none'=>'None'), $data);
+		if(is_array($data) && !empty($data)){
+			$data = array_merge(array('none'=>'None'), $data);
+		}
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
 	}
 	public function pn_key_segment_select_callback(){
@@ -1216,7 +1218,7 @@ class Push_Notification_Admin{
 			if(count($users)>0){
 				foreach ($users as $key => $user) {
 					$tokens = get_user_meta($user->ID, 'pnwoo_notification_token',true);
-					if(is_array($tokens)){
+					if(is_array($tokens) && !empty($tokens)){
 						$token_ids = array_merge($token_ids, $tokens);
 					}
 				}

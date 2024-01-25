@@ -255,7 +255,9 @@ class Push_Notification_Frontend{
     }
 
     public function manifest_add_gcm_id($manifest){
-    	$manifest = array_merge($manifest, $this->notificatioArray);
+		if(is_array($this->notificatioArray) && !empty($this->notificatioArray)){
+    		$manifest = array_merge($manifest, $this->notificatioArray);
+		}
     	return $manifest;
     }
 
