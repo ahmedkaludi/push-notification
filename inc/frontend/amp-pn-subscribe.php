@@ -34,9 +34,9 @@ get_header();
 	<section id="primary" class="content-area pn-flex-center pn-full-height">
 		<main id="main" class="site-main pn-content ">
 			<div class="pn-title">
-				Subscribe Notification
+			<?php echo esc_html__('Subscribe Notification', 'push-notification'); ?>
 			</div>
-			<p> Click on allow to stay updated </p>
+			<p> <?php echo esc_html__('Click on allow to stay updated', 'push-notification'); ?> </p>
 		</main><!-- #main -->
 	</section><!-- #primary -->
 
