@@ -52,7 +52,7 @@ class PN_Server_Request{
 
 
 
-		update_option('push_notification_auth_settings', $push_notification_auth_settings);
+		update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
 
 		return $response;
 
@@ -136,7 +136,7 @@ class PN_Server_Request{
 
 		}
 
-		update_option('push_notification_details_settings', $push_notification_auth_settings);
+		update_option('push_notification_details_settings', $push_notification_auth_settings, false);
 
 		return $response;
 

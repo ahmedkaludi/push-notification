@@ -31,23 +31,23 @@ class Push_Notification_Frontend{
 				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
 
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
-				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+				add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			}
 		}elseif(function_exists('superpwa_addons_status')){
 			add_filter( 'superpwa_manifest', array($this, 'manifest_add_gcm_id') );
 			add_action("wp_enqueue_scripts", array($this, 'superpwa_enqueue_pn_scripts'), 34 );
-			add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			add_filter( "superpwa_sw_template", array($this, 'superpwa_add_pn_swcode'),10,1);
 		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){
 			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-			//add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+			//add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			add_action("wp_footer", array($this, 'header_content'));
 			add_action("wp_footer", array($this, 'amp_header_button_css'));
 		}else{
 			//manifest
 			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-			add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			//create manifest
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			//ServiceWorker
@@ -434,11 +434,10 @@ class Push_Notification_Frontend{
 		</div>
 		<?php
 	}
-	function pwaforwp_notification_confirm_banner(){
+	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
 		$position = $settings['notification_position'];
 		$cssPosition = '';
-		$get_all_categories = get_categories();
 		$category = $settings['category'];
 		$catArray = array();
 		if(!empty($category)){
@@ -577,15 +576,11 @@ class Push_Notification_Frontend{
 							if(!empty($catArray) && in_array('All', $catArray)){
 			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All', 'push-notification').'</label>';
 							}
-							$i=0;
-								if(!empty($get_all_categories)){
-									foreach ($get_all_categories as $key =>$value) {
-										if(in_array($value->name, $catArray)){
-											echo '<label for="pn_category_checkbox'.esc_attr($i).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($i).'" value="'.esc_attr($value->name).'" />'.esc_attr($value->name).'</label>';
-										}
-										$i++;
-									}
+							if(!empty($catArray)){
+								foreach ($catArray as $key=>$value) {
+									echo '<label for="pn_category_checkbox'.esc_attr($key).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($key).'" value="'.esc_attr($value).'" />'.esc_attr($value).'</label>';
 								}
+							}
 				   			echo '</div>
 			   			</div>';
 		   			}

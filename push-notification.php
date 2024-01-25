@@ -62,7 +62,7 @@ function push_notification_on_activate(){
 	$pwaforwp_settings = get_option( 'pwaforwp_settings'); 
 	if(isset($pwaforwp_settings['notification_feature']) && $pwaforwp_settings['notification_feature']==0){
 		$pwaforwp_settings['notification_feature'] = 1;
-		update_option( 'pwaforwp_settings', $pwaforwp_settings); 
+		update_option( 'pwaforwp_settings', $pwaforwp_settings,false); 
 	}
 
 	/**
