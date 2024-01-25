@@ -865,10 +865,8 @@ class Push_Notification_Admin{
 			$link_url = esc_url_raw($_POST['link_url']);
 			$image_url = esc_url_raw($_POST['image_url']);
 			$icon_url = $notification_settings['notification_icon'];
-			$audience_token_id = isset($_POST['audience_token_id'])?$_POST['audience_token_id']:'';
-			$audience_token_id = sanitize_text_field($audience_token_id);
-			$audience_token_url = isset($_POST['audience_token_url'])?$_POST['audience_token_url']:'';
-			$audience_token_url = sanitize_text_field($audience_token_url);
+			$audience_token_id = isset($_POST['audience_token_id'])?sanitize_text_field($_POST['audience_token_id']):'';
+			$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
 			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
 
 			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field($_POST['notification_schedule']):'';
@@ -1338,13 +1336,13 @@ class Push_Notification_Admin{
 			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		    $api_url = 'http://magazine3.company/wp-json/api/central/email/subscribe';
-			$name =  isset($_POST['name'])?$_POST['name']:'';
-			$email =  isset($_POST['name'])?$_POST['name']:'';
-			$website =  isset($_POST['name'])?$_POST['name']:'';
+			$name =  isset($_POST['name'])?sanitize_text_field($_POST['name']):'';
+			$email =  isset($_POST['name'])?sanitize_text_field($_POST['name']):'';
+			$website =  isset($_POST['name'])?sanitize_text_field($_POST['name']):'';
 		    $api_params = array(
-		        'name' => sanitize_text_field($name),
-		        'email'=> sanitize_text_field($email),
-		        'website'=> sanitize_text_field($website),
+		        'name' => $name,
+		        'email'=> $email,
+		        'website'=> $website,
 		        'type'=> 'notification'
 		    );
 		    $response = wp_remote_post( $api_url, array( 'timeout' => 15, 'sslverify' => false, 'body' => $api_params ) );
