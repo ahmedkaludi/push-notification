@@ -196,7 +196,8 @@ class Push_Notification_Frontend{
 		wp_add_inline_script('pn-script-analytics', $data, 'after');
 
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
+		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL."assets/public/app{$min}.js", array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
 		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
 	}
@@ -218,7 +219,8 @@ class Push_Notification_Frontend{
 		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
 		wp_add_inline_script('pn-script-analytics', $data, 'after');
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app-pwaforwp.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL."assets/public/app-pwaforwp{$min}.js", array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
 		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
 	}

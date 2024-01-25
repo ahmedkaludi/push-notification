@@ -113,10 +113,10 @@ add_action( 'admin_enqueue_scripts', 'pn_enqueue_makebetter_email_js' );
 function pn_enqueue_makebetter_email_js(){
  
     if( is_admin() && pn_is_plugins_page()) {
+        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
+        wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$min}.js", array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
 
-        wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . 'assets/feedback-admin.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
-
-        wp_enqueue_style( 'pn-make-better-css', PUSH_NOTIFICATION_PLUGIN_URL . 'assets/feedback-admin.css', false , PUSH_NOTIFICATION_PLUGIN_VERSION);
+        wp_enqueue_style( 'pn-make-better-css', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$min}.css", false , PUSH_NOTIFICATION_PLUGIN_VERSION);
 
     }
     
