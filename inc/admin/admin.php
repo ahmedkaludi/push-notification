@@ -587,17 +587,18 @@ class Push_Notification_Admin{
                    	<p>'.esc_html__('We are always available to help you with anything', 'push-notification').'</p>
 		            <ul>
 					<li>
-					<input type="text" id="pn_query_email" name="pn_query_email" placeholder="email">
+					<label for="pn_query_email">'.esc_html__('Email', 'push-notification').'</label>
+					<input type="text" id="pn_query_email" class="regular-text" name="pn_query_email" placeholder="youremail@example.com" >
 				 	</li>
 		                <li><label for="pn_help_query_customer">'.esc_html__('Are you existing Premium Customer?', 'push-notification').'</label>
-		                    <select class="regular-select" rows="5" cols="60" id="pn_help_query_customer" name="pn_help_query_customer">
+		                    <select class="regular-select" id="pn_help_query_customer" name="pn_help_query_customer">
 		                    	<option value="">Select</option>
 		                    	<option value="Yes">'.esc_html__('Yes', 'push-notification').'</option>
 		                    	<option value="No">'.esc_html__('No', 'push-notification').'</option>
 		                    </select>
 		                </li> 
 		                <li><label for="pn_help_query_message">'.esc_html__('Message', 'push-notification').'</label>
-		                    <textarea rows="5" cols="60" id="pn_help_query_message" name="pn_help_query_message" class="regular-textarea"></textarea>
+		                    <textarea rows="5" id="pn_help_query_message" name="pn_help_query_message" class="regular-textarea"></textarea>
 		                    <br>
 		                    <p class="pn_help-query-success" style="display:none;">'.esc_html__('Message sent successfully, Please wait we will get back to you shortly', 'push-notification').'</p>
 		                    <p class="pn_help-query-error" style="display:none;">'.esc_html__('Message not sent. please check your network connection', 'push-notification').'</p>

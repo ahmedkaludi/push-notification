@@ -83,3 +83,7 @@ font-size: 16px;
 #dashboard_right_now .select2 li>span:before{
 content:'';
 }
+.regular-textarea , .regular-text , .regular-select {
+	width:500px !important;
+	max-width: 100% !important;
+}
