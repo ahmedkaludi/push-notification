@@ -63,7 +63,7 @@ function pn_send_feedback() {
     if(isset($form['nonce'])){
 
         if ( ! wp_verify_nonce( $form['nonce'], 'push_notification_feedback' ) ) {
-            die(); 
+            wp_die(); 
         }
 
         $text = '';
@@ -102,7 +102,7 @@ function pn_send_feedback() {
 
     }
 
-    die();
+    wp_die();
 }
 add_action( 'wp_ajax_pn_send_feedback', 'pn_send_feedback' );
 

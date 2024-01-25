@@ -108,7 +108,7 @@ class Push_Notification_Frontend{
 			header('Accept-Ranges: bytes');
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
 			echo $messageSw;
                 exit;
 		}
@@ -117,7 +117,7 @@ class Push_Notification_Frontend{
 			header('Accept-Ranges: bytes');
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
 			echo $messageSw;
                 exit;
 		}
@@ -264,10 +264,10 @@ class Push_Notification_Frontend{
     public function pn_register_subscribers(){
 
 		if(empty( $_POST['nonce'])){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 			$token_id = sanitize_text_field($_POST['token_id']);
 			$user_agent = sanitize_text_field($_POST['user_agent']);
@@ -275,36 +275,36 @@ class Push_Notification_Frontend{
 			$os = sanitize_text_field($_POST['os']);
 			$ip_address = $this->get_the_user_ip();
 			if(empty($token_id)){
-				echo json_encode(array("status"=> 503, 'message'=>'token_id is blank'));die;
+				echo wp_send_json(array("status"=> 503, 'message'=>'token_id is blank'));
 			}
 			if(empty($user_agent)){
-				echo json_encode(array("status"=> 503, 'message'=>'user_agent is blank'));die;
+				echo wp_send_json(array("status"=> 503, 'message'=>'user_agent is blank'));
 			}
 			if(empty($os)){
-				echo json_encode(array("status"=> 503, 'message'=>'os is blank'));die;
+				echo wp_send_json(array("status"=> 503, 'message'=>'os is blank'));
 			}
 			if ($user_agent == 'undefined') {
 				$user_agent = $this->check_browser_type();
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
-			echo json_encode($response);die;
+			echo wp_send_json($response);
 		
 	}
 
 	public function pn_noteclick_subscribers(){
 		if(empty( $_POST['nonce'])){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 			$campaign = sanitize_text_field($_POST['campaign']);
 			if(empty($campaign)){
-				echo json_encode(array("status"=> 503, 'message'=>'Campaign is blank'));die;
+				echo wp_send_json(array("status"=> 503, 'message'=>'Campaign is blank'));
 			}
 			$response = PN_Server_Request::sendPushNotificatioClickData($campaign);
-			echo json_encode($response);die;
+			echo wp_send_json($response);
 		
 	}
 
@@ -626,7 +626,7 @@ class Push_Notification_Frontend{
 	{
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
 			$swJsContent .= PHP_EOL.$messageSw;
 		    return $swJsContent;
 	}
