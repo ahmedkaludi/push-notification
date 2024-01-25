@@ -2,7 +2,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-class commonFunction {
+class Push_Notification_Helper {
     
     public function pn_expanded_allowed_tags() {
         

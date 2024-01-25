@@ -3,8 +3,8 @@
  *  Metabox displays in admin sidebar to send notification on particular post
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
-if(file_exists(PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/commonFunction.php")){
-	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/commonFunction.php";
+if(file_exists(PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/push-notification-helper.php")){
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/push-notification-helper.php";
 }
 class PnMetaBox {
     
@@ -78,8 +78,8 @@ class PnMetaBox {
 				$output .= $this->pn_format_rows($input );
 			}
 		}
-		$common_function = new commonFunction();
-		$allowed_html = $common_function->pn_expanded_allowed_tags();
+		$pn_helper = new Push_Notification_Helper();
+		$allowed_html = $pn_helper->pn_expanded_allowed_tags();
 		echo '<table class="form-table"><tbody>' . wp_kses($output, $allowed_html) . '</tbody></table>';
 	}
 	public function pn_format_rows($input) {
