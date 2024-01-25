@@ -275,13 +275,13 @@ class Push_Notification_Frontend{
 			$os = sanitize_text_field($_POST['os']);
 			$ip_address = $this->get_the_user_ip();
 			if(empty($token_id)){
-				echo wp_send_json(array("status"=> 503, 'message'=>'token_id is blank'));
+				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('token_id is blank', 'push-notification')));
 			}
 			if(empty($user_agent)){
-				echo wp_send_json(array("status"=> 503, 'message'=>'user_agent is blank'));
+				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('user_agent is blank', 'push-notification')));
 			}
 			if(empty($os)){
-				echo wp_send_json(array("status"=> 503, 'message'=>'os is blank'));
+				echo wp_send_json(array("status"=> 503, 'message'=>esc_html__('OS is blank', 'push-notification')));
 			}
 			if ($user_agent == 'undefined') {
 				$user_agent = $this->check_browser_type();
