@@ -480,7 +480,7 @@ class Push_Notification_Admin{
 						</thead>
 						<tbody>';
 						$current_count_start = 0;
-						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data'])) {
+						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
 								echo '<tr>
 									<td>'.esc_html($current_count_start+= 1).'</td>
@@ -896,7 +896,7 @@ class Push_Notification_Admin{
 
 			if( isset( $auth_settings['user_token'] ) ){
 				$push_notify_token=[];
-				if(isset($audience_token_id) && !empty($audience_token_id) && is_array($audience_token_id))
+				if(!empty($audience_token_id) && is_array($audience_token_id))
 				{
 					foreach($audience_token_id as $token_id){
 						
@@ -1018,7 +1018,7 @@ class Push_Notification_Admin{
 						</thead>
 						<tbody>';
 						$current_count_start = 0;
-						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data'])) {
+						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
 								$campaigns_html.='<tr>
 									<td>'.esc_html($current_count_start+= 1).'</td>
@@ -1440,13 +1440,15 @@ class PN_Field_Generator{
 			$value = $settings[$name];
 		}
 		?><select multiple name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text" id="<?php echo esc_attr($id); ?>" >
-			<?php foreach ($options as $key => $opt) {
+			<?php 
+				if(!empty($options)){
+					foreach ($options as $key => $opt) {
 				$sel = '';
 				if(isset($value) && in_array($key, $value)){
 					$sel = 'selected';
 				}
 				echo '<option value="'.esc_attr($key).'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
-			} ?>
+			} } ?>
 		</select><?php
 	}
 	public static function get_multi_input_checkbox($name, $value, $data, $id="", $class=""){
@@ -1466,6 +1468,7 @@ class PN_Field_Generator{
 		?>
 </div>
 <?php	
+	 if(!empty($data)){
 		foreach ($data as $value) { 
 			$check = '';
 			if(isset($value) && !empty($catArray)){
@@ -1488,6 +1491,7 @@ class PN_Field_Generator{
 		<?php
 		$i++;
 		}
+	  }
 	}
 
 	public static function get_input_select($name, $value, $options, $id="", $class=""){
@@ -1583,8 +1587,10 @@ function push_notification_pro_notifyform_before(){
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
 			<select id="notification-custom-select" class="regular-text" placeholder="'.esc_html__('Select Subscribers','push-notification').'" multiple>';
-			foreach($users as $user){
-				echo '<option value="'.esc_attr($user->ID).'">('.esc_attr($user->user_email).')</option>';			
+			if(!empty($users)){
+				foreach($users as $user){
+					echo '<option value="'.esc_attr($user->ID).'">('.esc_attr($user->user_email).')</option>';			
+				}
 			}			
 		echo' </select>
 		  </div>';

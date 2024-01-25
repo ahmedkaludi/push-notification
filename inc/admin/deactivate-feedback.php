@@ -21,9 +21,11 @@ shuffle($reasons);
 	    <h3><strong><?php echo esc_html__('If you have a moment, please let us know why you are deactivating:', 'push-notification'); ?></strong></h3>
 	    <ul>
                 <?php 
-                foreach ($reasons as $reason){
-                    echo $reason;
-                }
+				if(!empty($reasons)){
+					foreach ($reasons as $reason){
+						echo $reason;
+					}
+				}
                 ?>
 	    </ul>
 	    <?php if ($email) : ?>

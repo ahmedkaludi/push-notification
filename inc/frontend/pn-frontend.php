@@ -578,12 +578,14 @@ class Push_Notification_Frontend{
 			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All', 'push-notification').'</label>';
 							}
 							$i=0;
-			   			 		foreach ($get_all_categories as $key =>$value) {
-			   			 			if(in_array($value->name, $catArray)){
-	   			 						echo '<label for="pn_category_checkbox'.esc_attr($i).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($i).'" value="'.esc_attr($value->name).'" />'.esc_attr($value->name).'</label>';
-	   			 					}
-									$i++;
-					      		}
+								if(!empty($get_all_categories)){
+									foreach ($get_all_categories as $key =>$value) {
+										if(in_array($value->name, $catArray)){
+											echo '<label for="pn_category_checkbox'.esc_attr($i).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($i).'" value="'.esc_attr($value->name).'" />'.esc_attr($value->name).'</label>';
+										}
+										$i++;
+									}
+								}
 				   			echo '</div>
 			   			</div>';
 		   			}
