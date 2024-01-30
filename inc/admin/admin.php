@@ -445,7 +445,7 @@ class Push_Notification_Admin{
 									<label for="notification-link">'.esc_html__('Icon url', 'push-notification').'</label>
 									<input type="text" id="notification-iconurl" class="regular-text"  value="'.esc_url_raw($notification_settings['notification_icon']).'">
 									<button type="button" class="button upload_icon_url" data-editor="content">
-									<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>Upload an image
+									<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>'.esc_html__('Upload an Icon', 'push-notification').'
 								</button>
 								</div>
 
@@ -453,7 +453,7 @@ class Push_Notification_Admin{
 									<label for="notification-imageurl">'.esc_html__('Banner url', 'push-notification').'</label>
 									<input type="text" id="notification-imageurl" class="regular-text">
 									<button type="button" class="button upload_image_url" data-editor="content">
-										<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>Upload an image
+										<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>'.esc_html__('Upload an image', 'push-notification').'
 									</button>
 								</div>
 								<div class="form-group">
