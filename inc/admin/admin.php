@@ -443,7 +443,10 @@ class Push_Notification_Admin{
 								</div>
 								<div class="form-group">
 									<label for="notification-link">'.esc_html__('Icon url', 'push-notification').'</label>
-									<input type="text" id="notification-icon" class="regular-text"  value="'.esc_url_raw($notification_settings['notification_icon']).'">
+									<input type="text" id="notification-iconurl" class="regular-text"  value="'.esc_url_raw($notification_settings['notification_icon']).'">
+									<button type="button" class="button upload_icon_url" data-editor="content">
+									<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>Upload an image
+								</button>
 								</div>
 
 								<div class="form-group">
