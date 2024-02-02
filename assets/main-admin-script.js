@@ -375,17 +375,24 @@ jQuery(document).ready(function($){
 		jQuery("#pn_push_segment_category_input").val(category);
 	}
 
+	function IsEmail(email) {
+        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
+	}
+
 	//Help Query
 	jQuery(".pn_help-send-query").on("click", function(e){
-	        e.preventDefault();   
+	        e.preventDefault();
+			$('.error_js').remove();   
+	        var email = jQuery("#pn_query_email").val();           
 	        var message = jQuery("#pn_help_query_message").val();           
 	        var customer = jQuery("#pn_help_query_customer").val();    
-	        if(jQuery.trim(message) !='' && customer){       
+	        if(jQuery.trim(message) !='' && customer && IsEmail(email) == true){       
 	                    jQuery.ajax({
 	                        type: "POST",    
 	                        url: ajaxurl,                    
 	                        dataType: "json",
-	                        data:{action:"pn_send_query_message", customer_type: customer, message:message, nonce: pn_setings.remote_nonce},
+	                        data:{action:"pn_send_query_message", customer_type: customer, message:message, nonce: pn_setings.remote_nonce,email:email},
 	                        success:function(response){                       
 	                          if(response['status'] =='t'){
 	                            jQuery(".pn_help-query-success").show();
@@ -400,19 +407,17 @@ jQuery(document).ready(function($){
 	                        }
 	                        });
 	        }else{
-	            if(jQuery.trim(message) =='' && customer ==''){
-	                alert('Please enter the message and select customer type');
-	            }else{
-	            
+	            if(jQuery.trim(email) ==''){
+					jQuery("#pn_query_email").after('<p  class="error_js" style="color:red;"> Pleas enter email<p/>');
+	            }else if(IsEmail(email) == false){
+					jQuery("#pn_query_email").after('<p  class="error_js" style="color:red;">Please enter a valid email<p/>');
+                }
 	            if(customer ==''){
-	                alert('Select Customer type');
+					jQuery("#pn_help_query_customer").after('<p  class="error_js" style="color:red;">Please select customer type<p/>');
 	            }
 	            if(jQuery.trim(message) == ''){
-	                alert('Please enter the message');
+					jQuery("#pn_help_query_message").after('<p  class="error_js" style="color:red;">Please enter the message<p/>');
 	            }
-	                
-	            }
-	            
 	        }                   
 	        
 	});
@@ -452,6 +457,23 @@ jQuery(document).ready(function($){
         .open();
     });
 
+		jQuery(".upload_icon_url").click(function(e) {  // upload_image_url
+        e.preventDefault();
+        var pwaforwpMediaUploader = wp.media({
+            title: pn_setings.uploader_title,
+            button: {
+                text: pn_setings.uploader_button
+            },
+            multiple: false,  // Set this to true to allow multiple files to be selected
+                        library:{type : 'image'}
+        })
+        .on("select", function() {
+            var attachment = pwaforwpMediaUploader.state().get("selection").first().toJSON();
+            jQuery("#notification-iconurl").val(attachment.url);
+        })
+        .open();
+    });
+
 	jQuery("#notification-send-type").change(function(){
 		console.log(jQuery(this).val());
 	 if(jQuery(this).val()=='custom-select'){
@@ -473,6 +495,7 @@ jQuery(document).ready(function($){
 		var title 	 = jQuery('#notification-title').val();
 		var link_url 	 = jQuery('#notification-link').val();
 		var image_url = jQuery('#notification-imageurl').val();
+		var icon_url = jQuery('#notification-icon').val();
 		var message  = jQuery('#notification-message').val();
 		var send_type  = jQuery('#notification-send-type').val();
 		var select_subs  = jQuery('#notification-custom-select').val();
@@ -505,6 +528,7 @@ jQuery(document).ready(function($){
 				title: title,
 				link_url: link_url,
 				image_url: image_url,
+				icon_url:icon_url,
 				message: message,
 				audience_token_id:user_ids,
 				audience_token_url:target_ajax_url,

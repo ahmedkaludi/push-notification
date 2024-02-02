@@ -1,8 +1,8 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 6.3
-Stable tag: 1.31
+Tested up to: 6.4
+Stable tag: 1.32
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -53,6 +53,16 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.32 (02 February 2024) =
+* Added: New feature send notification for a specific/individual post-publication #29
+* Added: Show subscribers (active and expired) separately.#72 
+* Added: Provide email field in support form #78 
+* Enhancement : Code improvement #82
+* Fixed: Notification Apostrophe issue and spelling error.#80
+* Fixed: Plugin is not being deactivated on multisite #83 
+* Fixed: Conflict issue with campaigns #73
+* Enhancement: Test with WordPress 6.4 and update readme.txt #77
 
 = 1.31 (30 October 2023) =
 * Added: Added Option to export Users from User's section in push notification #57.

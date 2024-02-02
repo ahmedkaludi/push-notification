@@ -31,23 +31,23 @@ class Push_Notification_Frontend{
 				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
 
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
-				add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+				add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			}
 		}elseif(function_exists('superpwa_addons_status')){
 			add_filter( 'superpwa_manifest', array($this, 'manifest_add_gcm_id') );
 			add_action("wp_enqueue_scripts", array($this, 'superpwa_enqueue_pn_scripts'), 34 );
-			add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			add_filter( "superpwa_sw_template", array($this, 'superpwa_add_pn_swcode'),10,1);
 		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){
 			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-			//add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+			//add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			add_action("wp_footer", array($this, 'header_content'));
 			add_action("wp_footer", array($this, 'amp_header_button_css'));
 		}else{
 			//manifest
 			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-			add_action("wp_footer", array($this, 'pwaforwp_notification_confirm_banner'), 34 );
+			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			//create manifest
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			//ServiceWorker
@@ -108,7 +108,7 @@ class Push_Notification_Frontend{
 			header('Accept-Ranges: bytes');
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
 			echo $messageSw;
                 exit;
 		}
@@ -117,7 +117,7 @@ class Push_Notification_Frontend{
 			header('Accept-Ranges: bytes');
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
 			echo $messageSw;
                 exit;
 		}
@@ -196,7 +196,8 @@ class Push_Notification_Frontend{
 		wp_add_inline_script('pn-script-analytics', $data, 'after');
 
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
+		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL."assets/public/app{$min}.js", array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
 		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
 	}
@@ -218,7 +219,8 @@ class Push_Notification_Frontend{
 		$data = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
 		wp_add_inline_script('pn-script-analytics', $data, 'after');
 		wp_enqueue_script('pn-script-messaging-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/messaging.min.js', array('pn-script-app-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/app-pwaforwp.js', array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		wp_enqueue_script('pn-script-frontend', PUSH_NOTIFICATION_PLUGIN_URL."assets/public/app-pwaforwp{$min}.js", array('pn-script-app-frontend','pn-script-messaging-frontend'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		$settings = $this->json_settings();
 		wp_localize_script('pn-script-app-frontend', 'pnScriptSetting', $settings);
 	}
@@ -255,17 +257,19 @@ class Push_Notification_Frontend{
     }
 
     public function manifest_add_gcm_id($manifest){
-    	$manifest = array_merge($manifest, $this->notificatioArray);
+		if(is_array($this->notificatioArray) && !empty($this->notificatioArray)){
+    		$manifest = array_merge($manifest, $this->notificatioArray);
+		}
     	return $manifest;
     }
 
     public function pn_register_subscribers(){
 
 		if(empty( $_POST['nonce'])){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 			$token_id = sanitize_text_field($_POST['token_id']);
 			$user_agent = sanitize_text_field($_POST['user_agent']);
@@ -273,36 +277,36 @@ class Push_Notification_Frontend{
 			$os = sanitize_text_field($_POST['os']);
 			$ip_address = $this->get_the_user_ip();
 			if(empty($token_id)){
-				echo json_encode(array("status"=> 503, 'message'=>'token_id is blank'));die;
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('token_id is blank', 'push-notification')));
 			}
 			if(empty($user_agent)){
-				echo json_encode(array("status"=> 503, 'message'=>'user_agent is blank'));die;
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('user_agent is blank', 'push-notification')));
 			}
 			if(empty($os)){
-				echo json_encode(array("status"=> 503, 'message'=>'os is blank'));die;
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('OS is blank', 'push-notification')));
 			}
 			if ($user_agent == 'undefined') {
 				$user_agent = $this->check_browser_type();
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
-			echo json_encode($response);die;
+			wp_send_json($response);
 		
 	}
 
 	public function pn_noteclick_subscribers(){
 		if(empty( $_POST['nonce'])){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			echo json_encode(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));die;
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
 			$campaign = sanitize_text_field($_POST['campaign']);
 			if(empty($campaign)){
-				echo json_encode(array("status"=> 503, 'message'=>'Campaign is blank'));die;
+				wp_send_json(array("status"=> 503, 'message'=>'Campaign is blank'));
 			}
 			$response = PN_Server_Request::sendPushNotificatioClickData($campaign);
-			echo json_encode($response);die;
+			wp_send_json($response);
 		
 	}
 
@@ -432,11 +436,10 @@ class Push_Notification_Frontend{
 		</div>
 		<?php
 	}
-	function pwaforwp_notification_confirm_banner(){
+	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
 		$position = $settings['notification_position'];
 		$cssPosition = '';
-		$get_all_categories = get_categories();
 		$category = $settings['category'];
 		$catArray = array();
 		if(!empty($category)){
@@ -575,13 +578,11 @@ class Push_Notification_Frontend{
 							if(!empty($catArray) && in_array('All', $catArray)){
 			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All', 'push-notification').'</label>';
 							}
-							$i=0;
-			   			 		foreach ($get_all_categories as $key =>$value) {
-			   			 			if(in_array($value->name, $catArray)){
-	   			 						echo '<label for="pn_category_checkbox'.esc_attr($i).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($i).'" value="'.esc_attr($value->name).'" />'.esc_attr($value->name).'</label>';
-	   			 					}
-									$i++;
-					      		}
+							if(!empty($catArray)){
+								foreach ($catArray as $key=>$value) {
+									echo '<label for="pn_category_checkbox'.esc_attr($key).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($key).'" value="'.esc_attr($value).'" />'.esc_attr($value).'</label>';
+								}
+							}
 				   			echo '</div>
 			   			</div>';
 		   			}
@@ -624,7 +625,7 @@ class Push_Notification_Frontend{
 	{
 			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', json_encode($settings), $messageSw);
+			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
 			$swJsContent .= PHP_EOL.$messageSw;
 		    return $swJsContent;
 	}

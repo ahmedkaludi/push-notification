@@ -21,14 +21,17 @@ shuffle($reasons);
 	    <h3><strong><?php echo esc_html__('If you have a moment, please let us know why you are deactivating:', 'push-notification'); ?></strong></h3>
 	    <ul>
                 <?php 
-                foreach ($reasons as $reason){
-                    echo $reason;
-                }
+				if(!empty($reasons)){
+					foreach ($reasons as $reason){
+						echo $reason;
+					}
+				}
                 ?>
 	    </ul>
 	    <?php if ($email) : ?>
     	    <input type="hidden" name="pn_disable_from" value="<?php echo esc_attr($email); ?>"/>
 	    <?php endif; ?>
+		<input type="hidden" name="nonce" value="<?php echo wp_create_nonce('push_notification_feedback'); ?>">
 	    <input id="pn-reloaded-feedback-submit" class="button button-primary" type="submit" name="pn_disable_submit" value="<?php echo esc_html__('Submit & Deactivate', 'push-notification'); ?>"/>
 	    <a class="button"><?php echo esc_html__('Only Deactivate', 'push-notification'); ?></a>
 	    <a class="pn-for-wp-feedback-not-deactivate" href="#"><?php echo esc_html__('Don\'t deactivate', 'push-notification'); ?></a>
