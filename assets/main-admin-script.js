@@ -273,8 +273,14 @@ jQuery(document).ready(function($){
 
 	jQuery('#pn_push_segment_on_category_checkbox').click(function(){
 		if(jQuery(this).prop("checked")==true){
+			jQuery("#segment_category_selector_wrapper").hide();
+			jQuery("#js_category").prop('disabled',true);
+			jQuery("#js_category_hidden").prop('disabled',false);
+		}else{
+			jQuery("#js_category").prop('disabled',false);
+			jQuery("#js_category_hidden").prop('disabled',true);
 			jQuery("#segment_category_selector_wrapper").show();
-		}else{jQuery("#segment_category_selector_wrapper").hide();}
+		}
 
 	});
 
@@ -642,3 +648,47 @@ jQuery("#notification-schedule").change(function(){
 		jQuery('#notification-date').parent().hide();
 	}	
 });
+
+function pn_for_wp_select2(){
+    var $select2 = jQuery('.pn_category_select2');
+    
+    if($select2.length > 0){
+        jQuery($select2).each(function(i, obj) {
+            var currentP = jQuery(this);  
+            var $defaultSelected = currentP.find("option[value]:is([selected])");  
+            var $defaultResults = currentP.find("option[value]");  
+            
+            var defaultResults = [];
+            $defaultResults.each(function () {
+                var $option = jQuery(this);
+                defaultResults.push({
+                    id: $option.attr('value'),
+                    text: $option.text()
+                });
+            });
+            var defaultSelected = [];
+            $defaultSelected.each(function () {
+                var $option = jQuery(this);
+                defaultSelected.push($option.text());
+            });
+            var ajaxnewurl = ajaxurl+ '?action=pn_select2_category_data&nonce='+pn_setings.remote_nonce;
+            currentP.select2({           
+                ajax: {             
+                    url: ajaxnewurl,
+                    delay: 250, 
+                    cache: false,
+                },            
+                minimumInputLength: 2, 
+                minimumResultsForSearch : 50,
+                dataAdapter: jQuery.fn.select2.amd.require('select2/data/extended-ajax'),
+                defaultResults: defaultResults,
+                multiple: true,
+                placeholder: "Select Category"
+            });
+            currentP.val(defaultSelected).trigger("change");
+
+        });
+
+    }
+}
+pn_for_wp_select2();

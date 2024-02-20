@@ -62,11 +62,11 @@ font-size: 16px;
     border: 1px solid #c3c4c7;
 }
 #segment_category_selector_wrapper {
-	width: 18em;
-	border: 1px solid #8c8f94;
-	border-radius: 3px;
-	padding: 10px 24px 10px 8px;
-	margin-top: 5px;
+	width: 30em;
+	/* border: 1px solid #8c8f94; */
+	/* border-radius: 3px; */
+	/* padding: 10px 24px 10px 8px;
+	margin-top: 5px; */
 }
 #pn_help {
     background: #ffffff;
