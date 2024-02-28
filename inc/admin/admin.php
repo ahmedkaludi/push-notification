@@ -101,12 +101,16 @@ class Push_Notification_Admin{
 		if($hook_suffix=='toplevel_page_push-notification'){
 			wp_enqueue_media();
 			$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
-			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
-			wp_enqueue_style('push-notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all' );
-		    wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array(),PUSH_NOTIFICATION_PLUGIN_VERSION );
-			wp_enqueue_script('select2-extended-script', PUSH_NOTIFICATION_PLUGIN_URL. 'assets/select2-extended.min.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
+			
 			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-style{$min}.css", array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
+			wp_enqueue_style('push-notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all' );
+			wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array(),PUSH_NOTIFICATION_PLUGIN_VERSION );
+			wp_enqueue_script('select2-extended-script', PUSH_NOTIFICATION_PLUGIN_URL. 'assets/select2-extended.min.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
+
+			wp_enqueue_script('pn-meteremoji', PUSH_NOTIFICATION_PLUGIN_URL."assets/meterEmoji.min.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+			wp_enqueue_script('pn-emoji-custom', PUSH_NOTIFICATION_PLUGIN_URL."assets/emoji-custom.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+			
 			
 	
 			 if ( is_multisite() ) {
@@ -180,7 +184,7 @@ class Push_Notification_Admin{
 								echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
 							}
 						}
-						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
 					?>
@@ -355,6 +359,32 @@ class Push_Notification_Admin{
 
 	}
 
+	function mobile_notification_preview(){
+		echo '<div class="pn-iphone">
+        			<div class="pn-notch"></div>
+					<div class="pn-screen">
+						
+						<div class="pn-notification-container">
+							<div class="pn-web-container">
+								
+								<span class="pn-bell-icon"></span>
+								<div class="pn-web-name">pushnotifications.io</div>
+								<span class="dashicons dashicons-arrow-up-alt2 pn-arrow_icon"></span>
+							</div>
+							
+							<div class="pn-notification-header">
+								<div class="pn-notification-content">
+									<div class="pn-notification-title">Notification Title</div>
+									<div class="pn-notification-description">This is the content of the push notification. You can customize it based on your needs.</div>
+								</div>
+								<div class="pn-image-icon js_all" id="js_pn_icon"></div>
+							</div>
+							<div class="pn-notification-banner js_all" id="js_pn_banner"></div>
+						</div>
+					</div>
+    			</div>';
+	}
+
 	function shownotificationData(){
 		$auth_settings = push_notification_auth_settings();
 		$detail_settings = push_notification_details_settings();
@@ -382,9 +412,10 @@ class Push_Notification_Admin{
 		if(isset($detail_settings['subscriber_count'])){ $subscriber_count = $detail_settings['subscriber_count']; }
 		if(isset($detail_settings['active_count'])){ $active_count = $detail_settings['active_count']; }
 		if(isset($detail_settings['expired_count'])){ $expired_count = $detail_settings['expired_count']; }
+		
 		echo '<div id="pn_dashboard" style="display:none;" class="pn-tabs">
 		<section class="pn_general_wrapper">
-				<div class="action-wrapper"> '.esc_html__($updated_at, 'push-notification').' <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update">'.esc_html__('Refresh data', 'push-notification').'</button>
+				<div class="action-wrapper"><span style="line-height: 1.4;"> '.esc_html__($updated_at, 'push-notification').'</span> <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update" >'.esc_html__('Refresh data', 'push-notification').'</button>
 				</div>
 				<div class="pn-content">
 					<div class="pn-card-wrapper">
@@ -430,29 +461,39 @@ class Push_Notification_Admin{
 				echo '</div></section>
 			</div>';
 		}
-		echo '<br/><br/><div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
-					<div id="dashboard_right_now" class="postbox " >
+		echo '<br/><br/>
+			<div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
+					<div id="dashboard_right_now" class="postbox" >
 						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
-						<div class="inside">
+						<h2 class="pn_select_design">'.esc_html__('Select push notification design', 'push-notification').'</h2>
+						<div class="pn-image-container">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m.png" alt="Image 1" class="pn-clickable-image pn-clickable-image-selected" notification_type="message">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m_i.png" alt="Image 2" class="pn-clickable-image" notification_type="message-with-icon">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m_b.png" alt="Image 3" class="pn-clickable-image" notification_type="message-with-banner">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m_i_b.png" alt="Image 1" class="pn-clickable-image" notification_type="message-with-icon-and-banner">
+						</div>
+						<div class="inside device-container-test">
+						<div class="pn-form-part">
 							<div class="main">';
 							do_action('push_notification_pro_notifyform_before');
 							echo '<div class="form-group">
 									<label for="notification-title">'.esc_html__('Title','push-notification').'</label>
-									<input type="text" id="notification-title" class="regular-text">
+									<input type="text" id="notification-title" class="regular-text js_pn_custom" data-meteor-emoji="true">
 								</div>
 								<div class="form-group">
 									<label for="notification-link">'.esc_html__('Link', 'push-notification').'</label>
-									<input type="text" id="notification-link" class="regular-text">
+									<input type="text" id="notification-link" class="regular-text js_pn_custom">
 								</div>
-								<div class="form-group">
+								<input type="hidden" id="js_notification_icon" notification_icon="'.esc_url_raw($notification_settings['notification_icon']).'" />
+								<div class="form-group message-with-icon message-with-icon-and-banner js_all">
 									<label for="notification-link">'.esc_html__('Icon url', 'push-notification').'</label>
-									<input type="text" id="notification-iconurl" class="regular-text"  value="'.esc_url_raw($notification_settings['notification_icon']).'">
+									<input type="text" id="notification-iconurl" class="regular-text"  value="">
 									<button type="button" class="button upload_icon_url" data-editor="content">
-									<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>'.esc_html__('Upload an Icon', 'push-notification').'
+									<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>'.esc_html__(' Upload an Icon', 'push-notification').'
 								</button>
 								</div>
 
-								<div class="form-group">
+								<div class="form-group message-with-banner message-with-icon-and-banner js_all">
 									<label for="notification-imageurl">'.esc_html__('Banner url', 'push-notification').'</label>
 									<input type="text" id="notification-imageurl" class="regular-text">
 									<button type="button" class="button upload_image_url" data-editor="content">
@@ -461,14 +502,15 @@ class Push_Notification_Admin{
 								</div>
 								<div class="form-group">
 									<label for="notification-message">'.esc_html__('Message', 'push-notification').'</label>
-									<textarea type="text" id="notification-message" class="regular-text"></textarea>
+									<textarea type="text" rows="3" id="notification-message" class="regular-text js_pn_custom" data-meteor-emoji="true"></textarea>
 								</div>
 								<div class="submit inline-edit-save">
 									<input type="button" class="button pn-submit-button" id="'.apply_filters('push_notification_submit_id','pn-send-custom-notification').'" value="'.esc_html__('Send Notification', 'push-notification').'"><span class="spinner"></span>
 									<div class="pn-send-messageDiv"></div>
 								</div>
-							</div>
-						</div>
+							</div></div><div class="pn-iphone-device-part">';
+							$this->mobile_notification_preview();
+						echo'</div></div>
 					</div>
 				</div>
 				<div id="pn_campaings" style="display:none;" class="pn-tabs">
@@ -649,7 +691,7 @@ class Push_Notification_Admin{
 				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span><br/><br/>";				
 			}
 		
-			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' >".esc_html__('Revoke key', 'push-notification')."</button>";
+			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='line-height: 1.4;' >".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
 		if(!empty($authData['token_details']['validated']) && $authData['token_details']['validated']=='1'){
 			echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Refresh', 'push-notification')."</button>";
@@ -1593,7 +1635,7 @@ function push_notification_pro_notifyform_before(){
 	}
 	echo '<div class="form-group">
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
-			<select id="notification-send-type" class="regular-text">
+			<select id="notification-send-type" class="regular-text js_pn_select">
 				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
 				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
 				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>			
@@ -1607,7 +1649,7 @@ function push_notification_pro_notifyform_before(){
 
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
-			<select id="notification-custom-select" class="regular-text" placeholder="'.esc_html__('Select Subscribers','push-notification').'" multiple>';
+			<select id="notification-custom-select" class="regular-text js_pn_select" placeholder="'.esc_html__('Select Subscribers','push-notification').'" multiple>';
 			if(!empty($users)){
 				foreach($users as $user){
 					echo '<option value="'.esc_attr($user->ID).'">('.esc_attr($user->user_email).')</option>';			
@@ -1619,20 +1661,20 @@ function push_notification_pro_notifyform_before(){
 		echo '<div class="form-group" style="display:none">
 				<label for="notification-custom-upload">'.esc_html__('Upload subscriber list', 'push-notification').'</label>
 				<input type="file" id="notification-custom-upload" accept=".csv">
-				<p><b>'.esc_html__('Note : CSV should contain user email separated by commas ( , ) notification will be send to only emails that has subscribed to push notification','push-notification').' <a target="_blank" href="'.esc_url(PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv').'"
+				<p><b>'.esc_html__('Note : CSV should contain user email separated by commas ( , ) notification will be').' <br/>'.esc_html__('send to only emails that has subscribed to push notification','push-notification').' <a target="_blank" href="'.esc_url(PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv').'"
 				>'.esc_html__('Sample CSV File','push-notification').'</a></b></p>
 			</div>';
 
 		echo '<div class="form-group">
 				<label for="notification-schedule">'.esc_html__('Schedule Notification','push-notification').'</label>
-				<select id="notification-schedule" class="regular-text">
+				<select id="notification-schedule" class="regular-text js_pn_select">
 					<option value="no">'.esc_html__('No','push-notification').'</option>
 					<option value="yes">'.esc_html__('Yes','push-notification').'</option>
 				</select>
 			</div>';
 		echo '<div class="form-group" style="display:none" >
 			<label for="notification-date">'.esc_html__('Schedule Date Time', 'push-notification').'</label>
-			<input class="regular-text" type="date" id="notification-date" min="'.esc_attr($today_date).'">
+			<input class="regular-text" type="date" id="notification-date" min="'.esc_attr($today_date).'" style="width:400px">
 			<input type="time" id="notification-time">
 		</div>';
 

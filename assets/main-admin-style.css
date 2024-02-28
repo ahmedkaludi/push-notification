@@ -87,3 +87,207 @@ content:'';
 	width:500px !important;
 	max-width: 100% !important;
 }
+
+/* push notification send preview start */
+
+.device-container-test {
+	display: flex;
+}
+
+.pn-form_part,
+.pn-iphone-device-part {
+	flex: 1;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.pn-iphone {
+	position: relative;
+	width: 340px; /* iPhone 6/7/8 width */
+	height: 600px; /* iPhone 6/7/8 height */
+	margin: 10px auto;
+	background-color: #fff;
+	border-radius: 45px;
+	/* box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); */
+	overflow: hidden;
+	background-image: url('image/iphone.svg');
+}
+
+.pn-notch {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 60px;
+	height: 20px;
+	margin-left: -30px;
+	background-color: #f8f8f8;
+	border-radius: 0 0 10px 10px;
+}
+
+.pn-screen {
+	width: 100%;
+	height: calc(100% - 20px);
+	overflow: hidden;
+}
+.pn-notification-container {
+	width: 300px; /* iPhone 6/7/8 width */
+	margin: 50px auto;
+	background-color: #fff;
+	border-radius: 20px;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+	overflow: hidden;
+}
+
+.pn-notification-header {
+	width: 270px; /* iPhone 6/7/8 width */
+	/* margin: 20px auto; */
+	margin: 0px 5px 0px 20px;
+	display: flex;
+}
+
+.pn-notification-content {
+	flex: 1;
+	margin: 5px 0px 10px 10px;
+}
+
+.pn-notification-website {
+	font-size: 16px;
+	margin-top: 20px;
+	margin-left: 10px;
+	/* line-height: 2.4!important; */
+	display: flex;
+	flex-direction: column;
+}
+
+.pn-web-title {
+	margin: 12px 5px 0px 0px;
+	flex: 1;
+}
+
+.pn-notification-title {
+	font-size: 16px;
+	font-weight: bold;
+	margin-bottom: 10px;
+	line-height: 0.2
+}
+.pn-notification-description {
+	font-size: 14px;
+}
+
+.pn-notification-banner {
+	width: 86%;
+	height: 180px; /* Adjust the height as needed */
+	background-image: url('image/netflix.jpg');
+	background-size: cover;
+	background-position: center;
+	margin: 0px 15px 10px 30px;
+	border-radius: 7%;
+}
+.pn-notification-image {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	margin: 0px 10px 0px 5px;
+	vertical-align: center;
+	object-fit: cover;
+}
+
+.js_pn_select{
+	max-width:490px!important;
+	width: 490px !important;
+}
+.js_pn_custom{
+	max-width:490px!important;
+	width: 490px !important;
+}
+
+.pn-image-container {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	width: 80%;
+	margin-left: 30px;
+}
+
+.pn-clickable-image {
+	width: 203.5px;
+	margin: 20px auto 50px auto;
+	cursor: pointer;
+	border: 1px solid #ddd;
+	border-radius: 20px;
+}
+
+.pn-web-container {
+	display: flex;
+	padding: 10px;
+}
+
+.pn-bell-icon {
+	margin: 4px 6px 0px 0px;
+	display: flex;
+	-webkit-box-pack: center;
+	justify-content: center;
+	-webkit-box-align: center;
+	align-items: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: 100% 100%;
+	background-color: rgb(239, 239, 239);
+	width: 24px;
+	height: 24px;
+	border-radius: 12px;
+	background-image: url('image/netflix-small.png');
+}
+
+.pn-web-name {
+	font-size: 16px;
+	flex: 1;
+}
+
+.pn-image-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 30%;
+	object-fit: cover;
+	background-image: url('image/notification_preview_icon.jpg');
+}
+
+.pn-arrow_icon {
+	display: flex;
+	-webkit-box-pack: center;
+	justify-content: center;
+	-webkit-box-align: center;
+	align-items: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: 100% 100%;
+	background-color: rgb(239, 239, 239);
+	width: 24px;
+	height: 24px;
+	border-radius: 12px;
+	margin: 4px 0px 0px 10px;
+}
+
+.pn-clickable-image-selected {
+	width: 203.5px;
+	margin: 20px auto 50px auto;
+	background-color: #0c0a0a;
+	border-radius: 20px;
+	border: 1px solid #5e97c5;
+	box-shadow: 0px 4px 20px 0px rgb(34 113 177);
+	overflow: hidden;
+}
+
+
+.pn_select_design {   
+	font-size: 15px;
+	margin-left: 24px;
+	margin-top: 30px;
+	margin-bottom: 1px;
+	text-align: center;
+	width: 80%;
+	margin-bottom: 12px;
+	text-transform: uppercase;
+	font-weight: 500;
+}
