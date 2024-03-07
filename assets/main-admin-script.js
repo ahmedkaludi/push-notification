@@ -771,4 +771,13 @@ jQuery("#notification-templat").change(function(){
         jQuery('#js_pn_icon').show();
         jQuery('#js_pn_banner').show();
     }
-})
+});
+
+jQuery("#pn_campaings_custom_div").on('click',".js_read_more",function() {
+    jQuery(this).parents("td").find('.full_text').show();
+    jQuery(this).parents("td").find('.less_text').hide();
+});
+jQuery("#pn_campaings_custom_div").on('click',".js_read_less",function() {
+    jQuery(this).parents("td").find('.full_text').hide();
+    jQuery(this).parents("td").find('.less_text').show();
+});

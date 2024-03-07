@@ -537,7 +537,8 @@ class Push_Notification_Admin{
 						<thead>
 							<tr>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th>'.esc_html__('Message title', 'push-notification').'</th>
+								<th>'.esc_html__('Title', 'push-notification').'</th>
+								<th>'.esc_html__('Message', 'push-notification').'</th>
 								<th>'.esc_html__('Sent on', 'push-notification').'</th>
 								<th>'.esc_html__('Status', 'push-notification').'</th>
 								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
@@ -549,9 +550,22 @@ class Push_Notification_Admin{
 						$current_count_start = 0;
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
+								$message = $campaign['message'];
+								if (strlen($message) > 100) {
+									$stringCut = substr($message, 0, 100);
+									$endPoint = strrpos($stringCut, ' ');
+									$message = $endPoint? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
+									$message = nl2br($message);
+									$message .= '... <a href="javascript:void(0)" class="js_read_more">read more</a>';
+								}else{
+									$message = nl2br($campaign['message']);
+								}
 								echo '<tr>
 									<td>'.esc_html($current_count_start+= 1).'</td>
 									<td>'.esc_html($campaign['title']).'</td>
+									<td><p class="less_text">'.$message.'</p>                        
+									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).'<a href="javascript:void(0)" class="js_read_less">read less</a> 
+									</p></td>
 									<td>'.esc_html($campaign['created_at'] ).'</td>
 									<td>';
 									if ($campaign['status'] === 'Done') {
@@ -1109,7 +1123,8 @@ class Push_Notification_Admin{
 						<thead>
 							<tr>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th>'.esc_html__('Message title', 'push-notification').'</th>
+								<th>'.esc_html__('Title', 'push-notification').'</th>
+								<th>'.esc_html__('Message', 'push-notification').'</th>
 								<th>'.esc_html__('Sent on', 'push-notification').'</th>
 								<th>'.esc_html__('Status', 'push-notification').'</th>
 								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
@@ -1121,9 +1136,23 @@ class Push_Notification_Admin{
 						$current_count_start = 0;
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
+								 
+								$message = $campaign['message'];
+								if (strlen($message) > 100) {
+									$stringCut = substr($message, 0, 100);
+									$endPoint = strrpos($stringCut, ' ');
+									$message = $endPoint? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
+									$message = nl2br($message);
+									$message .= '... <a href="javascript:void(0)" class="js_read_more">read more</a>';
+								}else{
+									$message = nl2br($campaign['message']);
+								}
 								$campaigns_html.='<tr>
 									<td>'.esc_html($current_count_start+= 1).'</td>
 									<td>'.esc_html($campaign['title']).'</td>
+									<td><p class="less_text">'.$message.'</p>                        
+									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).'<a href="javascript:void(0)" class="js_read_less">read less</a> 
+									</p></td>
 									<td>'.esc_html($campaign['created_at'] ).'</td>
 									<td>';
 									if ($campaign['status'] === 'Done') {
