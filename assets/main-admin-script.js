@@ -265,21 +265,27 @@ jQuery(document).ready(function($){
 		if(jQuery(this).prop("checked")==true){
 			jQuery("#category_selector_wrapper").show();
 			jQuery(".js_category_selector_wrapper").show();
+			if(jQuery('#pn_push_segment_on_category_checkbox').prop("checked")==true){
+				jQuery(".js_custom_category_selector_wrapper").show();
+			}
 		}else{
 			jQuery("#category_selector_wrapper").hide();
 			jQuery(".js_category_selector_wrapper").hide();
+			jQuery(".js_custom_category_selector_wrapper").hide();
 		}
 	});
 
 	jQuery('#pn_push_segment_on_category_checkbox').click(function(){
 		if(jQuery(this).prop("checked")==true){
-			jQuery("#segment_category_selector_wrapper").hide();
-			jQuery("#js_category").prop('disabled',true);
-			jQuery("#js_category_hidden").prop('disabled',false);
-		}else{
 			jQuery("#js_category").prop('disabled',false);
 			jQuery("#js_category_hidden").prop('disabled',true);
 			jQuery("#segment_category_selector_wrapper").show();
+			jQuery(".js_custom_category_selector_wrapper").show();
+		}else{
+			jQuery(".js_custom_category_selector_wrapper").hide();
+			jQuery("#segment_category_selector_wrapper").hide();
+			jQuery("#js_category").prop('disabled',true);
+			jQuery("#js_category_hidden").prop('disabled',false);
 		}
 
 	});

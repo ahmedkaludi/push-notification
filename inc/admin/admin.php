@@ -249,6 +249,18 @@ class Push_Notification_Admin{
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
 
+			$soc_display="style='display:none;'";
+			if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
+				$soc_display="style='display:block;'";
+			}
+			add_settings_field(
+				'pn_select_custom_categories',								// ID
+				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_categories" '.$soc_display.'><b>'.esc_html__('Select Custom Categories', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_select_custom_categories_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
 		add_settings_section('push_notification_user_settings_section',
 					 ' ', 
 					 '__return_false', 
@@ -743,6 +755,32 @@ class Push_Notification_Admin{
 			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
 				$display_category="style=display:none;";
 				$disable_category="disabled=true";
+				$disable_checkbox="";
+			}
+			$data = get_categories();
+			$category_data = push_notification_category(null);
+			$settings = push_notification_settings();
+			$selected_category = (isset($settings['category'])) ? $settings['category'] : [];
+			
+	}
+	public function pn_select_custom_categories_callback(){
+		$notification = push_notification_settings();
+		$display="style='display:none;'";
+		if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
+			$display="style='display:block;'";
+		}
+		echo "<div id='category_selector_wrapper' class='js_category_selector_wrapper' ".$display.">";
+			echo '<div class="pn-field_wrap">';
+				
+
+				$settings = push_notification_settings();
+			
+			$display_category="style=display:none;";
+			$disable_category="";
+			$disable_checkbox="disabled=true";
+			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
+				$display_category="style=display:block;";
+				$disable_category="";
 				$disable_checkbox="";
 			}
 			$data = get_categories();
