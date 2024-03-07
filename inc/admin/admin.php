@@ -935,17 +935,31 @@ class Push_Notification_Admin{
 	}
 	public function pn_revoke_keys(){
 		$nonce = sanitize_text_field($_POST['nonce']);
+
+		$request_response = array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification'));
 		if(empty( $_POST['nonce'])){
-			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json($request_response);
 		}
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json($request_response);
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
-				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				wp_send_json($request_response);
 			}
-			delete_option('push_notification_auth_settings');
-			wp_send_json(array("status"=> 200, 'message'=>esc_html__('API key removed successfully', 'push-notification')));
+			$auth_settings = push_notification_auth_settings();
+			if (isset($auth_settings['user_token']) && !empty($auth_settings['user_token'])) {
+				$user_token = $auth_settings['user_token'];
+				$server_response = PN_Server_Request::inactivateWebsite($user_token);
+				if ($server_response['status']) {
+					delete_option('push_notification_auth_settings');
+					$request_response['status'] = 200;
+					$request_response['server_response'] = $server_response;
+					$request_response['message'] = esc_html__('API key removed successfully', 'push-notification');
+				}else{
+					$request_response['server_response'] = $server_response;
+				}
+			}
+			wp_send_json($request_response);
 		}
 	}
 

@@ -200,8 +200,7 @@ jQuery(document).ready(function($){
 			method: "post",
 			dataType: 'json',
 			data: { action: "pn_revoke_keys", nonce: pn_setings.remote_nonce },
-			success: function(response){
-				
+			success: function(response){				
 				if(response.status==200){
 					self.after("&nbsp; "+response.message);
 					
