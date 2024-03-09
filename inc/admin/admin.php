@@ -934,8 +934,7 @@ class Push_Notification_Admin{
 		
 	}
 	public function pn_revoke_keys(){
-		$nonce = sanitize_text_field($_POST['nonce']);
-
+		
 		$request_response = array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification'));
 		if(empty( $_POST['nonce'])){
 			wp_send_json($request_response);
