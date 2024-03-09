@@ -1067,8 +1067,7 @@ class Push_Notification_Admin{
 	}
 
 	public function send_notification_on_update($new_status, $old_status, $post){
-		$pn_settings = push_notification_settings();
-		$auth_settings = push_notification_auth_settings();
+		$pn_settings = push_notification_settings();		
 		if ( 'publish' !== $new_status ){
         	return;
 		}
@@ -1077,12 +1076,12 @@ class Push_Notification_Admin{
 		}
 		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
 			return;
-		}		
-
-		$send_notification = false;
-		$post_meta = $_POST;
-	
-		if(!$send_notification && isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_meta['pn_send_notification_on_post']) || $post_meta['pn_send_notification_on_post'] !== 1)){
+		}				
+		$post_notf_on = '';
+		if(isset($_POST['pn_send_notification_on_post'])){
+			$post_notf_on = sanitize_text_field($_POST['pn_send_notification_on_post']);
+		}			
+		if(isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_notf_on) || $post_notf_on !== 1)){
 			if ( $new_status !== $old_status) {
 			 	$this->send_notification($post);
 			}
