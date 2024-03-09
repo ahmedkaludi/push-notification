@@ -1253,11 +1253,10 @@ class Push_Notification_Admin{
 		for($i=0; $i < count($category_detail); $i++) {
 			$category_name[] = $category_detail[$i]->slug;
 		}
+		$category = '';
 		if(!empty($category_name)){
 			$category = implode(',',$category_name);
-		} else{
-			$category = '';
-		}
+		} 
 		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$link_url = esc_url_raw(get_permalink( $post_id ));
@@ -1476,11 +1475,9 @@ function push_notification_settings(){
 		$icon = $pwaforwpSettings['icon'];
 	}
 	$default = array(
-		'notification_icon' => $icon,
-		// 'on_edit'=> 0,
+		'notification_icon' => $icon,		
 		'on_publish'=> 1,
-		'posttypes'=> array("post","page"),
-		'category'=> get_categories(),
+		'posttypes'=> array("post","page"),		
 		'notification_position'=> 'bottom-left',
 		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
 		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),

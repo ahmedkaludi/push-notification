@@ -529,7 +529,7 @@ class Push_Notification_Frontend{
 	display: block;
 	padding: 5px 15px;
 }
-.categories-multiselect {
+.pn-categories-multiselect {
 	font-size: 13px;
     margin: 10px 0;
 }
@@ -568,7 +568,7 @@ class Push_Notification_Frontend{
 				   		echo '<div id="pn-activate-permission-categories-text">
 			   				'.esc_html__('On which category would you like to receive?', 'push-notification').'
 			   			</div>
-				   		<div class="categories-multiselect">
+				   		<div class="pn-categories-multiselect">
 				   			<div id="pn-categories-checkboxes">';
 							if($all_category){
 			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All Categories', 'push-notification').'</label>';
