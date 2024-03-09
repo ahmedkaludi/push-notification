@@ -18,8 +18,7 @@ class Push_Notification_Admin{
 		add_action( 'wp_ajax_pn_refresh_user', array( $this, 'pn_refresh_api_key' ) ); 
 		add_action( 'wp_ajax_pn_revoke_keys', array( $this, 'pn_revoke_keys' ) ); 
 		add_action( 'wp_ajax_pn_subscribers_data', array( $this, 'pn_subscribers_data' ) ); 
-		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 
-		add_action( 'wp_ajax_pn_send_notification_on_category', array( $this, 'pn_send_notification_on_category' ) );
+		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 		
 		add_action('wp_ajax_pn_send_query_message', 'pn_send_query_message');
 		add_action('wp_ajax_pn_get_compaigns', array( $this, 'pn_get_compaigns' ));
 		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
@@ -1093,8 +1092,7 @@ class Push_Notification_Admin{
 
 	}
 
-	public function pn_get_compaigns(){
-		$page = sanitize_text_field($_POST['page']);
+	public function pn_get_compaigns(){		
 		if(empty( $_POST['nonce'])){
 			return;	
 		}
@@ -1104,6 +1102,7 @@ class Push_Notification_Admin{
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;	
 		}
+		$page = sanitize_text_field($_POST['page']);
 		$authData = push_notification_auth_settings();
 		if ($authData['token_details']['validated']!=1 ){
 			return;  
@@ -1291,30 +1290,7 @@ class Push_Notification_Admin{
 		}//auth token check 	
 
 	}
-
-	public function pn_send_notification_on_category($post){
-		$pn_settings = push_notification_settings();
-		$auth_settings = push_notification_auth_settings();
-
-		if(!isset($pn_settings['posttypes'])){
-			$pn_settings['posttypes'] = array("post");
-		}
-		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
-			return;
-		}
-
-		$send_notification = false;
-		if(isset($pn_settings['on_category']) && $pn_settings['on_category']==1){
-			 	$this->send_notification_on_cotegories($post);
-			 	$send_notification = true;
-		}
-	}
-
-	protected function send_notification_on_cotegories($post){
-		$categories = get_categories();
-		pushnotification_load_categories($categories);
-	}
-
+	
 	/**
 	 * Send the push notification when orders will change
 	 * @method pn_order_send_notification

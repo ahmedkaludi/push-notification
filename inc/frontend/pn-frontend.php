@@ -38,9 +38,7 @@ class Push_Notification_Frontend{
 			add_action("wp_enqueue_scripts", array($this, 'superpwa_enqueue_pn_scripts'), 34 );
 			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			add_filter( "superpwa_sw_template", array($this, 'superpwa_add_pn_swcode'),10,1);
-		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){
-			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-			//add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
+		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){			
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			add_action("wp_footer", array($this, 'header_content'));
 			add_action("wp_footer", array($this, 'amp_header_button_css'));
