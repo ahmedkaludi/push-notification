@@ -566,7 +566,7 @@ class Push_Notification_Frontend{
 			   		</div>';
 			   		if(!empty($settings['on_category']) && $settings['on_category'] == 1){
 				   		echo '<div id="pn-activate-permission-categories-text">
-			   				'.esc_html__('Which Notifications would you like to receive?', 'push-notification').'
+			   				'.esc_html__('On which category would you like to receive?', 'push-notification').'
 			   			</div>
 				   		<div class="categories-multiselect">
 				   			<div id="pn-categories-checkboxes">';
