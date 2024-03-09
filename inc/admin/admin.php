@@ -386,8 +386,8 @@ class Push_Notification_Admin{
 							
 							<div class="pn-notification-header">
 								<div class="pn-notification-content">
-									<div class="pn-notification-title">Notification Title</div>
-									<div class="pn-notification-description">This is the content of the push notification. You can customize it based on your needs.</div>
+									<div class="pn-notification-title">'.esc_html__('Notification Title','push-notification').'</div>
+									<div class="pn-notification-description">'.esc_html__('This is the content of the push notification. You can customize it based on your needs','push-notification').'.</div>
 								</div>
 								<div class="pn-image-icon js_all" id="js_pn_icon"></div>
 							</div>
@@ -476,8 +476,7 @@ class Push_Notification_Admin{
 		echo '<br/><br/>
 			<div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
 					<div id="dashboard_right_now" class="postbox" >
-						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
-						<h2 class="pn_select_design">'.esc_html__('Select push notification design', 'push-notification').'</h2>
+						<h2 class="pn_select_design" style="margin-top:6px;">'.esc_html__('Select push notification design', 'push-notification').'</h2>
 						<div class="pn-image-container">
 							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m.png" alt="Image 1" class="pn-clickable-image pn-clickable-image-selected" notification_type="message">
 							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m_i.png" alt="Image 2" class="pn-clickable-image" notification_type="message-with-icon">
@@ -537,13 +536,13 @@ class Push_Notification_Admin{
 						<thead>
 							<tr>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th>'.esc_html__('Title', 'push-notification').'</th>
+								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
 								<th>'.esc_html__('Message', 'push-notification').'</th>
-								<th>'.esc_html__('Sent on', 'push-notification').'</th>
-								<th>'.esc_html__('Status', 'push-notification').'</th>
-								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
-								<th>'.esc_html__('Rate', 'push-notification').'</th>
-								<th>'.esc_html__('Clicks', 'push-notification').'</th>
+								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
+								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
@@ -564,7 +563,7 @@ class Push_Notification_Admin{
 									<td>'.esc_html($current_count_start+= 1).'</td>
 									<td>'.esc_html($campaign['title']).'</td>
 									<td><p class="less_text">'.$message.'</p>                        
-									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).'<a href="javascript:void(0)" class="js_read_less">read less</a> 
+									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).' <a href="javascript:void(0)" class="js_read_less">read less</a> 
 									</p></td>
 									<td>'.esc_html($campaign['created_at'] ).'</td>
 									<td>';
@@ -575,7 +574,7 @@ class Push_Notification_Admin{
 									}else{
 										echo '<span class="badge badge-pill badge-secondary" style="color:blue">'.esc_html($campaign['status']).'</span>';
 									}
-								echo'</td><td>';
+								echo'</td><td align="'.esc_attr('center').'">';
 								 	$resposeData = array();
 								 	$clickCount = 0;
 	                                if(isset($campaign['campaign_response'][0])){
@@ -596,10 +595,10 @@ class Push_Notification_Admin{
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										echo number_format($rate, 2, '.', ',')."%";
-										echo "<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										echo "<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}else{
 										echo "0%";
-										echo "<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										echo "<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}
 									echo'</td><td>';
 									echo esc_html($clickCount);
@@ -760,22 +759,6 @@ class Push_Notification_Admin{
 		echo "<div id='category_selector_wrapper' ".$display.">";
 			echo '<div class="pn-field_wrap">';
 				PN_Field_Generator::get_input_checkbox('segment_on_category', '1', 'pn_push_segment_on_category_checkbox', 'pn-checkbox pn_push_segment_on_category_checkbox');
-
-				$settings = push_notification_settings();
-			
-			$display_category="style=display:block;";
-			$disable_category="";
-			$disable_checkbox="disabled=true";
-			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
-				$display_category="style=display:none;";
-				$disable_category="disabled=true";
-				$disable_checkbox="";
-			}
-			$data = get_categories();
-			$category_data = push_notification_category(null);
-			$settings = push_notification_settings();
-			$selected_category = (isset($settings['category'])) ? $settings['category'] : [];
-			
 	}
 	public function pn_select_custom_categories_callback(){
 		$notification = push_notification_settings();
@@ -797,7 +780,6 @@ class Push_Notification_Admin{
 				$disable_category="";
 				$disable_checkbox="";
 			}
-			$data = get_categories();
 			$category_data = push_notification_category(null);
 			$settings = push_notification_settings();
 			$selected_category = (isset($settings['category'])) ? $settings['category'] : [];
@@ -1137,13 +1119,13 @@ class Push_Notification_Admin{
 						<thead>
 							<tr>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th>'.esc_html__('Title', 'push-notification').'</th>
+								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
 								<th>'.esc_html__('Message', 'push-notification').'</th>
-								<th>'.esc_html__('Sent on', 'push-notification').'</th>
-								<th>'.esc_html__('Status', 'push-notification').'</th>
-								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
-								<th>'.esc_html__('Rate', 'push-notification').'</th>
-								<th>'.esc_html__('Clicks', 'push-notification').'</th>
+								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
+								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
@@ -1165,7 +1147,7 @@ class Push_Notification_Admin{
 									<td>'.esc_html($current_count_start+= 1).'</td>
 									<td>'.esc_html($campaign['title']).'</td>
 									<td><p class="less_text">'.$message.'</p>                        
-									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).'<a href="javascript:void(0)" class="js_read_less">read less</a> 
+									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).' <a href="javascript:void(0)" class="js_read_less">read less</a> 
 									</p></td>
 									<td>'.esc_html($campaign['created_at'] ).'</td>
 									<td>';
@@ -1176,7 +1158,7 @@ class Push_Notification_Admin{
 									}else{
 										$campaigns_html.='<span class="badge badge-pill badge-secondary" style="color:blue">'.esc_html($campaign['status']).'</span>';
 									}
-								$campaigns_html.='</td><td>';
+								$campaigns_html.='</td><td align="'.esc_attr('center').'">';
 								 	$resposeData = array();
 								 	$clickCount = 0;
 	                                if(isset($campaign['campaign_response'][0])){
@@ -1197,10 +1179,10 @@ class Push_Notification_Admin{
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										$campaigns_html.= number_format($rate, 2, '.', ',')."%";
-										$campaigns_html.="<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										$campaigns_html.="<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}else{
 										$campaigns_html.="0%";
-										$campaigns_html.="<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										$campaigns_html.="<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}
 									$campaigns_html.='</td><td>';
 									$campaigns_html.=esc_html($clickCount);
@@ -1783,6 +1765,9 @@ function push_notification_category($search){
 function pn_select2_category_data(){
 	if ( ! isset( $_GET['nonce'] ) ){
 	  return; 
+	}
+	if( isset( $_GET['nonce']) &&  !wp_verify_nonce($_GET['nonce'], 'pn_notification') ){
+		return;
 	}
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
