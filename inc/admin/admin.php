@@ -255,7 +255,7 @@ class Push_Notification_Admin{
 			add_settings_field(
 				'pn_select_custom_categories',								// ID
 				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_categories" '.$soc_display.'><b>'.esc_html__('On Selected Categories', 'push-notification').'</b></label>',// Title
-				array( $this, 'pn_select_custom_categories_callback'),// Callback
+				array( $this, 'pn_select_specific_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
@@ -759,7 +759,7 @@ class Push_Notification_Admin{
 			echo '<div class="pn-field_wrap">';
 				PN_Field_Generator::get_input_checkbox('segment_on_category', '1', 'pn_push_segment_on_category_checkbox', 'pn-checkbox pn_push_segment_on_category_checkbox');
 	}
-	public function pn_select_custom_categories_callback(){
+	public function pn_select_specific_categories_callback(){
 		$notification = push_notification_settings();
 		$display="style='display:none;'";
 		if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
