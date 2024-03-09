@@ -230,7 +230,7 @@ class Push_Notification_Admin{
 					 'push_notification_segment_settings_section');
 			add_settings_field(
 				'pn_key_segment_select',								// ID
-				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation for notification', 'push-notification').'</b></label>',// Title
+				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_segment_select_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
