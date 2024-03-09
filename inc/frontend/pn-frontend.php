@@ -571,7 +571,7 @@ class Push_Notification_Frontend{
 				   		<div class="categories-multiselect">
 				   			<div id="pn-categories-checkboxes">';
 							if($all_category){
-			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All', 'push-notification').'</label>';
+			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All Categories', 'push-notification').'</label>';
 							}
 							if(!empty($catArray)){
 								foreach ($catArray as $key=>$value) {
