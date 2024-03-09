@@ -809,7 +809,7 @@ class Push_Notification_Admin{
 							$selected_option ='selected=selected';
 						}
 						
-						echo '<option value="'.esc_attr($value['text']).'"  '.esc_html($selected_option).'>'. esc_html__($value['text'],'push-notification').'</option>';
+						echo '<option value="'.esc_attr($value['text']).'"  '.esc_html($selected_option).'>'. esc_html($value['text']).'</option>';
 					}
 			echo '</select><input type="hidden" name="push_notification_settings[category][]" id="js_category_hidden" value="All" '.esc_html($disable_checkbox).' /></div></div>';
 	}
