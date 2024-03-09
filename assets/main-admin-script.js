@@ -678,7 +678,7 @@ function pn_for_wp_select2(){
             var defaultSelected = [];
             $defaultSelected.each(function () {
                 var $option = jQuery(this);
-                defaultSelected.push($option.text());
+                defaultSelected.push($option.val());
             });
             var ajaxnewurl = ajaxurl+ '?action=pn_select2_category_data&nonce='+pn_setings.remote_nonce;
             currentP.select2({           

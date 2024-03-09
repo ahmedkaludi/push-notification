@@ -759,40 +759,38 @@ class Push_Notification_Admin{
 			echo '<div class="pn-field_wrap">';
 				PN_Field_Generator::get_input_checkbox('segment_on_category', '1', 'pn_push_segment_on_category_checkbox', 'pn-checkbox pn_push_segment_on_category_checkbox');
 	}
+	
 	public function pn_select_specific_categories_callback(){
 		$notification = push_notification_settings();
 		$display="style='display:none;'";
 		if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
 			$display="style='display:block;'";
 		}
-		echo "<div id='category_selector_wrapper' class='js_category_selector_wrapper' ".$display.">";
+		echo "<div id='category_selector_wrapper' class='js_custom_category_selector_wrapper' ".$display.">";
 			echo '<div class="pn-field_wrap">';
 				
 
-				$settings = push_notification_settings();
+			$settings = push_notification_settings();
 			
 			$display_category="style=display:none;";
 			$disable_category="";
-			$disable_checkbox="disabled=true";
 			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
 				$display_category="style=display:block;";
 				$disable_category="";
-				$disable_checkbox="";
 			}
-			$category_data = push_notification_category(null);
-			$settings = push_notification_settings();
-			$selected_category = (isset($settings['category'])) ? $settings['category'] : [];
+			$selected_category = (isset($settings['custom_category'])) ? $settings['custom_category'] : [];
+			$category_data = push_notification_category(null,$selected_category);
 			echo "<div id='segment_category_selector_wrapper' ".esc_html($display_category).">";
-				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
+				echo '<select name="push_notification_settings[custom_category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
 					foreach ($category_data as $key => $value) {
 						$selected_option ='';
-						if (in_array($value['text'],$selected_category)) {
+						if (in_array($value['id'],$selected_category)) {
 							$selected_option ='selected=selected';
 						}
 						
-						echo '<option value="'.esc_attr($value['text']).'"  '.esc_html($selected_option).'>'. esc_html($value['text']).'</option>';
+						echo '<option value="'.esc_attr($value['id']).'"  '.esc_html($selected_option).'>'. esc_html($value['text']).'</option>';
 					}
-			echo '</select><input type="hidden" name="push_notification_settings[category][]" id="js_category_hidden" value="All" '.esc_html($disable_checkbox).' /></div></div>';
+			echo '</select></div></div>';
 	}
 	public function pn_utm_tracking_callback(){
 		$notification = push_notification_settings();
@@ -1676,19 +1674,31 @@ function push_notification_pro_notifyform_before(){
 
 }
 
-function push_notification_category($search){
+function push_notification_category($search,$saved_data){
 	$args = array( 
-		'hide_empty' => true,
+		'hide_empty' => false,
 		'number'     => 50, 
 	);
 
 	if(!empty($search)){
 		$args['name__like'] = $search;
 	}
+	
 	$get_option = get_terms( 'category', $args);
+	$only_ids = [];
 	if(!empty($get_option) && is_array($get_option)){   
 		foreach ($get_option as $options_array) {
-			$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+			$only_ids[] =$options_array->term_id;
+			$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name);
+		}
+	}
+	if(!empty($saved_data)){             
+		$args['include'] = $saved_data;
+		$selected_cats = get_terms($args);
+		foreach ($selected_cats as $options_array) {
+			if (!in_array($options_array->term_id,$only_ids)) {
+				$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name);
+			}
 		}
 	}
 	return $result;
@@ -1706,7 +1716,7 @@ function pn_select2_category_data(){
 		return;
 	}
 	$search        = isset( $_GET['q'] ) ? sanitize_text_field( $_GET['q'] ) : '';
-	$result = push_notification_category($search);
+	$result = push_notification_category($search,[]);
 	
 	wp_send_json(['results' => $result] );
 	wp_die();

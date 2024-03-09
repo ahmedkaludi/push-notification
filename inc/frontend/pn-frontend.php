@@ -438,16 +438,9 @@ class Push_Notification_Frontend{
 		$settings = push_notification_settings();
 		$position = $settings['notification_position'];
 		$cssPosition = '';
-		$category = $settings['category'];
+		$catArray = (isset($settings['custom_category'])) ? $settings['custom_category'] : [];
 		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
-		$catArray = array();
-		if(!empty($category)){
-			if(!is_array($category)){
-				$catArray = explode(',', $category);
-			}else{
-				$catArray = $category;
-			}
-		}
+		
 		switch ($position) {
 			case 'bottom-left':
 				$cssPosition = 'bottom: 0;
