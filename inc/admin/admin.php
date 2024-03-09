@@ -231,7 +231,7 @@ class Push_Notification_Admin{
 					 'push_notification_segment_settings_section');
 			add_settings_field(
 				'pn_key_segment_select',								// ID
-				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Select segmentation for notification', 'push-notification').'</b></label>',// Title
+				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation for notification', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_segment_select_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -243,7 +243,7 @@ class Push_Notification_Admin{
 			}
 			add_settings_field(
 				'pn_key_segment_on_categories',								// ID
-				'<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>'.esc_html__('Segment on Categories', 'push-notification').'</b></label>',// Title
+				'<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>'.esc_html__('On All Categories', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_segment_on_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -255,7 +255,7 @@ class Push_Notification_Admin{
 			}
 			add_settings_field(
 				'pn_select_custom_categories',								// ID
-				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_categories" '.$soc_display.'><b>'.esc_html__('Select Custom Categories', 'push-notification').'</b></label>',// Title
+				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_categories" '.$soc_display.'><b>'.esc_html__('On Selected Categories', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_select_custom_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
