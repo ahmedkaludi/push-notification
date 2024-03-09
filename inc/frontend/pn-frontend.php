@@ -436,7 +436,10 @@ class Push_Notification_Frontend{
 	}
 	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
-		$position = $settings['notification_position'];
+		$position = "";
+		if (isset($settings['notification_position']) && !empty($settings['notification_position'])) {
+			$position = $settings['notification_position'];
+		}
 		$cssPosition = '';
 		$catArray = (isset($settings['custom_category'])) ? $settings['custom_category'] : [];
 		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
@@ -571,12 +574,12 @@ class Push_Notification_Frontend{
 				   		<div class="pn-categories-multiselect">
 				   			<div id="pn-categories-checkboxes">';
 							if($all_category){
-			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All Categories', 'push-notification').'</label>';
+			   			 		echo '<label for="all-categories" style="cursor: pointer;"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All Categories', 'push-notification').'</label>';
 							}
 							if(!empty($catArray)){
 								foreach ($catArray as $key=>$value) {
 									if (is_string($value)) {
-										echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr($value).'" />'.esc_html(get_cat_name($value)).'</label>';
+										echo '<label for="pn_category_checkbox'.esc_attr($value).'" style="cursor: pointer;"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr(get_category($value)->slug).'" />'.esc_html(get_cat_name($value)).'</label>';
 									}
 								}
 							}
