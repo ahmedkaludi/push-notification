@@ -1552,49 +1552,7 @@ class PN_Field_Generator{
 			} } ?>
 		</select><?php
 	}
-	public static function get_multi_input_checkbox($name, $value, $data, $id="", $class=""){
-		$settings = push_notification_settings();
-		$category = $settings['category'];
-		$catArray = array();
-		if(!empty($category) && is_string($category)){
-			$catArray = explode(',', $category);
-		}
-		$i=0; ?>
-<div class="checkbox_wrapper">
-	<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox_all'); ?>" <?php echo in_array('All', $catArray)?'checked':''; ?> value="<?php echo esc_attr__( 'All', 'push_notification') ?>"/>
-	<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'); ?>" value="<?php echo esc_attr__( 'All', 'push_notification') ?>" data-truevalue="<?php echo esc_attr__( 'All', 'push_notification') ?>"/>
-		<?php 
 	
-		echo '<label style="display:inline-block" for="pn_push_category_checkbox_all">'.esc_attr__( 'All', 'push_notification').'</label>';
-		?>
-</div>
-<?php	
-	 if(!empty($data)){
-		foreach ($data as $value) { 
-			$check = '';
-			if(isset($value) && !empty($catArray)){
-				if(in_array($value->name, $catArray)){
-					$check = 'checked';
-				}
-			}
-		?>
-			<div class="checkbox_wrapper">
-				<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" <?php echo esc_attr($check); ?> value="<?php echo isset($value->name)? esc_attr($value->name):''; ?>"/>
-				<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" value="<?php echo isset($value->name)?esc_attr($value->name):''; ?>" data-truevalue="<?php echo isset($value->name)?esc_attr($value->name):''; ?>"/>
-				<?php 
-				$label_text = '';
-				if(isset($value) && !empty($value)){
-					$label_text = esc_html__($value->name, 'push-notification');
-				}
-				echo '<label style="display:inline-block" for="pn_push_category_checkbox'.esc_attr($i).'">'.$label_text.'</label>';
-				?>
-			</div>
-		<?php
-		$i++;
-		}
-	  }
-	}
-
 	public static function get_input_select($name, $value, $options, $id="", $class=""){
 		$settings = push_notification_settings();
 		if( isset($settings[$name]) ){
