@@ -740,21 +740,30 @@ class Push_Notification_Admin{
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
 	}
 	public function pn_key_segment_select_callback(){		
-		$name = 'on_category';
-		$value = 1;$class = $id = 'pn_push_on_category_checkbox';
+		$notification = push_notification_settings();
+		$on_category_checked = "";
+		if (!empty($notification['on_category'])) {
+			$on_category_checked = "checked";
+		}
 		echo '<div class="pn-field_wrap">';
-			PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
-		echo '</div>';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_push_on_category_checkbox" name="push_notification_settings[on_category]"  value="1" '.esc_attr($on_category_checked).'/></div></div>';
 	}
 	public function pn_key_segment_on_categories_callback(){
 		$notification = push_notification_settings();
 		$display="style='display:none;'";
+		$segment_on_category_checked = "";
 		if(isset($notification['on_category']) && $notification['on_category']){
 			$display="style='display:block;'";
 		}
+		if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
+			$segment_on_category_checked = "checked";
+		}
 		echo "<div id='category_selector_wrapper' ".$display.">";
-			echo '<div class="pn-field_wrap">';
-				PN_Field_Generator::get_input_checkbox('segment_on_category', '1', 'pn_push_segment_on_category_checkbox', 'pn-checkbox pn_push_segment_on_category_checkbox');
+			echo '<div class="pn-field_wrap">
+			<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_push_segment_on_category_checkbox" name="push_notification_settings[segment_on_category]"  value="1" '.esc_attr($segment_on_category_checked).'/>
+				</div></div>';
 	}
 	
 	public function pn_select_specific_categories_callback(){
@@ -775,10 +784,10 @@ class Push_Notification_Admin{
 				$display_category="style=display:block;";
 				$disable_category="";
 			}
-			$selected_category = (isset($settings['custom_category'])) ? $settings['custom_category'] : [];
+			$selected_category = (isset($settings['specific_category'])) ? $settings['specific_category'] : [];
 			$category_data = push_notification_category(null,$selected_category);
 			echo "<div id='segment_category_selector_wrapper' ".esc_html($display_category).">";
-				echo '<select name="push_notification_settings[custom_category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
+				echo '<select name="push_notification_settings[specific_category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
 					foreach ($category_data as $key => $value) {
 						$selected_option ='';
 						if (in_array($value['id'],$selected_category)) {

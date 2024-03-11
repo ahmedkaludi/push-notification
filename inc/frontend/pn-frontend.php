@@ -441,7 +441,7 @@ class Push_Notification_Frontend{
 			$position = $settings['notification_position'];
 		}
 		$cssPosition = '';
-		$catArray = (isset($settings['custom_category'])) ? $settings['custom_category'] : [];
+		$catArray = (isset($settings['specific_category'])) ? $settings['specific_category'] : [];
 		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
 		
 		switch ($position) {
@@ -576,7 +576,7 @@ class Push_Notification_Frontend{
 				   		<div class="pn-categories-multiselect">
 				   			<div id="pn-categories-checkboxes">';
 							if($all_category){
-			   			 		echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value=" " />'.esc_html__('All Categories', 'push-notification').'</label>';
+			   			 		echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
 							}
 							if(!empty($catArray)){
 								foreach ($catArray as $key=>$value) {
