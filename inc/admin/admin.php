@@ -784,10 +784,10 @@ class Push_Notification_Admin{
 				$display_category="style=display:block;";
 				$disable_category="";
 			}
-			$selected_category = (isset($settings['specific_category'])) ? $settings['specific_category'] : [];
+			$selected_category = (isset($settings['category'])) ? $settings['category'] : [];
 			$category_data = push_notification_category(null,$selected_category);
 			echo "<div id='segment_category_selector_wrapper' ".esc_html($display_category).">";
-				echo '<select name="push_notification_settings[specific_category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
+				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
 					foreach ($category_data as $key => $value) {
 						$selected_option ='';
 						if (in_array($value['id'],$selected_category)) {
@@ -1268,19 +1268,13 @@ class Push_Notification_Admin{
 			    );
 			$link_url = add_query_arg( array_filter($utm_details), $link_url  );
 		}
-		$userid_arr= [];
-		$userd_ids = isset($_POST['user_ids'])? sanitize_text_field($_POST['user_ids']):'';		
-		if($userd_ids){
-			$userid_arr = explode(',',$userd_ids);
-		}
-
 		$image_url = '';
 		if(has_post_thumbnail($post_id)){
 			$image_url = esc_url_raw(get_the_post_thumbnail_url($post_id));
 		}
 		$icon_url = $push_notification_settings['notification_icon'];
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category,$userd_ids);
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category);
 		}//auth token check 	
 
 	}
