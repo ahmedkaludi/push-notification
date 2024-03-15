@@ -264,29 +264,11 @@ jQuery(document).ready(function($){
 		if(jQuery(this).prop("checked")==true){
 			jQuery("#category_selector_wrapper").show();
 			jQuery(".js_category_selector_wrapper").show();
-			if(jQuery('#pn_push_segment_on_category_checkbox').prop("checked")==true){
-				jQuery(".js_custom_category_selector_wrapper").show();
-			}
 		}else{
 			jQuery("#category_selector_wrapper").hide();
 			jQuery(".js_category_selector_wrapper").hide();
 			jQuery(".js_custom_category_selector_wrapper").hide();
 		}
-	});
-
-	jQuery('#pn_push_segment_on_category_checkbox').click(function(){
-		if(jQuery(this).prop("checked")==true){
-			jQuery("#js_category").prop('disabled',false);
-			jQuery("#js_category_hidden").prop('disabled',true);
-			jQuery("#segment_category_selector_wrapper").show();
-			jQuery(".js_custom_category_selector_wrapper").show();
-		}else{
-			jQuery(".js_custom_category_selector_wrapper").hide();
-			jQuery("#segment_category_selector_wrapper").hide();
-			jQuery("#js_category").prop('disabled',true);
-			jQuery("#js_category_hidden").prop('disabled',false);
-		}
-
 	});
 
 	jQuery(".push-notification-tabs a").click(function(e){
@@ -494,14 +476,22 @@ jQuery(document).ready(function($){
 	 if(jQuery(this).val()=='custom-select'){
 		 jQuery('#notification-custom-select').parent().show();
 		 jQuery('#notification-custom-upload').parent().hide();
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
 	 else if(jQuery(this).val()=='custom-upload'){
 		 jQuery('#notification-custom-select').parent().hide();
 		 jQuery('#notification-custom-upload').parent().show();  
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
+	 else if(jQuery(this).val()=='custom-page-subscribed'){
+		jQuery('#notification-custom-select').parent().hide();
+		jQuery('#notification-custom-upload').parent().hide();  
+		jQuery('#notification-custom-page-subscribed').parent().show();
+	}
 	 else{
 		 jQuery('#notification-custom-select').parent().hide();
 		 jQuery('#notification-custom-upload').parent().hide();  
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
 		
 	});
@@ -514,6 +504,7 @@ jQuery(document).ready(function($){
 		var message  = jQuery('#notification-message').val();
 		var send_type  = jQuery('#notification-send-type').val();
 		var select_subs  = jQuery('#notification-custom-select').val();
+		var page_subscribed  = jQuery('#notification-custom-page-subscribed').val();
 		var subs_csv  = document.getElementById('notification-custom-upload');
 		var target_ajax_url="pn_send_notification";
 		var notification_schedule  = jQuery('#notification-schedule').val();
@@ -528,7 +519,7 @@ jQuery(document).ready(function($){
 			user_ids=select_subs.join(',');
 		}
 
-		if(send_type=='custom-select' || send_type=='custom-upload' )
+		if(send_type=='custom-select' || send_type=='custom-upload' || send_type=='custom-page-subscribed' )
 		{
 			target_ajax_url = 'campaign_for_individual_tokens';
 		}
@@ -551,6 +542,7 @@ jQuery(document).ready(function($){
 				notification_schedule:notification_schedule,
 				notification_date:notification_date,
 				notification_time:notification_time,
+				page_subscribed:page_subscribed
 				},
 			success: function(response){
 				
@@ -650,133 +642,137 @@ function pnCsvToArray(str, delimiter = ",") {
 	});
   }
 
-jQuery("#notification-schedule").change(function(){
-	if(jQuery(this).val()=='yes'){
-		jQuery('#notification-date').parent().show();
-	}else{
-		jQuery('#notification-date').parent().hide();
-	}	
-});
+  jQuery(function($) {
 
-function pn_for_wp_select2(){
-    var $select2 = jQuery('.pn_category_select2');
-    
-    if($select2.length > 0){
-        jQuery($select2).each(function(i, obj) {
-            var currentP = jQuery(this);  
-            var $defaultSelected = currentP.find("option[value]:is([selected])");  
-            var $defaultResults = currentP.find("option[value]");  
-            
-            var defaultResults = [];
-            $defaultResults.each(function () {
-                var $option = jQuery(this);
-                defaultResults.push({
-                    id: $option.attr('value'),
-                    text: $option.text()
-                });
-            });
-            var defaultSelected = [];
-            $defaultSelected.each(function () {
-                var $option = jQuery(this);
-                defaultSelected.push($option.val());
-            });
-            var ajaxnewurl = ajaxurl+ '?action=pn_select2_category_data&nonce='+pn_setings.remote_nonce;
-            currentP.select2({           
-                ajax: {             
-                    url: ajaxnewurl,
-                    delay: 250, 
-                    cache: false,
-                },            
-                minimumInputLength: 2, 
-                minimumResultsForSearch : 50,
-                dataAdapter: jQuery.fn.select2.amd.require('select2/data/extended-ajax'),
-                defaultResults: defaultResults,
-                multiple: true,
-                placeholder: "Select Category"
-            });
-            currentP.val(defaultSelected).trigger("change");
+	jQuery("#notification-schedule").change(function(){
+		if(jQuery(this).val()=='yes'){
+			jQuery('#notification-date').parent().show();
+		}else{
+			jQuery('#notification-date').parent().hide();
+		}	
+	});
 
-        });
+	function pn_for_wp_select2(){
+		var $select2 = jQuery('.pn_category_select2');
+		
+		if($select2.length > 0){
+			jQuery($select2).each(function(i, obj) {
+				var currentP = jQuery(this);  
+				var $defaultSelected = currentP.find("option[value]:is([selected])");  
+				var $defaultResults = currentP.find("option[value]");  
+				
+				var defaultResults = [];
+				$defaultResults.each(function () {
+					var $option = jQuery(this);
+					defaultResults.push({
+						id: $option.attr('value'),
+						text: $option.text()
+					});
+				});
+				var defaultSelected = [];
+				$defaultSelected.each(function () {
+					var $option = jQuery(this);
+					defaultSelected.push($option.val());
+				});
+				var ajaxnewurl = ajaxurl+ '?action=pn_select2_category_data&nonce='+pn_setings.remote_nonce;
+				currentP.select2({           
+					ajax: {             
+						url: ajaxnewurl,
+						delay: 250, 
+						cache: false,
+					},            
+					minimumInputLength: 2, 
+					minimumResultsForSearch : 50,
+					dataAdapter: jQuery.fn.select2.amd.require('select2/data/extended-ajax'),
+					defaultResults: defaultResults,
+					multiple: true,
+					placeholder: "Select Category"
+				});
+				currentP.val(defaultSelected).trigger("change");
 
-    }
-}
-pn_for_wp_select2();
+			});
 
-icon_url_text =jQuery("#notification-iconurl").val();
-jQuery(".pn-notification-image").attr('src',icon_url_text);
+		}
+	}
+	pn_for_wp_select2();
 
-jQuery("#notification-title").keyup(function(){
-    title_text =jQuery(this).val();
-    
-    jQuery(".pn-notification-title").html(title_text);
-    
-});
-jQuery("#notification-message").keyup(function(){
-    desc_text =jQuery(this).val();
-    jQuery(".pn-notification-description").html(desc_text);
-});
+	jQuery(".pn-notification-image").attr('src',jQuery("#notification-iconurl").val());
 
-jQuery(".js_all").hide();
-jQuery(".pn-clickable-image").click(function(){
-    jQuery('.pn-image-container').find('.pn-clickable-image').removeClass('pn-clickable-image-selected');
-    jQuery(this).addClass('pn-clickable-image-selected');
-    template_type =jQuery(this).attr('notification_type');
-    
-    jQuery(".js_all").hide();
-    jQuery('.'+template_type).show();
+	jQuery("#notification-title").keyup(function(){
+		title_text =jQuery(this).val();
+		
+		jQuery(".pn-notification-title").html(title_text);
+		
+	});
+	jQuery("#notification-message").keyup(function(){
+		desc_text =jQuery(this).val();
+		jQuery(".pn-notification-description").html(desc_text);
+	});
 
-    icon_url = banner_url = jQuery("#js_notification_icon").attr('notification_icon');
-    // jQuery("#js_pn_banner").addClass('notification-banner');
-    banner_imageurl = jQuery("#notification-imageurl").val();
-    icon_imageurl = jQuery("#notification-iconurl").val();
+	jQuery(".js_all").hide();
+		jQuery(".pn-clickable-image").click(function(){
+			jQuery('.pn-image-container').find('.pn-clickable-image').removeClass('pn-clickable-image-selected');
+			jQuery(this).addClass('pn-clickable-image-selected');
+			template_type =jQuery(this).attr('notification_type');
+			
+			jQuery(".js_all").hide();
+			jQuery('.'+template_type).show();
 
-    if (banner_imageurl && banner_imageurl !="") {
-        banner_url = banner_imageurl;
-    }
-    if (icon_imageurl && icon_imageurl !="") {
-        icon_url = icon_imageurl;
-    }
+			icon_url = banner_url = jQuery("#js_notification_icon").attr('notification_icon');
+			// jQuery("#js_pn_banner").addClass('notification-banner');
+			banner_imageurl = jQuery("#notification-imageurl").val();
+			icon_imageurl = jQuery("#notification-iconurl").val();
 
-    if (template_type == 'message-with-banner') {
-        jQuery('#js_pn_banner').show();
-    }else if (template_type == 'message-with-icon') {
-        jQuery('#js_pn_icon').show();        
-    }else if (template_type == 'message-with-icon-and-banner') {
-        jQuery('#js_pn_icon').show();
-        jQuery('#js_pn_banner').show();
-    }
-});
-jQuery("#notification-templat").change(function(){
-    template_type =jQuery(this).val();
-    jQuery(".js_all").hide();
-    jQuery('.'+template_type).show();
+			if (banner_imageurl && banner_imageurl !="") {
+				banner_url = banner_imageurl;
+			}
+			if (icon_imageurl && icon_imageurl !="") {
+				icon_url = icon_imageurl;
+			}
 
-    icon_url = banner_url = jQuery("#js_notification_icon").attr('notification_icon');
-    banner_imageurl = jQuery("#notification-imageurl").val();
-    icon_imageurl = jQuery("#notification-iconurl").val();
+			if (template_type == 'message-with-banner') {
+				jQuery('#js_pn_banner').show();
+			}else if (template_type == 'message-with-icon') {
+				jQuery('#js_pn_icon').show();        
+			}else if (template_type == 'message-with-icon-and-banner') {
+				jQuery('#js_pn_icon').show();
+				jQuery('#js_pn_banner').show();
+			}
+		});
+		jQuery("#notification-templat").change(function(){
+			template_type =jQuery(this).val();
+			jQuery(".js_all").hide();
+			jQuery('.'+template_type).show();
 
-    if (banner_imageurl && banner_imageurl !="") {
-        banner_url = banner_imageurl;
-    }
-    if (icon_imageurl && icon_imageurl !="") {
-        icon_url = icon_imageurl;
-    }
+			icon_url = banner_url = jQuery("#js_notification_icon").attr('notification_icon');
+			banner_imageurl = jQuery("#notification-imageurl").val();
+			icon_imageurl = jQuery("#notification-iconurl").val();
 
-    if (template_type == 'message-with-banner') {
-        jQuery('#js_pn_banner').show();
-    }else if (template_type == 'message-with-icon') {
-        jQuery('#js_pn_icon').show();        
-    }else if (template_type == 'message-with-icon-and-banner') {
-        jQuery('#js_pn_icon').show();
-        jQuery('#js_pn_banner').show();
-    }
-});
+			if (banner_imageurl && banner_imageurl !="") {
+				banner_url = banner_imageurl;
+			}
+			if (icon_imageurl && icon_imageurl !="") {
+				icon_url = icon_imageurl;
+			}
 
-jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_more",function() {
-    jQuery(this).parents("td").find('.full_text').show();
-    jQuery(this).parents("td").find('.less_text').hide();
-});
-jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_less",function() {
-    jQuery(this).parents("td").find('.full_text').hide();
-    jQuery(this).parents("td").find('.less_text').show();
-});
+			if (template_type == 'message-with-banner') {
+				jQuery('#js_pn_banner').show();
+			}else if (template_type == 'message-with-icon') {
+				jQuery('#js_pn_icon').show();        
+			}else if (template_type == 'message-with-icon-and-banner') {
+				jQuery('#js_pn_icon').show();
+				jQuery('#js_pn_banner').show();
+			}
+		});
+
+		jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_more",function() {
+			jQuery(this).parents("td").find('.full_text').show();
+			jQuery(this).parents("td").find('.less_text').hide();
+		});
+		jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_less",function() {
+			jQuery(this).parents("td").find('.full_text').hide();
+			jQuery(this).parents("td").find('.less_text').show();
+		});
+
+  });
+	 

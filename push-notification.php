@@ -39,6 +39,12 @@ function push_notification_initialize(){
 	if ( class_exists( 'OneSignal' ) ) {
 		add_action('admin_notices', 'push_notification_feature_notice');
 	}
+	$pn_db_ver = get_option('push_notification_db_version',false);
+	if(!$pn_db_ver || $pn_db_ver!= PUSH_NOTIFICATION_PLUGIN_VERSION){
+		push_notification_on_install();
+		update_option('push_notification_db_version', PUSH_NOTIFICATION_PLUGIN_VERSION);
+	}
+	
 }
 
 function push_notification_feature_notice(){
@@ -57,13 +63,26 @@ function push_notification_add_action_links($actions, $plugin_file, $plugin_data
 }
 
 register_activation_hook( PUSH_NOTIFICATION_PLUGIN_FILE, 'push_notification_on_activate' );
-function push_notification_on_activate(){
+function push_notification_on_activate($network_wide){
 	/** Setup notification feature in PWA-for-wp*/
 	$pwaforwp_settings = get_option( 'pwaforwp_settings'); 
 	if(isset($pwaforwp_settings['notification_feature']) && $pwaforwp_settings['notification_feature']==0){
 		$pwaforwp_settings['notification_feature'] = 1;
 		update_option( 'pwaforwp_settings', $pwaforwp_settings,false); 
 	}
+
+	global $wpdb;
+
+    if ( is_multisite() && $network_wide ) {
+        $blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
+        foreach ( $blog_ids as $blog_id ) {
+            switch_to_blog( $blog_id );
+            push_notification_on_install();
+            restore_current_blog();
+        }
+    } else {
+        push_notification_on_install();
+    }
 
 	/**
 	 * on activation of plugin compatibile with PWA for wp
@@ -169,4 +188,43 @@ function pn_send_push_notificatioin_filter($user_id=null, $title="", $message=""
 		$response['message'] = esc_html__('User id, title, link_url and message field are required','push-notification');
 	}
 	return $response;
+}
+
+function push_notification_on_install(){
+
+	global $wpdb;
+	
+	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+	$charset_collate = $engine = '';	
+	
+	if(!empty($wpdb->charset)) {
+		$charset_collate .= " DEFAULT CHARACTER SET {$wpdb->charset}";
+	} 
+	if($wpdb->has_cap('collation') AND !empty($wpdb->collate)) {
+		$charset_collate .= " COLLATE {$wpdb->collate}";
+	}
+
+	$found_engine = $wpdb->get_var("SELECT ENGINE FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = '".DB_NAME."' AND `TABLE_NAME` = '{$wpdb->prefix}posts';");
+        
+	if(strtolower($found_engine) == 'innodb') {
+		$engine = ' ENGINE=InnoDB';
+	}
+
+	$found_tables = $wpdb->get_col("SHOW TABLES LIKE '{$wpdb->prefix}pn_token_urls%';");	
+    
+    if(!in_array("{$wpdb->prefix}pn_token_urls", $found_tables)) {
+            
+		dbDelta("CREATE TABLE `{$wpdb->prefix}pn_token_urls` (
+			`id` bigint( 20 ) unsigned NOT NULL AUTO_INCREMENT,
+			`url` varchar(250) NOT NULL,
+			`status` varchar(20) NOT NULL DEFAULT 'active',	
+			`token` varchar(250)  NOT NULL,			
+			`created_at` datetime NOT NULL,
+			`updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+			 KEY `url` ( `url` ),
+			 PRIMARY KEY (`id`)
+		) ".$charset_collate.$engine.";");                
+    }	
+
 }

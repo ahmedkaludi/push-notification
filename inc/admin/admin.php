@@ -248,13 +248,10 @@ class Push_Notification_Admin{
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
 
-			$soc_display="style='display:none;'";
-			if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
-				$soc_display="style='display:block;'";
-			}
+			
 			add_settings_field(
 				'pn_select_custom_categories',								// ID
-				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_categories" '.$soc_display.'><b>'.esc_html__('On Selected Categories', 'push-notification').'</b></label>',// Title
+				'<label class="js_custom_category_selector_wrapper" ><b>'.esc_html__('On Selected Categories', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_select_specific_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -729,7 +726,7 @@ class Push_Notification_Admin{
 	}
 
 	public function user_settings_onpublish_callback(){		
-		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
+		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish_checkbox', 'pn-checkbox pn_push_on_publish');
 	}
 
 	public function pn_key_posttype_select_callback(){		
@@ -768,29 +765,21 @@ class Push_Notification_Admin{
 	
 	public function pn_select_specific_categories_callback(){
 		$notification = push_notification_settings();
-		$display="style='display:none;'";
-		if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
-			$display="style='display:block;'";
-		}
-		echo "<div id='category_selector_wrapper' class='js_custom_category_selector_wrapper' ".$display.">";
+		
+		echo "<div id='category_selector_wrapper' class='js_custom_category_selector_wrapper'>";
 			echo '<div class="pn-field_wrap">';
 				
 
 			$settings = push_notification_settings();
 			
-			$display_category="style=display:none;";
-			$disable_category="";
-			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
-				$display_category="style=display:block;";
-				$disable_category="";
-			}
-			$selected_category = (isset($settings['specific_category'])) ? $settings['specific_category'] : [];
+			
+			$selected_category = (isset($settings['category'])) ? explode(',',$settings['category']) : [];
 			$category_data = push_notification_category(null,$selected_category);
-			echo "<div id='segment_category_selector_wrapper' ".esc_html($display_category).">";
-				echo '<select name="push_notification_settings[specific_category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
+			echo "<div id='segment_category_selector_wrapper'>";
+				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2">';
 					foreach ($category_data as $key => $value) {
 						$selected_option ='';
-						if (in_array($value['id'],$selected_category)) {
+						if (in_array($value['id'],$selected_category) ||  in_array(get_cat_name($value['id']),$selected_category)) {
 							$selected_option ='selected=selected';
 						}
 						
@@ -981,8 +970,8 @@ class Push_Notification_Admin{
 			$icon_url = isset($_POST['icon_url'])?esc_url_raw($_POST['icon_url']):$notification_settings['notification_icon'];
 			$audience_token_id = isset($_POST['audience_token_id'])?sanitize_text_field($_POST['audience_token_id']):'';
 			$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
+			$page_subscribed = isset($_POST['page_subscribed'])?sanitize_text_field($_POST['page_subscribed']):'';
 			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
-
 			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field($_POST['notification_schedule']):'';
 
 			$notification_date = isset($_POST['notification_date'])?sanitize_text_field($_POST['notification_date']):'';
@@ -994,7 +983,6 @@ class Push_Notification_Admin{
 				$audience_token_id = str_replace('\\','',$audience_token_id );
 				$audience_token_id = json_decode($audience_token_id,true);
 			}
-			
 			if(isset($notification_settings['utm_tracking_checkbox']) && $notification_settings['utm_tracking_checkbox']){
 				$utm_details = array(
 				    'utm_source'=> $notification_settings['notification_utm_source'],
@@ -1027,17 +1015,23 @@ class Push_Notification_Admin{
 							}
 							
 						}
-						
 						if(is_array($token_ids) && !empty($token_ids)){
 							$push_notify_token = array_merge($push_notify_token,$token_ids);
 						}
 						else if($token_ids){
 							$push_notify_token[]=$token_ids;
 						}
-
+					
 					}
 				
 				}
+
+				if($send_type=='custom-page-subscribed'){
+					if(!empty($page_subscribed)){
+						$push_notify_token =pn_get_tokens_by_url($page_subscribed);
+					}
+				}
+
 				$payload =array(
 					'user_token'=>$auth_settings['user_token'],
 					'title'=>$title,
@@ -1626,7 +1620,8 @@ function push_notification_pro_notifyform_before(){
 			<select id="notification-send-type" class="regular-text js_pn_select">
 				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
 				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
-				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>			
+				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>
+				<option value="custom-page-subscribed">'.esc_html__('Page subscribed','push-notification').'</option>			
 			</select>
 		  </div>';
 		  
@@ -1645,6 +1640,20 @@ function push_notification_pro_notifyform_before(){
 			}			
 		echo' </select>
 		  </div>';
+		  $pn_token_urls = pn_get_all_unique_meta();
+
+		  echo '<div class="form-group" style="display:none">
+		  <label for="notification-custom-page-subscribed">'.esc_html__('Select Page Subscribed','push-notification').'</label>
+		  <select id="notification-custom-page-subscribed" class="regular-text js_pn_select" placeholder="'.esc_html__('Select Page','push-notification').'">';
+		  if(!empty($pn_token_urls)){
+			  foreach($pn_token_urls as $url){
+				  echo '<option value="'.esc_url($url).'" data-url="'.basename($url).'">'.esc_attr(pn_get_page_title_by_url($url)).'</option>';			
+			  }
+		  }else{
+			echo '<option value="">'.esc_html__('No Subscribed Page Found','push-notification').'</option>';	
+		  }			
+	  echo' </select>
+		</div>';
 		  
 		echo '<div class="form-group" style="display:none">
 				<label for="notification-custom-upload">'.esc_html__('Upload subscriber list', 'push-notification').'</label>
@@ -1680,10 +1689,11 @@ function push_notification_category($search,$saved_data){
 	
 	$get_option = get_terms( 'category', $args);
 	$only_ids = [];
+	$result = [];
 	if(!empty($get_option) && is_array($get_option)){   
 		foreach ($get_option as $options_array) {
 			$only_ids[] =$options_array->term_id;
-			$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name);
+			$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name  );
 		}
 	}
 	if(!empty($saved_data)){             
@@ -1691,7 +1701,7 @@ function push_notification_category($search,$saved_data){
 		$selected_cats = get_terms($args);
 		foreach ($selected_cats as $options_array) {
 			if (!in_array($options_array->term_id,$only_ids)) {
-				$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name);
+				$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name );
 			}
 		}
 	}
@@ -1715,4 +1725,53 @@ function pn_select2_category_data(){
 	wp_send_json(['results' => $result] );
 	wp_die();
 }
+
 add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data');
+
+function pn_get_all_unique_meta(){
+global $wpdb;
+
+// Query to get all unique values of user meta key "pnwoo_notification_token"
+$unique_tokens = $wpdb->get_col(
+    $wpdb->prepare(
+        "
+		SELECT DISTINCT url
+        FROM %i
+        WHERE status = %s
+        ",
+		$wpdb->prefix.'pn_token_urls',
+		'active'
+    )
+);
+$unique_urls=[];
+foreach ($unique_tokens as $key => $value) {
+	$is_found = array_search($value,$unique_urls);
+	if ($is_found === false) {	
+		$unique_urls[]=$value;
+	}
+}
+return $unique_urls;
+}
+
+function pn_get_page_title_by_url( $page_url = null ){
+$page_id =url_to_postid($page_url);
+if ($page_id) {
+    // Get the page title
+    $page_title = get_the_title($page_id);
+   return $page_title;
+} 
+if($page_url ==  home_url()){
+	return esc_html__('Home','push-notification');
+}
+return $page_url;
+}
+
+function pn_get_tokens_by_url($url) {
+    if (version_compare(PUSH_NOTIFICATION_PLUGIN_VERSION, '1.31', '>')) {
+		global $wpdb; 
+		$tokens = $wpdb->get_col($wpdb->prepare("SELECT token FROM {$wpdb->prefix}pn_token_urls WHERE url = %s", $url));
+		return $tokens;
+	}
+
+	return [];
+}

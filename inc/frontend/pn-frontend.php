@@ -76,7 +76,7 @@ class Push_Notification_Frontend{
 
 		//Woocommerce order status Compatibility
 		//Store token ID
-		add_action('pn_tokenid_registration_id', array($this, 'store_user_registered_tokens'), 10, 5);
+		add_action('pn_tokenid_registration_id', array($this, 'store_user_registered_tokens'), 10, 6);
 	}
 	public static function update_autoptimize_exclude( $values, $option ){
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js')){
@@ -273,6 +273,7 @@ class Push_Notification_Frontend{
 			$user_agent = sanitize_text_field($_POST['user_agent']);
 			$category = sanitize_text_field($_POST['category']);
 			$os = sanitize_text_field($_POST['os']);
+			$url = sanitize_url($_POST['url']);
 			$ip_address = $this->get_the_user_ip();
 			if(empty($token_id)){
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('token_id is blank', 'push-notification')));
@@ -287,7 +288,7 @@ class Push_Notification_Frontend{
 				$user_agent = $this->check_browser_type();
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
-			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address);
+			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address,$url);
 			wp_send_json($response);
 		
 	}
@@ -441,7 +442,7 @@ class Push_Notification_Frontend{
 			$position = $settings['notification_position'];
 		}
 		$cssPosition = '';
-		$catArray = (isset($settings['specific_category'])) ? $settings['specific_category'] : [];
+		$catArray = (isset($settings['category'])) ? explode(',',$settings['category']) : [];
 		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
 		
 		switch ($position) {
@@ -580,9 +581,16 @@ class Push_Notification_Frontend{
 							}
 							if(!empty($catArray)){
 								foreach ($catArray as $key=>$value) {
-									if (is_string($value)) {
-										echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr(get_category($value)->slug).'" />'.esc_html(get_cat_name($value)).'</label>';
+									if($value == 'All'){
+										continue;
 									}
+									$cat_id = get_cat_ID($value);
+									if($cat_id){
+										echo '<label for="pn_category_checkbox_'.esc_attr($cat_id).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($cat_id).'" value="'.esc_attr(get_category($cat_id)->slug).'" />'.esc_html(get_cat_name($cat_id)).'</label>';
+									}else{
+										echo '<label for="pn_category_checkbox_'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr(get_category($value)).'" />'.esc_html(get_cat_name($value)).'</label>';
+									}
+									
 								}
 							}
 				   			echo '</div>
@@ -601,9 +609,10 @@ class Push_Notification_Frontend{
 	 * @param  String                       $user_agent Type of browser
 	 * @param  String                       $os         optional 
 	 * @param  String                       $ip_address optional Grab the client ipaddress dummy
+	 * @param  String                       $url optional 
 	 * @return Void                                   [description]
 	 */
-	function store_user_registered_tokens($token_id, $response, $user_agent, $os, $ip_address){
+	function store_user_registered_tokens($token_id, $response, $user_agent, $os, $ip_address,$url){
 		$userData = wp_get_current_user();
 		if(is_object($userData) && isset($userData->ID)){
 			$userid = $userData->ID;
@@ -611,6 +620,11 @@ class Push_Notification_Frontend{
 		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): array();
 		 	$token_ids[] = esc_attr($response['data']['id']);
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
+			$pn_save_url_token = apply_filters('push_notification_url_tokens',$url,true);
+			if($pn_save_url_token){
+				$this->pn_add_url_token(esc_url($url),esc_attr($response['data']['id']));
+			}
+			
 		}
 	}
 	function amp_header_button_css(){
@@ -630,6 +644,26 @@ class Push_Notification_Frontend{
 			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
 			$swJsContent .= PHP_EOL.$messageSw;
 		    return $swJsContent;
+	}
+
+	function pn_add_url_token($url, $token) {
+		global $wpdb; 
+
+		if(!$url || !$token) {
+			return false;
+		}
+		if (version_compare(PUSH_NOTIFICATION_PLUGIN_VERSION, '1.31', '>')) {
+			return $wpdb->insert(
+				$wpdb->prefix.'pn_token_urls',
+				array(
+					'url' => esc_url($url),
+					'status' => 'active',
+					'token' => $token,
+					'created_at' => current_time('mysql'),
+					'updated_at' => current_time('mysql')
+				)
+			);
+		}
 	}
 }
 
