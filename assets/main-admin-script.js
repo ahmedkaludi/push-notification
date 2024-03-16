@@ -200,8 +200,7 @@ jQuery(document).ready(function($){
 			method: "post",
 			dataType: 'json',
 			data: { action: "pn_revoke_keys", nonce: pn_setings.remote_nonce },
-			success: function(response){
-				
+			success: function(response){				
 				if(response.status==200){
 					self.after("&nbsp; "+response.message);
 					
@@ -265,18 +264,17 @@ jQuery(document).ready(function($){
 		if(jQuery(this).prop("checked")==true){
 			jQuery("#category_selector_wrapper").show();
 			jQuery(".js_category_selector_wrapper").show();
+			jQuery(".js_custom_category_selector_wrapper").show();
+			jQuery("#segment_category_selector_wrapper").show();
+			
 		}else{
 			jQuery("#category_selector_wrapper").hide();
 			jQuery(".js_category_selector_wrapper").hide();
+			jQuery(".js_custom_category_selector_wrapper").hide();
+			jQuery("#segment_category_selector_wrapper").hide();
 		}
 	});
 
-	jQuery('#pn_push_segment_on_category_checkbox').click(function(){
-		if(jQuery(this).prop("checked")==true){
-			jQuery("#segment_category_selector_wrapper").show();
-		}else{jQuery("#segment_category_selector_wrapper").hide();}
-
-	});
 
 	jQuery(".push-notification-tabs a").click(function(e){
 	        e.preventDefault();
@@ -453,6 +451,8 @@ jQuery(document).ready(function($){
         .on("select", function() {
             var attachment = pwaforwpMediaUploader.state().get("selection").first().toJSON();
             jQuery("#notification-imageurl").val(attachment.url);
+            jQuery("#js_pn_banner").addClass('notification-banner');
+			jQuery('.notification-banner').css('background-image','url('+attachment.url+')');
         })
         .open();
     });
@@ -470,6 +470,8 @@ jQuery(document).ready(function($){
         .on("select", function() {
             var attachment = pwaforwpMediaUploader.state().get("selection").first().toJSON();
             jQuery("#notification-iconurl").val(attachment.url);
+            jQuery("#js_pn_icon").css('background-image','url('+attachment.url+')');
+			
         })
         .open();
     });
@@ -641,4 +643,127 @@ jQuery("#notification-schedule").change(function(){
 	}else{
 		jQuery('#notification-date').parent().hide();
 	}	
+});
+
+function pn_for_wp_select2(){
+    var $select2 = jQuery('.pn_category_select2');
+    
+    if($select2.length > 0){
+        jQuery($select2).each(function(i, obj) {
+            var currentP = jQuery(this);  
+            var $defaultSelected = currentP.find("option[value]:is([selected])");  
+            var $defaultResults = currentP.find("option[value]");  
+            
+            var defaultResults = [];
+            $defaultResults.each(function () {
+                var $option = jQuery(this);
+                defaultResults.push({
+                    id: $option.attr('value'),
+                    text: $option.text()
+                });
+            });
+            var defaultSelected = [];
+            $defaultSelected.each(function () {
+                var $option = jQuery(this);
+                defaultSelected.push($option.val());
+            });
+            var ajaxnewurl = ajaxurl+ '?action=pn_select2_category_data&nonce='+pn_setings.remote_nonce;
+            currentP.select2({           
+                ajax: {             
+                    url: ajaxnewurl,
+                    delay: 250, 
+                    cache: false,
+                },            
+                minimumInputLength: 2, 
+                minimumResultsForSearch : 50,
+                dataAdapter: jQuery.fn.select2.amd.require('select2/data/extended-ajax'),
+                defaultResults: defaultResults,
+                multiple: true,
+                placeholder: "Select Category"
+            });
+            currentP.val(defaultSelected).trigger("change");
+
+        });
+
+    }
+}
+pn_for_wp_select2();
+
+icon_url_text =jQuery("#notification-iconurl").val();
+jQuery(".pn-notification-image").attr('src',icon_url_text);
+
+jQuery("#notification-title").keyup(function(){
+    title_text =jQuery(this).val();
+    
+    jQuery(".pn-notification-title").html(title_text);
+    
+});
+jQuery("#notification-message").keyup(function(){
+    desc_text =jQuery(this).val();
+    jQuery(".pn-notification-description").html(desc_text);
+});
+
+jQuery(".js_all").hide();
+jQuery(".pn-clickable-image").click(function(){
+    jQuery('.pn-image-container').find('.pn-clickable-image').removeClass('pn-clickable-image-selected');
+    jQuery(this).addClass('pn-clickable-image-selected');
+    template_type =jQuery(this).attr('notification_type');
+    
+    jQuery(".js_all").hide();
+    jQuery('.'+template_type).show();
+
+    icon_url = banner_url = jQuery("#js_notification_icon").attr('notification_icon');
+    // jQuery("#js_pn_banner").addClass('notification-banner');
+    banner_imageurl = jQuery("#notification-imageurl").val();
+    icon_imageurl = jQuery("#notification-iconurl").val();
+
+    if (banner_imageurl && banner_imageurl !="") {
+        banner_url = banner_imageurl;
+    }
+    if (icon_imageurl && icon_imageurl !="") {
+        icon_url = icon_imageurl;
+    }
+
+    if (template_type == 'message-with-banner') {
+        jQuery('#js_pn_banner').show();
+    }else if (template_type == 'message-with-icon') {
+        jQuery('#js_pn_icon').show();        
+    }else if (template_type == 'message-with-icon-and-banner') {
+        jQuery('#js_pn_icon').show();
+        jQuery('#js_pn_banner').show();
+    }
+});
+jQuery("#notification-templat").change(function(){
+    template_type =jQuery(this).val();
+    jQuery(".js_all").hide();
+    jQuery('.'+template_type).show();
+
+    icon_url = banner_url = jQuery("#js_notification_icon").attr('notification_icon');
+    banner_imageurl = jQuery("#notification-imageurl").val();
+    icon_imageurl = jQuery("#notification-iconurl").val();
+
+    if (banner_imageurl && banner_imageurl !="") {
+        banner_url = banner_imageurl;
+    }
+    if (icon_imageurl && icon_imageurl !="") {
+        icon_url = icon_imageurl;
+    }
+
+    if (template_type == 'message-with-banner') {
+        jQuery('#js_pn_banner').show();
+    }else if (template_type == 'message-with-icon') {
+        jQuery('#js_pn_icon').show();        
+    }else if (template_type == 'message-with-icon-and-banner') {
+        jQuery('#js_pn_icon').show();
+        jQuery('#js_pn_banner').show();
+    }
+});
+
+jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_more",function() {
+    jQuery(this).parents("td").find('.full_text').show();
+    jQuery(this).parents("td").find('.less_text').hide();
+});
+jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_less",function() {
+    jQuery(this).parents("td").find('.full_text').hide();
+    jQuery(this).parents("td").find('.less_text').show();
 });

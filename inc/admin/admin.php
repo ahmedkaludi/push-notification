@@ -18,8 +18,7 @@ class Push_Notification_Admin{
 		add_action( 'wp_ajax_pn_refresh_user', array( $this, 'pn_refresh_api_key' ) ); 
 		add_action( 'wp_ajax_pn_revoke_keys', array( $this, 'pn_revoke_keys' ) ); 
 		add_action( 'wp_ajax_pn_subscribers_data', array( $this, 'pn_subscribers_data' ) ); 
-		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 
-		add_action( 'wp_ajax_pn_send_notification_on_category', array( $this, 'pn_send_notification_on_category' ) ); 
+		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 		
 		add_action('wp_ajax_pn_send_query_message', 'pn_send_query_message');
 		add_action('wp_ajax_pn_get_compaigns', array( $this, 'pn_get_compaigns' ));
 		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
@@ -101,10 +100,17 @@ class Push_Notification_Admin{
 		if($hook_suffix=='toplevel_page_push-notification'){
 			wp_enqueue_media();
 			$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
+			
 			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-style{$min}.css", array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
 			wp_enqueue_style('push-notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all' );
-		    wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array(),PUSH_NOTIFICATION_PLUGIN_VERSION );
+			wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array(),PUSH_NOTIFICATION_PLUGIN_VERSION );
+			wp_enqueue_script('select2-extended-script', PUSH_NOTIFICATION_PLUGIN_URL. 'assets/select2-extended.min.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
+
+			wp_enqueue_script('pn-meteremoji', PUSH_NOTIFICATION_PLUGIN_URL."assets/meterEmoji.min.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+			wp_enqueue_script('pn-emoji-custom', PUSH_NOTIFICATION_PLUGIN_URL."assets/emoji-custom.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+			
+			
 	
 			 if ( is_multisite() ) {
 	            $link = get_site_url();              
@@ -177,7 +183,7 @@ class Push_Notification_Admin{
 								echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
 							}
 						}
-						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
 					?>
@@ -224,7 +230,7 @@ class Push_Notification_Admin{
 					 'push_notification_segment_settings_section');
 			add_settings_field(
 				'pn_key_segment_select',								// ID
-				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Select segmentation for notification', 'push-notification').'</b></label>',// Title
+				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_segment_select_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -236,8 +242,20 @@ class Push_Notification_Admin{
 			}
 			add_settings_field(
 				'pn_key_segment_on_categories',								// ID
-				'<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>'.esc_html__('Segment on Categories', 'push-notification').'</b></label>',// Title
+				'<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>'.esc_html__('On All Categories', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_segment_on_categories_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
+			$soc_display="style='display:none;'";
+			if(isset($notification['on_category']) && $notification['on_category']){
+				$soc_display="style='display:block;'";
+			}
+			add_settings_field(
+				'pn_select_custom_categories',								// ID
+				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_categories" '.$soc_display.'><b>'.esc_html__('On Selected Categories', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_select_specific_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
@@ -352,6 +370,32 @@ class Push_Notification_Admin{
 
 	}
 
+	function mobile_notification_preview(){
+		echo '<div class="pn-iphone">
+        			<div class="pn-notch"></div>
+					<div class="pn-screen">
+						
+						<div class="pn-notification-container">
+							<div class="pn-web-container">
+								
+								<span class="pn-bell-icon"></span>
+								<div class="pn-web-name">pushnotifications.io</div>
+								<span class="dashicons dashicons-arrow-up-alt2 pn-arrow_icon"></span>
+							</div>
+							
+							<div class="pn-notification-header">
+								<div class="pn-notification-content">
+									<div class="pn-notification-title">'.esc_html__('Notification Title','push-notification').'</div>
+									<div class="pn-notification-description">'.esc_html__('This is the content of the push notification. You can customize it based on your needs','push-notification').'.</div>
+								</div>
+								<div class="pn-image-icon js_all" id="js_pn_icon"></div>
+							</div>
+							<div class="pn-notification-banner js_all" id="js_pn_banner"></div>
+						</div>
+					</div>
+    			</div>';
+	}
+
 	function shownotificationData(){
 		$auth_settings = push_notification_auth_settings();
 		$detail_settings = push_notification_details_settings();
@@ -379,9 +423,10 @@ class Push_Notification_Admin{
 		if(isset($detail_settings['subscriber_count'])){ $subscriber_count = $detail_settings['subscriber_count']; }
 		if(isset($detail_settings['active_count'])){ $active_count = $detail_settings['active_count']; }
 		if(isset($detail_settings['expired_count'])){ $expired_count = $detail_settings['expired_count']; }
+		
 		echo '<div id="pn_dashboard" style="display:none;" class="pn-tabs">
 		<section class="pn_general_wrapper">
-				<div class="action-wrapper"> '.esc_html__($updated_at, 'push-notification').' <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update">'.esc_html__('Refresh data', 'push-notification').'</button>
+				<div class="action-wrapper"><span style="line-height: 1.4;"> '.esc_html($updated_at).'</span> <button type="button" class="button" id="grab-subscribers-data" class="dashicons dashicons-update" >'.esc_html__('Refresh data', 'push-notification').'</button>
 				</div>
 				<div class="pn-content">
 					<div class="pn-card-wrapper">
@@ -427,29 +472,38 @@ class Push_Notification_Admin{
 				echo '</div></section>
 			</div>';
 		}
-		echo '<br/><br/><div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
-					<div id="dashboard_right_now" class="postbox " >
-						<h2 class="hndle">'.esc_html__('Send Custom Notification', 'push-notification').'</h2>
-						<div class="inside">
+		echo '<br/><br/>
+			<div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
+					<div id="dashboard_right_now" class="postbox" >
+						<h2 class="pn_select_design" style="margin-top:6px;">'.esc_html__('Select push notification design', 'push-notification').'</h2>
+						<div class="pn-image-container">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m.png" alt="Image 1" class="pn-clickable-image pn-clickable-image-selected" notification_type="message">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m_i.png" alt="Image 2" class="pn-clickable-image" notification_type="message-with-icon">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m_b.png" alt="Image 3" class="pn-clickable-image" notification_type="message-with-banner">
+							<img src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/m_i_b.png" alt="Image 1" class="pn-clickable-image" notification_type="message-with-icon-and-banner">
+						</div>
+						<div class="inside device-container-test">
+						<div class="pn-form-part">
 							<div class="main">';
 							do_action('push_notification_pro_notifyform_before');
 							echo '<div class="form-group">
 									<label for="notification-title">'.esc_html__('Title','push-notification').'</label>
-									<input type="text" id="notification-title" class="regular-text">
+									<input type="text" id="notification-title" class="regular-text js_pn_custom" data-meteor-emoji="true">
 								</div>
 								<div class="form-group">
 									<label for="notification-link">'.esc_html__('Link', 'push-notification').'</label>
-									<input type="text" id="notification-link" class="regular-text">
+									<input type="text" id="notification-link" class="regular-text js_pn_custom">
 								</div>
-								<div class="form-group">
+								<input type="hidden" id="js_notification_icon" notification_icon="'.esc_url_raw($notification_settings['notification_icon']).'" />
+								<div class="form-group message-with-icon message-with-icon-and-banner js_all">
 									<label for="notification-link">'.esc_html__('Icon url', 'push-notification').'</label>
-									<input type="text" id="notification-iconurl" class="regular-text"  value="'.esc_url_raw($notification_settings['notification_icon']).'">
+									<input type="text" id="notification-iconurl" class="regular-text"  value="">
 									<button type="button" class="button upload_icon_url" data-editor="content">
-									<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>'.esc_html__('Upload an Icon', 'push-notification').'
+									<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span>'.esc_html__(' Upload an Icon', 'push-notification').'
 								</button>
 								</div>
 
-								<div class="form-group">
+								<div class="form-group message-with-banner message-with-icon-and-banner js_all">
 									<label for="notification-imageurl">'.esc_html__('Banner url', 'push-notification').'</label>
 									<input type="text" id="notification-imageurl" class="regular-text">
 									<button type="button" class="button upload_image_url" data-editor="content">
@@ -458,14 +512,15 @@ class Push_Notification_Admin{
 								</div>
 								<div class="form-group">
 									<label for="notification-message">'.esc_html__('Message', 'push-notification').'</label>
-									<textarea type="text" id="notification-message" class="regular-text"></textarea>
+									<textarea type="text" rows="3" id="notification-message" class="regular-text js_pn_custom" data-meteor-emoji="true"></textarea>
 								</div>
 								<div class="submit inline-edit-save">
 									<input type="button" class="button pn-submit-button" id="'.apply_filters('push_notification_submit_id','pn-send-custom-notification').'" value="'.esc_html__('Send Notification', 'push-notification').'"><span class="spinner"></span>
 									<div class="pn-send-messageDiv"></div>
 								</div>
-							</div>
-						</div>
+							</div></div><div class="pn-iphone-device-part">';
+							$this->mobile_notification_preview();
+						echo'</div></div>
 					</div>
 				</div>
 				<div id="pn_campaings" style="display:none;" class="pn-tabs">
@@ -480,21 +535,35 @@ class Push_Notification_Admin{
 						<thead>
 							<tr>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th>'.esc_html__('Message title', 'push-notification').'</th>
-								<th>'.esc_html__('Sent on', 'push-notification').'</th>
-								<th>'.esc_html__('Status', 'push-notification').'</th>
-								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
-								<th>'.esc_html__('Rate', 'push-notification').'</th>
-								<th>'.esc_html__('Clicks', 'push-notification').'</th>
+								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
+								<th>'.esc_html__('Message', 'push-notification').'</th>
+								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
+								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
 						$current_count_start = 0;
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
+								$message = strip_tags($campaign['message']);
+								if (strlen($message) > 100) {
+									$stringCut = substr($message, 0, 100);
+									$endPoint = strrpos($stringCut, ' ');
+									$message = $endPoint? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
+									$message = nl2br($message);
+									$message .= '... <a href="javascript:void(0)" class="pn_js_read_more">'.esc_html__('read more', 'push-notification').'</a>';
+								}else{
+									$message = nl2br($campaign['message']);
+								}
 								echo '<tr>
 									<td>'.esc_html($current_count_start+= 1).'</td>
 									<td>'.esc_html($campaign['title']).'</td>
+									<td><p class="less_text">'.$message.'</p>                        
+									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
+									</p></td>
 									<td>'.esc_html($campaign['created_at'] ).'</td>
 									<td>';
 									if ($campaign['status'] === 'Done') {
@@ -504,7 +573,7 @@ class Push_Notification_Admin{
 									}else{
 										echo '<span class="badge badge-pill badge-secondary" style="color:blue">'.esc_html($campaign['status']).'</span>';
 									}
-								echo'</td><td>';
+								echo'</td><td align="center">';
 								 	$resposeData = array();
 								 	$clickCount = 0;
 	                                if(isset($campaign['campaign_response'][0])){
@@ -525,10 +594,10 @@ class Push_Notification_Admin{
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										echo number_format($rate, 2, '.', ',')."%";
-										echo "<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										echo "<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}else{
 										echo "0%";
-										echo "<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										echo "<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}
 									echo'</td><td>';
 									echo esc_html($clickCount);
@@ -646,7 +715,7 @@ class Push_Notification_Admin{
 				echo "<span class='text-success resp_message' style='color:green;'>".esc_html__('User Verified', 'push-notification')."</span><br/><br/>";				
 			}
 		
-			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' >".esc_html__('Revoke key', 'push-notification')."</button>";
+			echo "<button type='button' class='button dashicons-before dashicons-no-alt pn-submit-button' id='pn-remove-apikey' style='line-height: 1.4;' >".esc_html__('Revoke key', 'push-notification')."</button>";
 		}
 		if(!empty($authData['token_details']['validated']) && $authData['token_details']['validated']=='1'){
 			echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Refresh', 'push-notification')."</button>";
@@ -659,47 +728,70 @@ class Push_Notification_Admin{
 		PN_Field_Generator::get_input('notification_icon', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
 	}
 
-	public function user_settings_onpublish_callback(){
-		$notification = push_notification_settings();
+	public function user_settings_onpublish_callback(){		
 		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
 	}
 
-	public function pn_key_posttype_select_callback(){
-		$notification = push_notification_settings();
+	public function pn_key_posttype_select_callback(){		
 		$data = get_post_types();
 		if(is_array($data) && !empty($data)){
 			$data = array_merge(array('none'=>'None'), $data);
 		}
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
 	}
-	public function pn_key_segment_select_callback(){
+	public function pn_key_segment_select_callback(){		
 		$notification = push_notification_settings();
-		$name = 'on_category';
-		$value = 1;$class = $id = 'pn_push_on_category_checkbox';
+		$on_category_checked = "";
+		if (!empty($notification['on_category'])) {
+			$on_category_checked = "checked";
+		}
 		echo '<div class="pn-field_wrap">';
-			PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
-		echo '</div>';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_push_on_category_checkbox" name="push_notification_settings[on_category]"  value="1" '.esc_attr($on_category_checked).'/></div></div>';
 	}
 	public function pn_key_segment_on_categories_callback(){
+		$notification = push_notification_settings();
+		$display="style='display:none;'";
+		$segment_on_category_checked = "";
+		if(isset($notification['on_category']) && $notification['on_category']){
+			$display="style='display:block;'";
+		}
+		if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
+			$segment_on_category_checked = "checked";
+		}
+		echo "<div id='category_selector_wrapper' ".$display.">";
+			echo '<div class="pn-field_wrap">
+			<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_push_segment_on_category_checkbox" name="push_notification_settings[segment_on_category]"  value="1" '.esc_attr($segment_on_category_checked).'/>
+				</div></div>';
+	}
+	
+	public function pn_select_specific_categories_callback(){
 		$notification = push_notification_settings();
 		$display="style='display:none;'";
 		if(isset($notification['on_category']) && $notification['on_category']){
 			$display="style='display:block;'";
 		}
-		echo "<div id='category_selector_wrapper' ".$display.">";
+		echo "<div id='category_selector_wrapper' class='js_custom_category_selector_wrapper' ".$display.">";
 			echo '<div class="pn-field_wrap">';
-				PN_Field_Generator::get_input_checkbox('segment_on_category', '1', 'pn_push_segment_on_category_checkbox', 'pn-checkbox pn_push_segment_on_category_checkbox');
-			echo '</div>';
-			$display_category="style='display:none;'";
-			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
-				$display_category="style='display:block;'";
-			}
-			echo "<div id='segment_category_selector_wrapper' ".$display_category.">";
-				$data = get_categories();
-				PN_Field_Generator::get_multi_input_checkbox('category_checkbox', '1', $data, '', '', 'pn-checkbox pn_push_category_checkbox', '');
-				PN_Field_Generator::get_input_category('category', 'pn_push_segment_category_input', '');
-			echo '</div>
-		</div>';
+				
+
+			$settings = push_notification_settings();
+			
+			$category_val = isset($settings['category'])?$settings['category']:array();
+			$selected_category = !is_array($category_val) ? explode(',',$category_val ) : $category_val;
+			$category_data = push_notification_category(null,$selected_category);
+			echo "<div id='segment_category_selector_wrapper'>";
+				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2">';
+					foreach ($category_data as $key => $value) {
+						$selected_option ='';
+						if (in_array($value['id'],$selected_category) ||  in_array(get_cat_name($value['id']),$selected_category)) {
+							$selected_option ='selected=selected';
+						}
+						
+						echo '<option value="'.esc_attr($value['id']).'"  '.esc_attr($selected_option).'>'. esc_html($value['text']).'</option>';
+					}
+			echo '</select></div></div>';
 	}
 	public function pn_utm_tracking_callback(){
 		$notification = push_notification_settings();
@@ -728,8 +820,7 @@ class Push_Notification_Admin{
 			echo '</div>';
 		echo "</div>";
 	}
-	public function pn_key_position_select_callback(){
-		$notification = push_notification_settings();
+	public function pn_key_position_select_callback(){		
 		$data = array(
 			'top-left'=> esc_html__('Top left', 'push-notification'),
 			'top-right'=> esc_html__('Top right', 'push-notification'),
@@ -738,36 +829,30 @@ class Push_Notification_Admin{
 		);
 		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
 	}
-	public function pn_key_banner_message_callback(){
-		$notification = push_notification_settings();
+	public function pn_key_banner_message_callback(){		
 		PN_Field_Generator::get_input('popup_banner_message', 'popup_banner_message_id');
 	}
 
-	public function pn_key_banner_accept_btn_callback(){
-		$notification = push_notification_settings();
+	public function pn_key_banner_accept_btn_callback(){		
 		PN_Field_Generator::get_input('popup_banner_accept_btn', 'popup_banner_accept_btn_id');
 	}
-	public function pn_key_banner_decline_btn_callback(){
-		$notification = push_notification_settings();
+	public function pn_key_banner_decline_btn_callback(){		
 		PN_Field_Generator::get_input('popup_banner_decline_btn', 'popup_banner_decline_btn_id');
 	}
 	public function pn_key_popupshowagain_callback(){
 		PN_Field_Generator::get_input('notification_popup_show_again', 'notification_popup_show_again', '');
 		echo "<p class='help'> ".esc_html__('Show Popup again after decline by the user (in Days)', 'push-notification')." </p>";
 	}
-	public function pn_key_popupshowafternseconds_callback(){
-		$notification = push_notification_settings();
+	public function pn_key_popupshowafternseconds_callback(){		
 		PN_Field_Generator::get_input('notification_popup_show_afternseconds', 'notification_popup_show_afternseconds', '');
 		echo "<p class='help'> ".esc_html__('Show Popup after n seconds (in Seconds)', 'push-notification')." </p>";
 	}
-	public function pn_key_popupshowafternpageview_callback(){
-		$notification = push_notification_settings();
+	public function pn_key_popupshowafternpageview_callback(){		
 		PN_Field_Generator::get_input('notification_popup_show_afternpageview', 'notification_popup_show_afternpageview', '');
 		echo "<p class='help'> ".esc_html__('Show Popup after nth page view (Default 1)', 'push-notification')." </p>";
 	}
 
-	public function user_notification_order_change_callback(){
-		$notification = push_notification_settings();
+	public function user_notification_order_change_callback(){		
 		PN_Field_Generator::get_input_checkbox('notification_on_order_change_to_user', 1, 'send_notification_to_user_order', "", esc_html__("To User", 'push-notification'));
 		PN_Field_Generator::get_input_checkbox('notification_on_order_change_to_admin', 1, 'send_notification_to_admin_order', "", esc_html__("To Admin", 'push-notification'));
 		echo "<p class='description'>".esc_html__('Send notification when order status will change',"push-notification")."</p>";
@@ -822,18 +907,31 @@ class Push_Notification_Admin{
 		
 	}
 	public function pn_revoke_keys(){
-		$nonce = sanitize_text_field($_POST['nonce']);
+		
+		$request_response = array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification'));
 		if(empty( $_POST['nonce'])){
-			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json($request_response);
 		}
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
-			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			wp_send_json($request_response);
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
-				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				wp_send_json($request_response);
 			}
-			delete_option('push_notification_auth_settings');
-			wp_send_json(array("status"=> 200, 'message'=>esc_html__('API key removed successfully', 'push-notification')));
+			$auth_settings = push_notification_auth_settings();
+			if (isset($auth_settings['user_token']) && !empty($auth_settings['user_token'])) {
+				$user_token = $auth_settings['user_token'];
+				$server_response = PN_Server_Request::inactivateWebsite($user_token);
+				if ($server_response['status']) {
+					delete_option('push_notification_auth_settings');
+					$request_response['status'] = 200;
+					$request_response['server_response'] = $server_response;
+					$request_response['message'] = esc_html__('API key removed successfully', 'push-notification');
+				}else{
+					$request_response['server_response'] = $server_response;
+				}
+			}
+			wp_send_json($request_response);
 		}
 	}
 
@@ -963,8 +1061,7 @@ class Push_Notification_Admin{
 	}
 
 	public function send_notification_on_update($new_status, $old_status, $post){
-		$pn_settings = push_notification_settings();
-		$auth_settings = push_notification_auth_settings();
+		$pn_settings = push_notification_settings();		
 		if ( 'publish' !== $new_status ){
         	return;
 		}
@@ -973,12 +1070,12 @@ class Push_Notification_Admin{
 		}
 		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
 			return;
-		}		
-
-		$send_notification = false;
-		$post_meta = $_POST;
-	
-		if(!$send_notification && isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_meta['pn_send_notification_on_post']) || $post_meta['pn_send_notification_on_post'] !== 1)){
+		}				
+		$post_notf_on = '';
+		if(isset($_POST['pn_send_notification_on_post'])){
+			$post_notf_on = sanitize_text_field($_POST['pn_send_notification_on_post']);
+		}			
+		if(isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_notf_on) || $post_notf_on !== 1)){
 			if ( $new_status !== $old_status) {
 			 	$this->send_notification($post);
 			}
@@ -986,8 +1083,7 @@ class Push_Notification_Admin{
 
 	}
 
-	public function pn_get_compaigns(){
-		$page = sanitize_text_field($_POST['page']);
+	public function pn_get_compaigns(){		
 		if(empty( $_POST['nonce'])){
 			return;	
 		}
@@ -997,6 +1093,7 @@ class Push_Notification_Admin{
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;	
 		}
+		$page = sanitize_text_field($_POST['page']);
 		$authData = push_notification_auth_settings();
 		if ($authData['token_details']['validated']!=1 ){
 			return;  
@@ -1011,21 +1108,36 @@ class Push_Notification_Admin{
 						<thead>
 							<tr>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th>'.esc_html__('Message title', 'push-notification').'</th>
-								<th>'.esc_html__('Sent on', 'push-notification').'</th>
-								<th>'.esc_html__('Status', 'push-notification').'</th>
-								<th>'.esc_html__('Subscribers', 'push-notification').'</th>
-								<th>'.esc_html__('Rate', 'push-notification').'</th>
-								<th>'.esc_html__('Clicks', 'push-notification').'</th>
+								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
+								<th>'.esc_html__('Message', 'push-notification').'</th>
+								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
+								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
 						$current_count_start = 0;
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
+								 
+								$message = $campaign['message'];
+								if (strlen($message) > 100) {
+									$stringCut = substr($message, 0, 100);
+									$endPoint = strrpos($stringCut, ' ');
+									$message = $endPoint? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
+									$message = nl2br($message);
+									$message .= '... <a href="javascript:void(0)" class="pn_js_read_more">'.esc_html__('read more', 'push-notification').'</a>';
+								}else{
+									$message = nl2br($campaign['message']);
+								}
 								$campaigns_html.='<tr>
 									<td>'.esc_html($current_count_start+= 1).'</td>
 									<td>'.esc_html($campaign['title']).'</td>
+									<td><p class="less_text">'.$message.'</p>                        
+									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
+									</p></td>
 									<td>'.esc_html($campaign['created_at'] ).'</td>
 									<td>';
 									if ($campaign['status'] === 'Done') {
@@ -1035,7 +1147,7 @@ class Push_Notification_Admin{
 									}else{
 										$campaigns_html.='<span class="badge badge-pill badge-secondary" style="color:blue">'.esc_html($campaign['status']).'</span>';
 									}
-								$campaigns_html.='</td><td>';
+								$campaigns_html.='</td><td align="'.esc_attr('center').'">';
 								 	$resposeData = array();
 								 	$clickCount = 0;
 	                                if(isset($campaign['campaign_response'][0])){
@@ -1056,10 +1168,10 @@ class Push_Notification_Admin{
 	                                if($success !==0 && $totalCount !== 0){
 										$rate = ($success/$totalCount)*100;
 										$campaigns_html.= number_format($rate, 2, '.', ',')."%";
-										$campaigns_html.="<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										$campaigns_html.="<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}else{
 										$campaigns_html.="0%";
-										$campaigns_html.="<br/>(".esc_html__('Success', 'push-notification').": ".esc_html($success). "<br/> ".esc_html__('Failed', 'push-notification').": ".esc_html($failed).")";
+										$campaigns_html.="<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
 									}
 									$campaigns_html.='</td><td>';
 									$campaigns_html.=esc_html($clickCount);
@@ -1075,11 +1187,11 @@ class Push_Notification_Admin{
 								$pre_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
 											<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
 							}else{
-								$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($campaigns['campaigns']['first_page_url']).'">
+								$pre_html = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_url($campaigns['campaigns']['first_page_url']).'">
 												<span class="screen-reader-text">'.esc_html__('First page', 'push-notification').'</span>
 												<span aria-hidden="true">«</span>
 											</a>
-											<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_attr($campaigns['campaigns']['prev_page_url']).'">
+											<a class="prev-page button js_custom_pagination" page="'.esc_attr(($campaigns['campaigns']['current_page']-1)).'" href="'.esc_url($campaigns['campaigns']['prev_page_url']).'">
 												<span class="screen-reader-text">'.esc_html__('Previous page', 'push-notification').'</span>
 												<span aria-hidden="true">‹</span>
 											</a>';
@@ -1088,11 +1200,11 @@ class Push_Notification_Admin{
 								$next_html = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
 											<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
 							}else{
-								$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['next_page_url']).'">
+								$next_html = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_url($campaigns['campaigns']['next_page_url']).'">
 												<span class="screen-reader-text">'.esc_html__('Next page', 'push-notification').'</span>
 												<span aria-hidden="true">›</span>
 											</a>
-											<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_attr($campaigns['campaigns']['last_page_url']).'">
+											<a class="last-page button js_custom_pagination"  page="'.esc_attr(($campaigns['campaigns']['current_page']+1)).'" href="'.esc_url($campaigns['campaigns']['last_page_url']).'">
 												<span class="screen-reader-text">'.esc_html__('Last page', 'push-notification').'</span>
 												<span aria-hidden="true">»</span>
 											</a>';
@@ -1104,8 +1216,8 @@ class Push_Notification_Admin{
 									<div class="alignleft actions">
 									</div>
 									<div class="tablenav-pages">
-										<span class="displaying-num">'.esc_html($campaigns['campaigns']['total']).' items</span>
-										<span class="pagination-links">'.$pre_html.'<span class="screen-reader-text">Current Page</span>
+										<span class="displaying-num">'.esc_html($campaigns['campaigns']['total']).' '.esc_html__('items', 'push-notification').'</span>
+										<span class="pagination-links">'.$pre_html.'<span class="screen-reader-text">'.esc_html__('Current Page', 'push-notification').'</span>
 											<span id="table-paging" class="paging-input">
 												<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' '.esc_html__('of', 'push-notification').'
 													<span class="total-pages">'.esc_html($campaigns['campaigns']['last_page']).'</span>
@@ -1134,11 +1246,10 @@ class Push_Notification_Admin{
 		for($i=0; $i < count($category_detail); $i++) {
 			$category_name[] = $category_detail[$i]->slug;
 		}
+		$category = '';
 		if(!empty($category_name)){
 			$category = implode(',',$category_name);
-		} else{
-			$category = '';
-		}
+		} 
 		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$link_url = esc_url_raw(get_permalink( $post_id ));
@@ -1152,47 +1263,17 @@ class Push_Notification_Admin{
 			    );
 			$link_url = add_query_arg( array_filter($utm_details), $link_url  );
 		}
-		$userid_arr= [];
-		$userd_ids = isset($_POST['user_ids'])?$_POST['user_ids']:'';
-		$userd_ids = sanitize_text_field($userd_ids);
-			if($userd_ids){
-				$userid_arr = explode(',',$userd_ids);
-			}
-
 		$image_url = '';
 		if(has_post_thumbnail($post_id)){
 			$image_url = esc_url_raw(get_the_post_thumbnail_url($post_id));
 		}
 		$icon_url = $push_notification_settings['notification_icon'];
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category,$userd_ids);
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category);
 		}//auth token check 	
 
 	}
-
-	public function pn_send_notification_on_category($post){
-		$pn_settings = push_notification_settings();
-		$auth_settings = push_notification_auth_settings();
-
-		if(!isset($pn_settings['posttypes'])){
-			$pn_settings['posttypes'] = array("post");
-		}
-		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
-			return;
-		}
-
-		$send_notification = false;
-		if(isset($pn_settings['on_category']) && $pn_settings['on_category']==1){
-			 	$this->send_notification_on_cotegories($post);
-			 	$send_notification = true;
-		}
-	}
-
-	protected function send_notification_on_cotegories($post){
-		$categories = get_categories();
-		pushnotification_load_categories($categories);
-	}
-
+	
 	/**
 	 * Send the push notification when orders will change
 	 * @method pn_order_send_notification
@@ -1380,11 +1461,9 @@ function push_notification_settings(){
 		$icon = $pwaforwpSettings['icon'];
 	}
 	$default = array(
-		'notification_icon' => $icon,
-		// 'on_edit'=> 0,
+		'notification_icon' => $icon,		
 		'on_publish'=> 1,
-		'posttypes'=> array("post","page"),
-		'category'=> get_categories(),
+		'posttypes'=> array("post","page"),		
 		'notification_position'=> 'bottom-left',
 		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
 		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
@@ -1432,7 +1511,7 @@ class PN_Field_Generator{
 			<input type="checkbox" class="regular-text checkbox_operator" id="<?php echo esc_attr($id); ?>" <?php if ( isset( $settings[$name] ) && $settings[$name]==$value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($value); ?>"/>
 			<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text checkbox_target" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($settings[$name]); ?>" data-truevalue="<?php echo esc_attr($value); ?>"/>
 			<?php if(!empty($label)){
-				echo '<label style="display:inline-block" for="'.esc_attr($id).'">'.esc_html__($label, 'push-notification').'</label>';
+				echo '<label style="display:inline-block" for="'.esc_attr($id).'">'.esc_html($label).'</label>';
 			} ?>
 		</div>
 		<?php
@@ -1450,53 +1529,11 @@ class PN_Field_Generator{
 				if(isset($value) && in_array($key, $value)){
 					$sel = 'selected';
 				}
-				echo '<option value="'.esc_attr($key).'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
+				echo '<option value="'.esc_attr($key).'" '.$sel.'>'.esc_html($opt).'</option>';
 			} } ?>
 		</select><?php
 	}
-	public static function get_multi_input_checkbox($name, $value, $data, $id="", $class=""){
-		$settings = push_notification_settings();
-		$category = $settings['category'];
-		$catArray = array();
-		if(!empty($category) && is_string($category)){
-			$catArray = explode(',', $category);
-		}
-		$i=0; ?>
-<div class="checkbox_wrapper">
-	<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox_all'); ?>" <?php echo in_array('All', $catArray)?'checked':''; ?> value="<?php echo esc_attr__( 'All', 'push_notification') ?>"/>
-	<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'); ?>" value="<?php echo esc_attr__( 'All', 'push_notification') ?>" data-truevalue="<?php echo esc_attr__( 'All', 'push_notification') ?>"/>
-		<?php 
 	
-		echo '<label style="display:inline-block" for="pn_push_category_checkbox_all">'.esc_attr__( 'All', 'push_notification').'</label>';
-		?>
-</div>
-<?php	
-	 if(!empty($data)){
-		foreach ($data as $value) { 
-			$check = '';
-			if(isset($value) && !empty($catArray)){
-				if(in_array($value->name, $catArray)){
-					$check = 'checked';
-				}
-			}
-		?>
-			<div class="checkbox_wrapper">
-				<input type="checkbox" class="regular-text checkbox_operator pn_push_segment_category_checkbox" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" <?php echo esc_attr($check); ?> value="<?php echo isset($value->name)? esc_attr($value->name):''; ?>"/>
-				<input type="hidden" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>][]" class="regular-text checkbox_target" id="<?php echo esc_attr('pn_push_category_checkbox'.$i); ?>" value="<?php echo isset($value->name)?esc_attr($value->name):''; ?>" data-truevalue="<?php echo isset($value->name)?esc_attr($value->name):''; ?>"/>
-				<?php 
-				$label_text = '';
-				if(isset($value) && !empty($value)){
-					$label_text = esc_html__($value->name, 'push-notification');
-				}
-				echo '<label style="display:inline-block" for="pn_push_category_checkbox'.esc_attr($i).'">'.$label_text.'</label>';
-				?>
-			</div>
-		<?php
-		$i++;
-		}
-	  }
-	}
-
 	public static function get_input_select($name, $value, $options, $id="", $class=""){
 		$settings = push_notification_settings();
 		if( isset($settings[$name]) ){
@@ -1508,7 +1545,7 @@ class PN_Field_Generator{
 				if(isset($value) && $key==$value){
 					$sel = 'selected';
 				}
-				echo '<option value="'.esc_attr($key).'" '.$sel.'>'.esc_html__($opt, 'push-notification').'</option>';
+				echo '<option value="'.esc_attr($key).'" '.$sel.'>'.esc_html($opt).'</option>';
 			} ?>
 		</select><?php
 	}
@@ -1519,7 +1556,7 @@ class PN_Field_Generator{
 	public static function get_button($name, $id="", $class=""){
 		$settings = push_notification_settings();
 		?>
-		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>"><?php echo esc_html__($name) ?></button>
+		<button type="button"  class="button <?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>"><?php echo esc_html($name) ?></button>
 	<?php
 	}  
 }
@@ -1542,9 +1579,9 @@ function pn_send_query_message(){
         $email    = sanitize_email($_POST['email']);        
         $customer_type = empty($customer_type)? $customer_type : 'No';
         $message .= "<table>
-        				<tr><td>".esc_html__('Are you existing Premium Customer?','push-notification')."</td><td>".esc_html__($customer_type, 'push-notification')."</td></tr>
+        				<tr><td>".esc_html__('Are you existing Premium Customer?','push-notification')."</td><td>".esc_html($customer_type)."</td></tr>
         				<tr><td>".esc_html__('Plugin','push-notification')."</td><td> ". esc_html__('Push Notification', 'push-notification') ."</td></tr>
-        				<tr><td>".esc_html__('Version','push-notification')."</td><td>".esc_html__(PUSH_NOTIFICATION_PLUGIN_VERSION, 'push-notification')."</td></tr>
+        				<tr><td>".esc_html__('Version','push-notification')."</td><td>".esc_html(PUSH_NOTIFICATION_PLUGIN_VERSION)."</td></tr>
         			</table>";
         $user       = wp_get_current_user();
         if($user){
@@ -1553,12 +1590,12 @@ function pn_send_query_message(){
             if($email){
                 $user_email = $email;
             } 
-            $to = esc_html__('team@magazine3.in', 'push-notification');
-            $subject = esc_html__("Push Notification Customer Query", 'push-notification');
+            $to = 'team@magazine3.in';
+            $subject = 'Push Notification Customer Query';
             $headers = 'From: '. esc_attr($user_email) . "\r\n" .
             'Reply-To: ' . esc_attr($user_email) . "\r\n";
             // Load WP components, no themes.                      
-            $sent = wp_mail($to, $subject, strip_tags($message), $headers);                    
+            $sent = wp_mail($to, $subject, strip_tags($message), $headers);
             if($sent){
             wp_send_json(array('status'=>'t'));            
             }else{
@@ -1575,7 +1612,7 @@ function push_notification_pro_notifyform_before(){
 	}
 	echo '<div class="form-group">
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
-			<select id="notification-send-type" class="regular-text">
+			<select id="notification-send-type" class="regular-text js_pn_select">
 				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
 				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
 				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>			
@@ -1589,7 +1626,7 @@ function push_notification_pro_notifyform_before(){
 
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
-			<select id="notification-custom-select" class="regular-text" placeholder="'.esc_html__('Select Subscribers','push-notification').'" multiple>';
+			<select id="notification-custom-select" class="regular-text js_pn_select" placeholder="'.esc_html__('Select Subscribers','push-notification').'" multiple>';
 			if(!empty($users)){
 				foreach($users as $user){
 					echo '<option value="'.esc_attr($user->ID).'">('.esc_attr($user->user_email).')</option>';			
@@ -1601,21 +1638,70 @@ function push_notification_pro_notifyform_before(){
 		echo '<div class="form-group" style="display:none">
 				<label for="notification-custom-upload">'.esc_html__('Upload subscriber list', 'push-notification').'</label>
 				<input type="file" id="notification-custom-upload" accept=".csv">
-				<p><b>'.esc_html__('Note : CSV should contain user email separated by commas ( , ) notification will be send to only emails that has subscribed to push notification','push-notification').' <a target="_blank" href="'.esc_url(PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv').'"
+				<p><b>'.esc_html__('Note : CSV should contain user email separated by commas ( , ) notification will be').' <br/>'.esc_html__('send to only emails that has subscribed to push notification','push-notification').' <a target="_blank" href="'.esc_url(PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv').'"
 				>'.esc_html__('Sample CSV File','push-notification').'</a></b></p>
 			</div>';
 
 		echo '<div class="form-group">
 				<label for="notification-schedule">'.esc_html__('Schedule Notification','push-notification').'</label>
-				<select id="notification-schedule" class="regular-text">
+				<select id="notification-schedule" class="regular-text js_pn_select">
 					<option value="no">'.esc_html__('No','push-notification').'</option>
 					<option value="yes">'.esc_html__('Yes','push-notification').'</option>
 				</select>
 			</div>';
 		echo '<div class="form-group" style="display:none" >
 			<label for="notification-date">'.esc_html__('Schedule Date Time', 'push-notification').'</label>
-			<input class="regular-text" type="date" id="notification-date" min="'.esc_attr($today_date).'">
+			<input class="regular-text" type="date" id="notification-date" min="'.esc_attr($today_date).'" style="width:400px">
 			<input type="time" id="notification-time">
 		</div>';
 
 }
+
+function push_notification_category($search,$saved_data){
+	$args = array( 
+		'hide_empty' => false,
+		'number'     => 50, 
+	);
+
+	if(!empty($search)){
+		$args['name__like'] = $search;
+	}
+	
+	$get_option = get_terms( 'category', $args);
+	$only_ids = [];
+	if(!empty($get_option) && is_array($get_option)){   
+		foreach ($get_option as $options_array) {
+			$only_ids[] =$options_array->term_id;
+			$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name);
+		}
+	}
+	if(!empty($saved_data)){             
+		$args['include'] = $saved_data;
+		$selected_cats = get_terms($args);
+		foreach ($selected_cats as $options_array) {
+			if (!in_array($options_array->term_id,$only_ids)) {
+				$result[] = array('id' => $options_array->term_id, 'text' => $options_array->name);
+			}
+		}
+	}
+	return $result;
+}
+
+
+function pn_select2_category_data(){
+	if ( ! isset( $_GET['nonce'] ) ){
+	  return; 
+	}
+	if( isset( $_GET['nonce']) &&  !wp_verify_nonce($_GET['nonce'], 'pn_notification') ){
+		return;
+	}
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	$search        = isset( $_GET['q'] ) ? sanitize_text_field( $_GET['q'] ) : '';
+	$result = push_notification_category($search,[]);
+	
+	wp_send_json(['results' => $result] );
+	wp_die();
+}
+add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data');

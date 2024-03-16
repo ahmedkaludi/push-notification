@@ -38,9 +38,7 @@ class Push_Notification_Frontend{
 			add_action("wp_enqueue_scripts", array($this, 'superpwa_enqueue_pn_scripts'), 34 );
 			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
 			add_filter( "superpwa_sw_template", array($this, 'superpwa_add_pn_swcode'),10,1);
-		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){
-			//add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-			//add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
+		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){			
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			add_action("wp_footer", array($this, 'header_content'));
 			add_action("wp_footer", array($this, 'amp_header_button_css'));
@@ -438,14 +436,16 @@ class Push_Notification_Frontend{
 	}
 	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
-		$position = $settings['notification_position'];
-		$cssPosition = '';
-		$category = $settings['category'];
-		$catArray = array();
-		if(!empty($category)){
-			if(!is_array($category))
-			$catArray = explode(',', $category);
+		$position = "";
+		if (isset($settings['notification_position']) && !empty($settings['notification_position'])) {
+			$position = $settings['notification_position'];
 		}
+		$cssPosition = '';
+		$setting_category = !empty($settings['category'])? $settings['category'] : [];
+		$selected_category =  !is_array($setting_category) ? explode(',',$setting_category) : $setting_category;
+		$catArray = !is_array($selected_category) ? explode(',',$selected_category) : $selected_category;
+		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
+		
 		switch ($position) {
 			case 'bottom-left':
 				$cssPosition = 'bottom: 0;
@@ -534,7 +534,7 @@ class Push_Notification_Frontend{
 	display: block;
 	padding: 5px 15px;
 }
-.categories-multiselect {
+.pn-categories-multiselect {
 	font-size: 13px;
     margin: 10px 0;
 }
@@ -546,9 +546,11 @@ class Push_Notification_Frontend{
 #pn-categories-checkboxes label{
     padding-right: 12px;
     text-transform: capitalize;
+	cursor:pointer;
 }
 #pn-categories-checkboxes input{
 	margin-right: 3px;
+	cursor:pointer;
 }
 #pn-activate-permission-categories-text {
     padding: 12px 0;
@@ -571,16 +573,18 @@ class Push_Notification_Frontend{
 			   		</div>';
 			   		if(!empty($settings['on_category']) && $settings['on_category'] == 1){
 				   		echo '<div id="pn-activate-permission-categories-text">
-			   				'.esc_html__('Which Notifications would you like to receive?', 'push-notification').'
+			   				'.esc_html__('On which category would you like to receive?', 'push-notification').'
 			   			</div>
-				   		<div class="categories-multiselect">
+				   		<div class="pn-categories-multiselect">
 				   			<div id="pn-categories-checkboxes">';
-							if(!empty($catArray) && in_array('All', $catArray)){
-			   			 		echo '<label for="all-categories"><input type="checkbox" name="category[]" id="all-categories" value=" " />'.esc_html__('All', 'push-notification').'</label>';
+							if($all_category){
+			   			 		echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
 							}
 							if(!empty($catArray)){
 								foreach ($catArray as $key=>$value) {
-									echo '<label for="pn_category_checkbox'.esc_attr($key).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($key).'" value="'.esc_attr($value).'" />'.esc_attr($value).'</label>';
+									if (is_string($value)) {
+										echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr(get_category($value)->slug).'" />'.esc_html(get_cat_name($value)).'</label>';
+									}
 								}
 							}
 				   			echo '</div>

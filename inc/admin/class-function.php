@@ -41,18 +41,41 @@ class PN_Server_Request{
 		$push_notification_auth_settings['user_token'] = sanitize_text_field($user_token);
 
 		if($response['status']==200){
-
 			$response['response'] = array_map( 'sanitize_text_field',  $response['response']  );
 
 			$push_notification_auth_settings['token_details'] = $response['response'];
 
 			$push_notification_auth_settings['messageManager'] = $response['response']['messageManager'];
 
+			update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
 		}
 
 
 
-		update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
+
+		return $response;
+
+	}
+
+	public static function inactivateWebsite($user_token){  
+
+		$verifyUrl = 'validate/in_activate_website';
+
+		if ( is_multisite() ) {
+
+            $weblink = get_site_url();              
+
+        }
+
+        else {
+
+            $weblink = home_url();
+
+        }    
+
+		$data = array("user_token"=>$user_token, "website"=>   $weblink);
+
+		$response = self::sendRequest($verifyUrl, $data, 'post');
 
 		return $response;
 
