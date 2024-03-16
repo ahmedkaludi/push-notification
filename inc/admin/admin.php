@@ -784,7 +784,8 @@ class Push_Notification_Admin{
 				$display_category="style=display:block;";
 				$disable_category="";
 			}
-			$selected_category = (isset($settings['category'])) ? $settings['category'] : [];
+			$category_val = isset($settings['category'])?$settings['category']:array();
+			$selected_category = !is_array($category_val) ? explode(',',$category_val ) : $category_val;
 			$category_data = push_notification_category(null,$selected_category);
 			echo "<div id='segment_category_selector_wrapper' ".esc_html($display_category).">";
 				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
