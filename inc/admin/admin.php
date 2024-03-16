@@ -791,7 +791,7 @@ class Push_Notification_Admin{
 				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
 					foreach ($category_data as $key => $value) {
 						$selected_option ='';
-						if (in_array($value['id'],$selected_category)) {
+						if (in_array($value['id'],$selected_category) ||  in_array(get_cat_name($value['id']),$selected_category)) {
 							$selected_option ='selected=selected';
 						}
 						
