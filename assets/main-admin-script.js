@@ -265,10 +265,13 @@ jQuery(document).ready(function($){
 			jQuery("#category_selector_wrapper").show();
 			jQuery(".js_category_selector_wrapper").show();
 			jQuery(".js_custom_category_selector_wrapper").show();
+			jQuery("#segment_category_selector_wrapper").show();
+			
 		}else{
 			jQuery("#category_selector_wrapper").hide();
 			jQuery(".js_category_selector_wrapper").hide();
 			jQuery(".js_custom_category_selector_wrapper").hide();
+			jQuery("#segment_category_selector_wrapper").hide();
 		}
 	});
 
