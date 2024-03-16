@@ -249,7 +249,7 @@ class Push_Notification_Admin{
 			);
 
 			$soc_display="style='display:none;'";
-			if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
+			if(isset($notification['on_category']) && $notification['on_category']){
 				$soc_display="style='display:block;'";
 			}
 			add_settings_field(
@@ -769,7 +769,7 @@ class Push_Notification_Admin{
 	public function pn_select_specific_categories_callback(){
 		$notification = push_notification_settings();
 		$display="style='display:none;'";
-		if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segment_on_category']) && $notification['segment_on_category']){
+		if(isset($notification['on_category']) && $notification['on_category']){
 			$display="style='display:block;'";
 		}
 		echo "<div id='category_selector_wrapper' class='js_custom_category_selector_wrapper' ".$display.">";
@@ -778,17 +778,11 @@ class Push_Notification_Admin{
 
 			$settings = push_notification_settings();
 			
-			$display_category="style=display:none;";
-			$disable_category="";
-			if(isset($notification['segment_on_category']) && $notification['segment_on_category']){
-				$display_category="style=display:block;";
-				$disable_category="";
-			}
 			$category_val = isset($settings['category'])?$settings['category']:array();
 			$selected_category = !is_array($category_val) ? explode(',',$category_val ) : $category_val;
 			$category_data = push_notification_category(null,$selected_category);
-			echo "<div id='segment_category_selector_wrapper' ".esc_html($display_category).">";
-				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2" '.esc_html($disable_category).'>';
+			echo "<div id='segment_category_selector_wrapper'>";
+				echo '<select name="push_notification_settings[category][]" id="js_category" class="regular-text pn_category_select2">';
 					foreach ($category_data as $key => $value) {
 						$selected_option ='';
 						if (in_array($value['id'],$selected_category) ||  in_array(get_cat_name($value['id']),$selected_category)) {
