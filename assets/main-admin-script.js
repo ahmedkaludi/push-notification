@@ -421,6 +421,7 @@ jQuery(document).ready(function($){
 	});
 
 	jQuery("body").on("click",".js_custom_pagination", function(e){
+		jQuery("#pn_cam_loading").css("display","block");
 	        e.preventDefault();
 	        var page = jQuery(this).attr('page');
 			jQuery.ajax({
@@ -428,10 +429,12 @@ jQuery(document).ready(function($){
 			method: "post",
 			dataType: 'html',
 				data:{action:'pn_get_compaigns',page:page,nonce: pn_setings.remote_nonce},
-				success:function(response){                       
+				success:function(response){              
+				jQuery("#pn_cam_loading").css("display","none");         
 					jQuery("#pn_campaings_custom_div").html(response);
 				},
-				error: function(response){                    
+				error: function(response){   
+				jQuery("#pn_cam_loading").css("display","none");                 
 					console.log(response);
 				}
 			});           

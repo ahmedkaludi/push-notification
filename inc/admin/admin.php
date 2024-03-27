@@ -524,6 +524,10 @@ class Push_Notification_Admin{
 					</div>
 				</div>
 				<div id="pn_campaings" style="display:none;" class="pn-tabs">
+				<div id="pn_cam_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
+				  <img style="width: 100px;" src="'.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/pn_camp_loading.gif" title="loading" />
+				</div>
+
 					<div class="row">
 						<div class="action-wrapper" style="float:right; padding-bottom: -10px;">
 							<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="button dashicons-before pn-submit-button" style="margin-bottom:10px;" id="js_notification_button"> ' . esc_html__('Add Campaign','push-notification') . '</a>
