@@ -276,7 +276,7 @@ class Push_Notification_Admin{
 			
 			add_settings_field(
 				'pn_key_sendpush_publish',								// ID
-				esc_html__('Send notification on publish', 'push-notification'),// Title
+				'<label for="pn_push_on_publish"><b>'.esc_html__('Send notification on publish', 'push-notification').'</b></label>',
 				array( $this, 'user_settings_onpublish_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
@@ -295,7 +295,7 @@ class Push_Notification_Admin{
 					 'push_notification_user_settings_section');
 			add_settings_field(
 				'pn_utm_tracking_select',								// ID
-				esc_html__('Enable', 'push-notification'),// Title
+				'<label for="utm_tracking_checkbox"><b>'.esc_html__('Enable', 'push-notification').'</b></label>',
 				array( $this, 'pn_utm_tracking_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_utm_tracking_settings_section'	// Settings Section ID
