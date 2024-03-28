@@ -583,7 +583,11 @@ class Push_Notification_Frontend{
 							if(!empty($catArray)){
 								foreach ($catArray as $key=>$value) {
 									if (is_string($value)) {
-										echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr(get_category($value)->slug).'" />'.esc_html(get_cat_name($value)).'</label>';
+										$catslugdata ='';
+										if(is_object(get_category($value))){
+										$catslugdata = get_category($value)->slug;
+										}
+										echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr($catslugdata).'" />'.esc_html(get_cat_name($value)).'</label>';
 									}
 								}
 							}
