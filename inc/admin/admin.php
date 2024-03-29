@@ -729,7 +729,7 @@ class Push_Notification_Admin{
 	}//function closed
 
 	public function user_settings_notification_icon_callback(){
-		PN_Field_Generator::get_input('notification_icon', '1', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
+		PN_Field_Generator::get_input('notification_icon', 'notification_icon', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
 	}
 
 	public function user_settings_onpublish_callback(){		
@@ -1501,7 +1501,15 @@ class PN_Field_Generator{
 	static $settingName = 'push_notification_settings';
 	public static function get_input($name, $id="", $class=""){
 		$settings = push_notification_settings();
-		?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
+			?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/>		
+		<?php
+		if($name == "notification_icon"){
+			?>
+			<button type="button" class="button not_icon upload_image_url" data-editor="content">
+				<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span><?php echo esc_html__('Upload an image', 'push-notification'); ?>
+			</button>
+			<?php 
+		}
 	}
 	public static function get_input_category($name, $id="", $class=""){
 		$settings = push_notification_settings();
