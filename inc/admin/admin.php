@@ -99,8 +99,10 @@ class Push_Notification_Admin{
 	function load_admin_scripts($hook_suffix){
 		if($hook_suffix=='toplevel_page_push-notification'){
 			wp_enqueue_media();
-			$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
+			$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '';	
 			
+			wp_enqueue_style( 'wp-color-picker' );
+   		 	wp_enqueue_script( 'push_notification_script',  PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array( 'wp-color-picker' ), false, true );
 			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-style{$min}.css", array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
 			wp_enqueue_style('push-notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all' );
@@ -299,19 +301,19 @@ class Push_Notification_Admin{
 				array( $this, 'pn_utm_tracking_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_utm_tracking_settings_section'	// Settings Section ID
-			);
+			);			
 
 		add_settings_section('push_notification_notification_settings_section',
-					 esc_html__('Notification settings','push-notification'), 
+					 esc_html__('Notification Subscription Popup','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
 			add_settings_field(
 				'pn_key_message_position_select',								// ID
-				esc_html__('Where would you like to display', 'push-notification'),// Title
+				esc_html__('Where would you like to display Pop Up', 'push-notification'),// Title
 				array( $this, 'pn_key_position_select_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
-			);
+			);						
 			add_settings_field(
 				'pn_key_popup_message_select',								// ID
 				esc_html__('Popup banner message', 'push-notification'),// Title
@@ -354,6 +356,59 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_key_actions_buttons_position',								// ID
+				esc_html__('Where would you like to display Buttons', 'push-notification'),// Title
+				array( $this, 'pn_key_actions_buttons_position_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key__notification_pop_up_icon_edit',					// ID
+				esc_html__('Pop Up icon', 'push-notification'),// Title
+				array( $this, 'user_settings_notification_pop_up_icon_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_section('push_notification_notification_pop_display_settings_section',
+					 esc_html__('Notification Subscription Popup Appearance','push-notification'), 
+					 '__return_false', 
+					 'push_notification_user_settings_section');
+			add_settings_field(
+				'pn_key_popup_display_setings_title_color',								// ID
+				esc_html__('Popup banner title color', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_settings_title_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_popup_display_setings_ok_color',								// ID
+				esc_html__('Popup banner accept color', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_settings_ok_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_popup_display_setings_no_thanks_color',								// ID
+				esc_html__('Popup banner decline color', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_settings_no_thanks_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_popup_display_setings_text_color',								// ID
+				esc_html__(' Popup Text color', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_settings_text_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_popup_display_setings_bg_color',								// ID
+				esc_html__(' Popup Background color', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_settings_bg_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);			
 
 		//WC compatiblility
 		add_settings_section('push_notification_user_wc_settings_section',
@@ -731,6 +786,9 @@ class Push_Notification_Admin{
 	public function user_settings_notification_icon_callback(){
 		PN_Field_Generator::get_input('notification_icon', 'notification_icon', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
 	}
+	public function user_settings_notification_pop_up_icon_callback(){
+		PN_Field_Generator::get_input('notification_pop_up_icon', 'notification_pop_up_icon', 'pn_push_on_edit', 'pn-checkbox pn_push_on_edit');
+	}
 
 	public function user_settings_onpublish_callback(){		
 		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
@@ -833,10 +891,31 @@ class Push_Notification_Admin{
 		);
 		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
 	}
+	public function pn_key_actions_buttons_position_callback(){		
+		$data = array(
+			'top'=> esc_html__('Top', 'push-notification'),
+			'bottom'=> esc_html__('Bottom', 'push-notification'),
+		);
+		PN_Field_Generator::get_input_select('notification_botton_position', 'top', $data, 'pn_push_on_publish', '');
+	}
 	public function pn_key_banner_message_callback(){		
 		PN_Field_Generator::get_input('popup_banner_message', 'popup_banner_message_id');
 	}
 
+	public function pn_key_popup_display_settings_title_callback(){		
+		PN_Field_Generator::get_input_color('popup_display_setings_title_color', 'popup_display_setings_title_color_id', 'my-color-field');
+	}public function pn_key_popup_display_settings_ok_callback(){		
+		PN_Field_Generator::get_input_color('popup_display_setings_ok_color', 'popup_display_setings_ok_color_id', 'my-color-field');
+	}
+	public function pn_key_popup_display_settings_no_thanks_callback(){		
+		PN_Field_Generator::get_input_color('popup_display_setings_no_thanks_color', 'popup_display_setings_no_thanks_color_id', 'my-color-field');
+	}
+	public function pn_key_popup_display_settings_text_callback(){		
+		PN_Field_Generator::get_input_color('popup_display_setings_text_color', 'popup_display_setings_text_color_id', 'my-color-field');
+	}
+	public function pn_key_popup_display_settings_bg_callback(){		
+		PN_Field_Generator::get_input_color('popup_display_setings_bg_color', 'popup_display_setings_bg_color_id', 'my-color-field');
+	}
 	public function pn_key_banner_accept_btn_callback(){		
 		PN_Field_Generator::get_input('popup_banner_accept_btn', 'popup_banner_accept_btn_id');
 	}
@@ -1510,6 +1589,18 @@ class PN_Field_Generator{
 			</button>
 			<?php 
 		}
+		if($name == "notification_pop_up_icon"){
+			?>
+			<button type="button" class="button pop_up_not_icon upload_image_url" data-editor="content">
+				<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span><?php echo esc_html__('Upload an Icon', 'push-notification'); ?>
+			</button>
+			<?php 
+		}
+	}
+	public static function get_input_color($name, $id="", $class=""){
+		$settings = push_notification_settings();
+			?><input type="text" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="<?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>" data-default-color="#effeff"/>		
+		<?php
 	}
 	public static function get_input_category($name, $id="", $class=""){
 		$settings = push_notification_settings();

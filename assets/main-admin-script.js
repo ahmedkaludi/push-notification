@@ -475,6 +475,22 @@ jQuery(document).ready(function($){
         })
         .open();
     });
+   jQuery(".pop_up_not_icon.upload_image_url").click(function(e) {  // upload_image_url
+        e.preventDefault();
+        var pwaforwpMediaUploader = wp.media({
+            title: pn_setings.uploader_title,
+            button: {
+                text: pn_setings.uploader_button
+            },
+            multiple: false,  // Set this to true to allow multiple files to be selected
+                        library:{type : 'image'}
+        })
+        .on("select", function() {
+            var attachment = pwaforwpMediaUploader.state().get("selection").first().toJSON();
+            jQuery("#notification_pop_up_icon").val(attachment.url);            
+        })
+        .open();
+    });
 
 		jQuery(".upload_icon_url").click(function(e) {  // upload_image_url
         e.preventDefault();
@@ -603,6 +619,10 @@ jQuery(document).ready(function($){
 		
 	})
 	jQuery("#notification-custom-select").select2();
+
+
+    	$('.my-color-field').wpColorPicker();
+
 });
 
 function pnCsvToArray(str, delimiter = ",") {

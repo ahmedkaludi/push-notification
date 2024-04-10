@@ -558,25 +558,30 @@ class Push_Notification_Frontend{
     font-size: 12px;
     font-weight: 600;
 }
-</style><div class="pn-wrapper">
-			   	<span class="pn-txt-wrap pn-select-box">
+</style><div class="pn-wrapper" style="background-color:'.esc_attr($settings['popup_display_setings_bg_color']).'">';
+				if(isset($settings['notification_pop_up_icon']) && !empty($settings['notification_pop_up_icon'])){
+					echo '<span style=" top: 0; vertical-align: top; "><img src="'.esc_attr($settings['notification_pop_up_icon']).'" style=" max-width: 70px;"></span>';
+				}
+			   echo '<span class="pn-txt-wrap pn-select-box">
 			   		<div class="pn-msg-box">
-				   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>
-				   		<span class="pn-btns">
-				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
+				   		<span class="pn-msg" style="color:'.esc_attr($settings['popup_display_setings_title_color']).'">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>';
+				   		if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'top'){
+				   			echo '<span class="pn-btns">
+				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link" style="color:'.esc_attr($settings['popup_display_setings_ok_color']).'">
 				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
 				   			</span>
-				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
+				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link" style="color:'.esc_attr($settings['popup_display_setings_no_thanks_color']).'">
 				   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
 				   			</span>
-				   		</span>
-			   		</div>';
+				   		</span>';
+				   		}
+			   		echo '</div>';
 			   		if(!empty($settings['on_category']) && $settings['on_category'] == 1){
-				   		echo '<div id="pn-activate-permission-categories-text">
+				   		echo '<div id="pn-activate-permission-categories-text" style="color:'.esc_attr($settings['popup_display_setings_title_color']).'">
 			   				'.esc_html__('On which category would you like to receive?', 'push-notification').'
 			   			</div>
 				   		<div class="pn-categories-multiselect">
-				   			<div id="pn-categories-checkboxes">';
+				   			<div id="pn-categories-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
 							if($all_category){
 			   			 		echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
 							}
@@ -593,6 +598,16 @@ class Push_Notification_Frontend{
 							}
 				   			echo '</div>
 			   			</div>';
+			   			if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom'){
+				   			echo '<span class="pn-btns" style="float:right;">
+				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link" style="color:'.esc_attr($settings['popup_display_setings_ok_color']).'">
+				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
+				   			</span>
+				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link" style="color:'.esc_attr($settings['popup_display_setings_no_thanks_color']).'">
+				   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
+				   			</span>
+				   		</span>';
+				   		}
 		   			}
 			   	echo '</span>
 			</div>';
