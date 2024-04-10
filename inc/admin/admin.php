@@ -301,7 +301,28 @@ class Push_Notification_Admin{
 				array( $this, 'pn_utm_tracking_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_utm_tracking_settings_section'	// Settings Section ID
-			);			
+			);	
+			add_settings_section('push_notification_url_capturing_settings_section',
+					 esc_html__('URL capturing','push-notification'), 
+					 '__return_false', 
+					 'push_notification_user_settings_section');
+			add_settings_field(
+			'pn_key_url_capture_select',								// ID
+			esc_html__('Capture URL method', 'push-notification'),// Title
+			array( $this, 'pn_key_url_capture_select_callback'),// Callback
+			'push_notification_user_settings_section',	// Page slug
+			'push_notification_url_capturing_settings_section'	// Settings Section ID
+		);			
+
+		add_settings_field(
+			'pn_key_url_capture_manual',								// ID
+			esc_html__('URL where capture will work', 'push-notification'),// Title
+			array( $this, 'pn_key_url_manual_capture_callback'),// Callback
+			'push_notification_user_settings_section',	// Page slug
+			'push_notification_url_capturing_settings_section'	// Settings Section ID
+		);	
+
+		
 
 		add_settings_section('push_notification_notification_settings_section',
 					 esc_html__('Notification Subscription Popup','push-notification'), 
@@ -891,6 +912,21 @@ class Push_Notification_Admin{
 		);
 		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
 	}
+
+	public function pn_key_url_capture_select_callback(){		
+		$data = array(
+			'off'=> esc_html__('Disabled', 'push-notification'),
+			'auto'=> esc_html__('Automatic', 'push-notification'),
+			'manual'=> esc_html__('Manual', 'push-notification'),
+		);
+		PN_Field_Generator::get_input_select('pn_url_capture', 'off', $data, 'pn_url_capture', '');
+	}
+
+	public function pn_key_url_manual_capture_callback(){
+	
+		PN_Field_Generator::get_input_textarea('pn_url_capture_manual', 'pn_url_capture_manual','//Add URLs in separate line'.PHP_EOL.'https://example.com/page1 '.PHP_EOL.'https://example.com/page2',50,8);
+	}
+
 	public function pn_key_actions_buttons_position_callback(){		
 		$data = array(
 			'top'=> esc_html__('Top', 'push-notification'),
@@ -1060,6 +1096,7 @@ class Push_Notification_Admin{
 			$audience_token_id = isset($_POST['audience_token_id'])?sanitize_text_field($_POST['audience_token_id']):'';
 			$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
 			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
+			$page_subscribed = isset($_POST['page_subscribed'])?sanitize_text_field($_POST['page_subscribed']):'';
 
 			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field($_POST['notification_schedule']):'';
 
@@ -1116,6 +1153,14 @@ class Push_Notification_Admin{
 					}
 				
 				}
+
+				if($send_type=='custom-page-subscribed'){
+					$authData = push_notification_auth_settings();
+					if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated']!=1){
+						$push_notify_token =pn_get_tokens_by_url($page_subscribed);
+					}
+				}
+
 				$payload =array(
 					'user_token'=>$auth_settings['user_token'],
 					'title'=>$title,
@@ -1558,7 +1603,8 @@ function push_notification_settings(){
 		'notification_utm_medium'=> 'pn-ref',
 		'notification_utm_campaign'=> 'pn-campaign',
 		'notification_utm_term'=> 'pn-term',
-		'notification_utm_content'=> 'pn-content',
+		'pn_url_capture'=> 'off',
+		'pn_url_capture_manual'=>''
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
@@ -1652,6 +1698,15 @@ class PN_Field_Generator{
 			} ?>
 		</select><?php
 	}
+	// generate a function for textarea 
+	public static function get_input_textarea($name, $id="", $placeholder="Enter the details" ,$cols=10 , $rows=1	,$class=""){
+		$settings = push_notification_settings();
+        if( isset($settings[$name]) ){
+            $value = $settings[$name];
+        }
+        ?><textarea cols="<?php echo esc_attr($cols); ?>" rows="<?php echo esc_attr($rows); ?>" placeholder="<?php echo esc_attr($placeholder); ?>" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="<?php echo esc_attr($class); ?>" id="<?php echo esc_attr($id); ?>" ><?php if(isset($settings[$name]) && is_string($settings[$name])) echo esc_attr($settings[$name]); ?></textarea><?php
+    }
+
 	public static function get_input_password($name, $id="", $class=""){
 		$settings = push_notification_settings();
 		?><input type="password" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/><?php
@@ -1718,7 +1773,8 @@ function push_notification_pro_notifyform_before(){
 			<select id="notification-send-type" class="regular-text js_pn_select">
 				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
 				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
-				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>			
+				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>
+				<option value="custom-page-subscribed">'.esc_html__('Page subscribed','push-notification').'</option>				
 			</select>
 		  </div>';
 		  
@@ -1737,7 +1793,21 @@ function push_notification_pro_notifyform_before(){
 			}			
 		echo' </select>
 		  </div>';
-		  
+		$pn_token_urls = pn_get_all_unique_meta();
+
+		  echo '<div class="form-group" style="display:none">
+		  <label for="notification-custom-page-subscribed">'.esc_html__('Select Page Subscribed','push-notification').'</label>
+		  <select id="notification-custom-page-subscribed" class="regular-text js_pn_select" placeholder="'.esc_html__('Select Page','push-notification').'">';
+		  if(!empty($pn_token_urls)){
+			  foreach($pn_token_urls as $url){
+				  echo '<option value="'.esc_url($url).'" data-url="'.basename($url).'">'.esc_attr(pn_get_page_title_by_url($url)).'</option>';			
+			  }
+		  }else{
+			echo '<option value="">'.esc_html__('No Subscribed Page Found','push-notification').'</option>';	
+		  }			
+	  echo' </select>
+		</div>';
+
 		echo '<div class="form-group" style="display:none">
 				<label for="notification-custom-upload">'.esc_html__('Upload subscriber list', 'push-notification').'</label>
 				<input type="file" id="notification-custom-upload" accept=".csv">
@@ -1772,6 +1842,7 @@ function push_notification_category($search,$saved_data){
 	
 	$get_option = get_terms( 'category', $args);
 	$only_ids = [];
+	$result = [];
 	if(!empty($get_option) && is_array($get_option)){   
 		foreach ($get_option as $options_array) {
 			$only_ids[] =$options_array->term_id;
@@ -1808,3 +1879,47 @@ function pn_select2_category_data(){
 	wp_die();
 }
 add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data');
+
+function pn_get_all_unique_meta(){
+		global $wpdb;
+		// Query to get all unique values of user meta key "pnwoo_notification_token"
+		$unique_tokens = $wpdb->get_col(
+			$wpdb->prepare(
+				"
+				SELECT DISTINCT url
+				FROM %i
+				WHERE status = %s
+				",
+				$wpdb->prefix.'pn_token_urls',
+				'active'
+			)
+		);
+		$unique_urls=[];
+		foreach ($unique_tokens as $key => $value) {
+			$is_found = array_search($value,$unique_urls);
+			if ($is_found === false) {	
+				$unique_urls[]=$value;
+			}
+		}
+		return $unique_urls;
+	}
+	
+	function pn_get_page_title_by_url( $page_url = null ){
+		$page_id =url_to_postid($page_url);
+		if ($page_id) {
+			// Get the page title
+			$page_title = get_the_title($page_id);
+		return $page_title;
+		} 
+		if($page_url ==  home_url()){
+			return esc_html__('Home','push-notification');
+		}
+		return $page_url;
+	}
+	
+	function pn_get_tokens_by_url($url) {
+		$tokens =[];
+		global $wpdb; 
+		$tokens = $wpdb->get_col($wpdb->prepare("SELECT token FROM {$wpdb->prefix}pn_token_urls WHERE url = %s", $url));
+		return $tokens;
+	}
