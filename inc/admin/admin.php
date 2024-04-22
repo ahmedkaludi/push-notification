@@ -269,7 +269,7 @@ class Push_Notification_Admin{
             if (!function_exists('pwaforwp_defaultSettings')) {
                 add_settings_field(
 					'pn_key__notification_icon_edit',					// ID
-					esc_html__('Notification icon URL', 'push-notification'),// Title
+					esc_html__('Notification Icon URL', 'push-notification'),// Title
 					array( $this, 'user_settings_notification_icon_callback'),// Callback
 					'push_notification_user_settings_section',	// Page slug
 					'push_notification_user_settings_section'	// Settings Section ID
@@ -278,14 +278,14 @@ class Push_Notification_Admin{
 			
 			add_settings_field(
 				'pn_key_sendpush_publish',								// ID
-				'<label for="pn_push_on_publish"><b>'.esc_html__('Send notification on publish', 'push-notification').'</b></label>',
+				'<label for="pn_push_on_publish"><b>'.esc_html__('Send Notification on Publish', 'push-notification').'</b></label>',
 				array( $this, 'user_settings_onpublish_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_posttype_select',								// ID
-				esc_html__('Send notification on', 'push-notification'),// Title
+				esc_html__('Send Notification On', 'push-notification'),// Title
 				array( $this, 'pn_key_posttype_select_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
@@ -316,28 +316,28 @@ class Push_Notification_Admin{
 			);						
 			add_settings_field(
 				'pn_key_popup_message_select',								// ID
-				esc_html__('Popup banner message', 'push-notification'),// Title
+				esc_html__('Popup Banner Message', 'push-notification'),// Title
 				array( $this, 'pn_key_banner_message_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_popup_accept_btn',								// ID
-				esc_html__('Popup banner accept', 'push-notification'),// Title
+				esc_html__('Popup Banner Accept', 'push-notification'),// Title
 				array( $this, 'pn_key_banner_accept_btn_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_popup_decline_btn',								// ID
-				esc_html__('Popup banner decline', 'push-notification'),// Title
+				esc_html__('Popup Banner Decline', 'push-notification'),// Title
 				array( $this, 'pn_key_banner_decline_btn_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_show_again_on',								// ID
-				esc_html__('Popup show again', 'push-notification'),// Title
+				esc_html__('Popup Show Again', 'push-notification'),// Title
 				array( $this, 'pn_key_popupshowagain_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
@@ -376,35 +376,35 @@ class Push_Notification_Admin{
 					 'push_notification_user_settings_section');
 			add_settings_field(
 				'pn_key_popup_display_setings_title_color',								// ID
-				esc_html__('Popup banner title color', 'push-notification'),// Title
+				esc_html__('Popup Banner Title Color', 'push-notification'),// Title
 				array( $this, 'pn_key_popup_display_settings_title_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_popup_display_setings_ok_color',								// ID
-				esc_html__('Popup banner accept color', 'push-notification'),// Title
+				esc_html__('Popup Banner Accept Color', 'push-notification'),// Title
 				array( $this, 'pn_key_popup_display_settings_ok_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_popup_display_setings_no_thanks_color',								// ID
-				esc_html__('Popup banner decline color', 'push-notification'),// Title
+				esc_html__('Popup Banner Decline Color', 'push-notification'),// Title
 				array( $this, 'pn_key_popup_display_settings_no_thanks_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_popup_display_setings_text_color',								// ID
-				esc_html__(' Popup Text color', 'push-notification'),// Title
+				esc_html__(' Popup Text Color', 'push-notification'),// Title
 				array( $this, 'pn_key_popup_display_settings_text_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_popup_display_setings_bg_color',								// ID
-				esc_html__(' Popup Background color', 'push-notification'),// Title
+				esc_html__(' Popup Background Color', 'push-notification'),// Title
 				array( $this, 'pn_key_popup_display_settings_bg_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
