@@ -516,14 +516,22 @@ jQuery(document).ready(function($){
 	 if(jQuery(this).val()=='custom-select'){
 		 jQuery('#notification-custom-select').parent().show();
 		 jQuery('#notification-custom-upload').parent().hide();
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
 	 else if(jQuery(this).val()=='custom-upload'){
 		 jQuery('#notification-custom-select').parent().hide();
 		 jQuery('#notification-custom-upload').parent().show();  
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
+	 else if(jQuery(this).val()=='custom-page-subscribed'){
+		jQuery('#notification-custom-select').parent().hide();
+		jQuery('#notification-custom-upload').parent().hide();  
+		jQuery('#notification-custom-page-subscribed').parent().show();
+	}
 	 else{
 		 jQuery('#notification-custom-select').parent().hide();
 		 jQuery('#notification-custom-upload').parent().hide();  
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
 		
 	});
@@ -535,6 +543,7 @@ jQuery(document).ready(function($){
 		var icon_url = jQuery('#notification-icon').val();
 		var message  = jQuery('#notification-message').val();
 		var send_type  = jQuery('#notification-send-type').val();
+		var page_subscribed  = jQuery('#notification-custom-page-subscribed').val();
 		var select_subs  = jQuery('#notification-custom-select').val();
 		var subs_csv  = document.getElementById('notification-custom-upload');
 		var target_ajax_url="pn_send_notification";
@@ -550,7 +559,7 @@ jQuery(document).ready(function($){
 			user_ids=select_subs.join(',');
 		}
 
-		if(send_type=='custom-select' || send_type=='custom-upload' )
+		if(send_type=='custom-select' || send_type=='custom-upload' || send_type=='custom-page-subscribed' )
 		{
 			target_ajax_url = 'campaign_for_individual_tokens';
 		}
@@ -573,6 +582,7 @@ jQuery(document).ready(function($){
 				notification_schedule:notification_schedule,
 				notification_date:notification_date,
 				notification_time:notification_time,
+				page_subscribed:page_subscribed
 				},
 			success: function(response){
 				
@@ -806,3 +816,16 @@ jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_less",function() {
     jQuery(this).parents("td").find('.full_text').hide();
     jQuery(this).parents("td").find('.less_text').show();
 });
+
+jQuery("#pn_url_capture").change(function(){
+	pn_url_capture_manual();
+});
+pn_url_capture_manual();
+function pn_url_capture_manual(){
+	let capture =jQuery('#pn_url_capture').val();
+	if(capture == 'manual'){
+		jQuery('#pn_url_capture_manual').parent().parent().show();
+	}else{
+		jQuery('#pn_url_capture_manual').parent().parent().hide();
+	}
+}
