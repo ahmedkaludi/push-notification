@@ -131,8 +131,8 @@ class Push_Notification_Frontend{
 	      $access_type = get_filesystem_method();
 	      if($access_type === 'direct')
 	      {
-	      	$file = PUSH_NOTIFICATION_PLUGIN_DIR.($filePath);
-	         $creds = request_filesystem_credentials($file, '', false, false, array());
+			$file = PUSH_NOTIFICATION_PLUGIN_DIR.'assets/'.$filePath;
+	        $creds = request_filesystem_credentials($file, '', false, false, array());
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
 	        }   
@@ -651,11 +651,14 @@ class Push_Notification_Frontend{
 */
 	public function superpwa_add_pn_swcode($swJsContent)
 	{
-			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
-			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
-			$swJsContent .= PHP_EOL.$messageSw;
-		    return $swJsContent;
+		header("Service-Worker-Allowed: /");
+		header("Content-Type: application/javascript");
+		header('Accept-Ranges: bytes');
+		$messageSw = $this->pn_get_layout_files('messaging-sw.js');
+		$settings = $this->json_settings();
+		$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
+		$swJsContent .= PHP_EOL.$messageSw;
+		return $swJsContent;
 	}
 
 	public function pn_add_url_token($url, $token) {
