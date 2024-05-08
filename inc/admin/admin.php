@@ -961,7 +961,7 @@ class Push_Notification_Admin{
 		PN_Field_Generator::get_input_color('popup_display_setings_bg_color', 'popup_display_setings_bg_color_id', 'my-color-field');
 	}
 	public function pn_key_popup_display_setings_border_radius_callback(){        
-        PN_Field_Generator::get_input('popup_display_setings_border_radius', 'popup_display_setings_border_radius_id');
+        PN_Field_Generator::get_input_number('popup_display_setings_border_radius', 'popup_display_setings_border_radius_id');
 		echo "<p class='description'>".esc_html__('Set Border radius of Popup (in px)',"push-notification")."</p>";
     }
 	public function pn_key_banner_accept_btn_callback(){		
@@ -1660,6 +1660,11 @@ class PN_Field_Generator{
 			</button>
 			<?php 
 		}
+	}
+	public static function get_input_number($name, $id="", $class=""){
+		$settings = push_notification_settings();
+			?><input type="number" name="<?php echo esc_attr(self::$settingName); ?>[<?php echo esc_attr($name); ?>]" class="regular-text" id="<?php echo esc_attr($id); ?>" value="<?php if ( isset( $settings[$name] ) && ( ! empty($settings[$name]) ) ) echo esc_attr($settings[$name]); ?>"/>		
+		<?php
 	}
 	public static function get_input_color($name, $id="", $class=""){
 		$settings = push_notification_settings();

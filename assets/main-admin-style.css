@@ -291,3 +291,6 @@ content:'';
 	text-transform: uppercase;
 	font-weight: 500;
 }
+#popup_display_setings_border_radius_id{
+	width:100px;
+}
