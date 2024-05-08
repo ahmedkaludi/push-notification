@@ -486,13 +486,18 @@ class Push_Notification_Frontend{
 		    top: auto;';
 				break;
 		}
+		$custom_bg_color = isset($settings['popup_display_setings_bg_color'])?$settings['popup_display_setings_bg_color']:'#222';
+		$custom_txt_color = isset($settings['popup_display_setings_title_color'])?$settings['popup_display_setings_title_color']:'#fff';
+		$activate_btn_color = isset($settings['popup_display_setings_ok_color'])?$settings['popup_display_setings_ok_color']:'#8ab4f8';
+		$decline_btn_color = isset($settings['popup_display_setings_no_thanks_color'])?$settings['popup_display_setings_no_thanks_color']:'#5f6368';
+		$border_radius =  isset($settings['popup_display_setings_border_radius'])?$settings['popup_display_setings_border_radius']:'4';
 		echo '<style>.pn-wrapper{
 			box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
 		    font-size: 14px;
 		    align-items: center;
-		    background-color: #222;
+		    background-color: '.esc_attr($custom_bg_color).';
 		    border: none;
-		    border-radius: 4px;
+		    border-radius: '.esc_attr($border_radius).'px;
 		    box-sizing: border-box;
 		    color: #fff;
 		    display: none;
@@ -509,9 +514,11 @@ class Push_Notification_Frontend{
     flex-wrap: wrap;
     position: relative;
     height: auto;
-    line-height: 1;
+    line-height: 1.5;
+	color:'.esc_attr($custom_txt_color).';
+	max-width:400px;
 }
-.pn-wrapper .btn.act{color: #8ab4f8;}
+.pn-wrapper .btn.act{color: '.esc_attr($activate_btn_color).';}
 .pn-wrapper .btn{
 	align-items: center;
     border: none;
@@ -522,7 +529,7 @@ class Push_Notification_Frontend{
     background: none;
     border-radius: 4px;
     box-sizing: border-box;
-    color: #5f6368;
+    color: '.esc_attr($decline_btn_color).';
     cursor: pointer;
     font-weight: 500;
     outline: none;
@@ -559,26 +566,26 @@ class Push_Notification_Frontend{
     font-size: 12px;
     font-weight: 600;
 }
-</style><div class="pn-wrapper" style="background-color:'.esc_attr($settings['popup_display_setings_bg_color']).'">';
+</style><div class="pn-wrapper">';
 				if(isset($settings['notification_pop_up_icon']) && !empty($settings['notification_pop_up_icon'])){
 					echo '<span style=" top: 0; vertical-align: top; "><img src="'.esc_attr($settings['notification_pop_up_icon']).'" style=" max-width: 70px;"></span>';
 				}
 			   echo '<span class="pn-txt-wrap pn-select-box">
 			   		<div class="pn-msg-box">
-				   		<span class="pn-msg" style="color:'.esc_attr($settings['popup_display_setings_title_color']).'">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>';
+				   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>';
 				   		if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'top'){
 				   			echo '<span class="pn-btns">
-				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link" style="color:'.esc_attr($settings['popup_display_setings_ok_color']).'">
+				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
 				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
 				   			</span>
-				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link" style="color:'.esc_attr($settings['popup_display_setings_no_thanks_color']).'">
+				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
 				   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
 				   			</span>
 				   		</span>';
 				   		}
 			   		echo '</div>';
 			   		if(!empty($settings['on_category']) && $settings['on_category'] == 1){
-				   		echo '<div id="pn-activate-permission-categories-text" style="color:'.esc_attr($settings['popup_display_setings_title_color']).'">
+				   		echo '<div id="pn-activate-permission-categories-text">
 			   				'.esc_html__('On which category would you like to receive?', 'push-notification').'
 			   			</div>
 				   		<div class="pn-categories-multiselect">
@@ -599,17 +606,19 @@ class Push_Notification_Frontend{
 							}
 				   			echo '</div>
 			   			</div>';
-			   			if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom'){
-				   			echo '<span class="pn-btns" style="float:right;">
-				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link" style="color:'.esc_attr($settings['popup_display_setings_ok_color']).'">
-				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
-				   			</span>
-				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link" style="color:'.esc_attr($settings['popup_display_setings_no_thanks_color']).'">
-				   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
-				   			</span>
-				   		</span>';
-				   		}
+
 		   			}
+
+					   if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom'){
+						echo '<span class="pn-btns" style="float:right;margin-top:20px;">
+						<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
+							'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
+						</span>
+						<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
+							'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
+						</span>
+					</span>';
+					}
 			   	echo '</span>
 			</div>';
 	}

@@ -308,7 +308,7 @@ class Push_Notification_Admin{
 					 'push_notification_user_settings_section');
 			add_settings_field(
 			'pn_key_url_capture_select',								// ID
-			esc_html__('Capture URL method', 'push-notification'),// Title
+			esc_html__('Save page url on subscribe', 'push-notification'),// Title
 			array( $this, 'pn_key_url_capture_select_callback'),// Callback
 			'push_notification_user_settings_section',	// Page slug
 			'push_notification_url_capturing_settings_section'	// Settings Section ID
@@ -427,6 +427,14 @@ class Push_Notification_Admin{
 				'pn_key_popup_display_setings_bg_color',								// ID
 				esc_html__(' Popup Background Color', 'push-notification'),// Title
 				array( $this, 'pn_key_popup_display_settings_bg_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);			
+
+			add_settings_field(
+				'pn_key_popup_display_setings_border_radius',								// ID
+				esc_html__(' Popup Border Radius', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_setings_border_radius_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
 			);			
@@ -915,7 +923,7 @@ class Push_Notification_Admin{
 
 	public function pn_key_url_capture_select_callback(){		
 		$data = array(
-			'off'=> esc_html__('Disabled', 'push-notification'),
+			'off'=> esc_html__('Select Method', 'push-notification'),
 			'auto'=> esc_html__('Automatic', 'push-notification'),
 			'manual'=> esc_html__('Manual', 'push-notification'),
 		);
@@ -952,6 +960,10 @@ class Push_Notification_Admin{
 	public function pn_key_popup_display_settings_bg_callback(){		
 		PN_Field_Generator::get_input_color('popup_display_setings_bg_color', 'popup_display_setings_bg_color_id', 'my-color-field');
 	}
+	public function pn_key_popup_display_setings_border_radius_callback(){        
+        PN_Field_Generator::get_input('popup_display_setings_border_radius', 'popup_display_setings_border_radius_id');
+		echo "<p class='description'>".esc_html__('Set Border radius of Popup (in px)',"push-notification")."</p>";
+    }
 	public function pn_key_banner_accept_btn_callback(){		
 		PN_Field_Generator::get_input('popup_banner_accept_btn', 'popup_banner_accept_btn_id');
 	}
@@ -1604,7 +1616,13 @@ function push_notification_settings(){
 		'notification_utm_campaign'=> 'pn-campaign',
 		'notification_utm_term'=> 'pn-term',
 		'pn_url_capture'=> 'off',
-		'pn_url_capture_manual'=>''
+		'pn_url_capture_manual'=>'',
+		'popup_display_setings_title_color'=>'',
+		'popup_display_setings_no_thanks_color'=>'#5f6368',
+		'popup_display_setings_ok_color'=>'#8ab4f8',
+		'popup_display_setings_text_color'=>'#fff',
+		'popup_display_setings_bg_color'=>'#222',
+		'popup_display_setings_border_radius'=>'4',
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
@@ -1630,14 +1648,14 @@ class PN_Field_Generator{
 		<?php
 		if($name == "notification_icon"){
 			?>
-			<button type="button" class="button not_icon upload_image_url" data-editor="content">
+			<button type="button" class="button pn_not_icon" data-editor="content">
 				<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span><?php echo esc_html__('Upload an image', 'push-notification'); ?>
 			</button>
 			<?php 
 		}
 		if($name == "notification_pop_up_icon"){
 			?>
-			<button type="button" class="button pop_up_not_icon upload_image_url" data-editor="content">
+			<button type="button" class="button pn_pop_up_not_icon" data-editor="content">
 				<span class="dashicons dashicons-format-image" style="margin-top: 4px;"></span><?php echo esc_html__('Upload an Icon', 'push-notification'); ?>
 			</button>
 			<?php 
@@ -1768,14 +1786,17 @@ function push_notification_pro_notifyform_before(){
 	if(PN_Server_Request::getProStatus()=='inactive'){
 		return;
 	}
+	$notification_settings= push_notification_settings();
 	echo '<div class="form-group">
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
 			<select id="notification-send-type" class="regular-text js_pn_select">
 				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
 				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
-				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>
-				<option value="custom-page-subscribed">'.esc_html__('Page subscribed','push-notification').'</option>				
-			</select>
+				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>';
+	if(isset($notification_settings['pn_url_capture']) && ($notification_settings['pn_url_capture']=='auto' || $notification_settings['pn_url_capture']=='manual')){
+	 echo '<option value="custom-page-subscribed">'.esc_html__('Select Page','push-notification').'</option>';
+	}				
+	echo '</select>
 		  </div>';
 		  
 		  $users = get_users(array(

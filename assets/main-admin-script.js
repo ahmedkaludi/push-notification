@@ -459,7 +459,7 @@ jQuery(document).ready(function($){
         })
         .open();
     });
-	jQuery(".not_icon.upload_image_url").click(function(e) {  // upload_image_url
+	jQuery(".pn_not_icon").click(function(e) {  // upload_image_url
         e.preventDefault();
         var pwaforwpMediaUploader = wp.media({
             title: pn_setings.uploader_title,
@@ -475,7 +475,7 @@ jQuery(document).ready(function($){
         })
         .open();
     });
-   jQuery(".pop_up_not_icon.upload_image_url").click(function(e) {  // upload_image_url
+   jQuery(".pn_pop_up_not_icon").click(function(e) {  // upload_image_url
         e.preventDefault();
         var pwaforwpMediaUploader = wp.media({
             title: pn_setings.uploader_title,
