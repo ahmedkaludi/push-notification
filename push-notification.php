@@ -99,13 +99,13 @@ function push_notification_on_activate($network_wide){
  * After activate plugin path to redirect
  * @plugin name of current activation plugin 
  */
-function push_notification_after_activation_redirect( $plugin ) {
-    if( $plugin == plugin_basename( PUSH_NOTIFICATION_PLUGIN_FILE ) ) {
-		wp_safe_redirect( admin_url( 'admin.php?page=push-notification' ) );
-        exit();
-    }
-}
-add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
+// function push_notification_after_activation_redirect( $plugin ) {
+//     if( $plugin == plugin_basename( PUSH_NOTIFICATION_PLUGIN_FILE ) ) {
+// 		wp_safe_redirect( admin_url( 'admin.php?page=push-notification' ) );
+//         exit();
+//     }
+// }
+// add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
 
 
 /**
