@@ -8,6 +8,15 @@ class Push_Notification_Frontend{
 		$this->init();
 	}
 
+	public function pn_manifest_config(){
+		return array(
+			"gcm_sender_id"=> "103953800507",
+			"start_url"=> "/",
+			"name"=> get_bloginfo( 'name' ),
+			"display"=> "standalone"
+		);
+	}
+
 	public function init(){
 		$auth_settings = push_notification_auth_settings();
 		if(empty($auth_settings)
@@ -250,13 +259,13 @@ class Push_Notification_Frontend{
         return true;
     }
     public function get_manifest($request){
-    	$array = $this->notificatioArray;
+    	$array = $this->pn_manifest_config();
         return $array;
     }
 
     public function manifest_add_gcm_id($manifest){
-		if(is_array($this->notificatioArray) && !empty($this->notificatioArray)){
-    		$manifest = array_merge($manifest, $this->notificatioArray);
+		if(is_array($this->pn_manifest_config()) && !empty($this->pn_manifest_config())){
+    		$manifest = array_merge($manifest, $this->pn_manifest_config());
 		}
     	return $manifest;
     }
