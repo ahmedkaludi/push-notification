@@ -377,6 +377,7 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
+			if(PN_Server_Request::getProStatus()=='active'){
 			add_settings_field(
 				'pn_key_actions_buttons_position',								// ID
 				esc_html__('Where would you like to display Buttons', 'push-notification'),// Title
@@ -391,6 +392,8 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
+		}
+			if(PN_Server_Request::getProStatus()=='active'){
 			add_settings_section('push_notification_notification_pop_display_settings_section',
 					 esc_html__('Notification Subscription Popup Appearance','push-notification'), 
 					 '__return_false', 
@@ -437,21 +440,23 @@ class Push_Notification_Admin{
 				array( $this, 'pn_key_popup_display_setings_border_radius_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
-			);			
-
+			);
+		}
+			
+			if( class_exists( 'WooCommerce', false )){
 		//WC compatiblility
-		add_settings_section('push_notification_user_wc_settings_section',
+			add_settings_section('push_notification_user_wc_settings_section',
 					 esc_html__('WooCommerce settings','push-notification'), 
 					 '__return_false', 
-					 'push_notification_user_wc_settings_section');
+					 'push_notification_user_settings_section');
             add_settings_field(
 				'pn_wc_notification_orderchgn_edit',					// ID
 				esc_html__('Notification on order change', 'push-notification'),// Title
 				array( $this, 'user_notification_order_change_callback'),// Callback
-				'push_notification_user_wc_settings_section',	// Page slug
+				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_wc_settings_section'	// Settings Section ID
-			);           
-
+			); 
+		}
 	}
 
 	function mobile_notification_preview(){
@@ -634,6 +639,12 @@ class Push_Notification_Admin{
 						</thead>
 						<tbody>';
 						$current_count_start = 0;
+						$timezone_string = get_option('timezone_string');
+						if (empty($timezone_string)) {
+							$offset = get_option('gmt_offset');
+							$timezone_string = timezone_name_from_abbr('', $offset * 3600, 0);
+						}
+						date_default_timezone_set($timezone_string);
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
 								$message = strip_tags($campaign['message']);
@@ -646,13 +657,14 @@ class Push_Notification_Admin{
 								}else{
 									$message = nl2br($campaign['message']);
 								}
+								$time_in_seconds = new DateTime($campaign['created_at'], new DateTimeZone('UTC'));
 								echo '<tr>
 									<td>'.esc_html($current_count_start+= 1).'</td>
 									<td>'.esc_html($campaign['title']).'</td>
 									<td><p class="less_text">'.$message.'</p>                        
 									<p class="full_text" style="display:none;">'.strip_tags($campaign['message']).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
 									</p></td>
-									<td>'.esc_html($campaign['created_at'] ).'</td>
+									<td>'.esc_html(date('d-M-Y H:i:s',$time_in_seconds->format('U'))).'</td>
 									<td>';
 									if ($campaign['status'] === 'Done') {
 										echo '<span class="badge badge-pill badge-success" style="color:green">'.esc_html($campaign['status']).'</span>';
@@ -984,9 +996,20 @@ class Push_Notification_Admin{
 	}
 
 	public function user_notification_order_change_callback(){		
+
+		if ( !class_exists( 'WooCommerce' ) ) {
+			
+			echo "<p class='description'>".esc_html__('This feature is only available for WooCommerce users.',"push-notification")."</p>";
+			return;
+		}
 		PN_Field_Generator::get_input_checkbox('notification_on_order_change_to_user', 1, 'send_notification_to_user_order', "", esc_html__("To User", 'push-notification'));
 		PN_Field_Generator::get_input_checkbox('notification_on_order_change_to_admin', 1, 'send_notification_to_admin_order', "", esc_html__("To Admin", 'push-notification'));
 		echo "<p class='description'>".esc_html__('Send notification when order status will change',"push-notification")."</p>";
+	}
+
+	public function user_notification_um_title(){		
+		PN_Field_Generator::get_input('pn_um_notification_title', 'pn_um_notification_title', '');
+		echo "<p class='help'> ".esc_html__('Show Popup after nth page view (Default 1)', 'push-notification')." </p>";
 	}
 
 	public function pn_verify_user(){
@@ -1097,6 +1120,7 @@ class Push_Notification_Admin{
 			if ( ! current_user_can( 'manage_options' ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
+			global $wpdb;
 			$auth_settings = push_notification_auth_settings();
 			$notification_settings = push_notification_settings();
 
@@ -1132,7 +1156,7 @@ class Push_Notification_Admin{
 				    );
 				$link_url = add_query_arg( array_filter($utm_details), $link_url  );
 			}
-
+			$user_ids=[];
 			if( isset( $auth_settings['user_token'] ) ){
 				$push_notify_token=[];
 				if(!empty($audience_token_id) && is_array($audience_token_id))
@@ -1141,6 +1165,7 @@ class Push_Notification_Admin{
 						
 						if($send_type=='custom-select'){
 							$token_ids = get_user_meta($token_id, 'pnwoo_notification_token',true);
+							$user_ids[] = $token_id;
 						}else if($send_type=='custom-upload'){
 							if(!empty($token_id['email']))
 							{	
@@ -1151,6 +1176,7 @@ class Push_Notification_Admin{
 							}
 							if($user && isset($user->ID)){
 								$token_ids = get_user_meta($user->ID, 'pnwoo_notification_token',true);
+								$user_ids[] = $user->ID;
 							}
 							
 						}
@@ -1188,8 +1214,36 @@ class Push_Notification_Admin{
 					'notification_date'=>$notification_date,
 				);
 				$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
+				$table_name = $wpdb->prefix . 'um_notifications';
 				if($response){
-				 wp_send_json($response);
+				 	wp_send_json($response);
+					 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API')){
+
+						foreach($user_ids as $pn_user_id){
+							$insert = $wpdb->insert(
+								$table_name,
+								array(
+									'time'    => date( 'Y-m-d H:i:s' ),
+									'user'    => $pn_user_id,
+									'status'  => 'unread',
+									'photo'   => $icon_url,
+									'type'    => 'new_pm',
+									'url'     => $link_url,
+									'content' => $message,
+								)
+							);
+							if($insert){
+								$new_notify = get_user_meta( $pn_user_id, 'um_new_notifications');
+								if($new_notify && is_array($new_notify)){
+									$new_notify[] = $wpdb->insert_id;
+									update_user_meta( $pn_user_id, 'um_new_notifications', $new_notify );
+								}
+							}
+							
+						}
+						
+					 }
+
 				}else{
 					wp_send_json(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));
 				}
@@ -1623,6 +1677,7 @@ function push_notification_settings(){
 		'popup_display_setings_text_color'=>'#fff',
 		'popup_display_setings_bg_color'=>'#222',
 		'popup_display_setings_border_radius'=>'4',
+		'notification_botton_position'=>'top'
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
@@ -1814,7 +1869,7 @@ function push_notification_pro_notifyform_before(){
 			<select id="notification-custom-select" class="regular-text js_pn_select" placeholder="'.esc_html__('Select Subscribers','push-notification').'" multiple>';
 			if(!empty($users)){
 				foreach($users as $user){
-					echo '<option value="'.esc_attr($user->ID).'">('.esc_attr($user->user_email).')</option>';			
+					echo '<option value="'.esc_attr($user->ID).'">'.esc_attr($user->user_login).' ('.esc_attr($user->user_email).')</option>';			
 				}
 			}			
 		echo' </select>

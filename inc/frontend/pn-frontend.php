@@ -86,6 +86,11 @@ class Push_Notification_Frontend{
 		//Woocommerce order status Compatibility
 		//Store token ID
 		add_action('pn_tokenid_registration_id', array($this, 'store_user_registered_tokens'), 10, 6);
+
+		//set transient to detect user login so that we can update the token id
+		add_action('wp_login', array($this, 'after_login_transient'), 10, 2); 
+		 // force token update if login is detected
+		add_filter('pn_token_exists', array($this, 'pn_token_exists'), 10, 1);
 	}
 	public static function update_autoptimize_exclude( $values, $option ){
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js')){
@@ -172,6 +177,13 @@ class Push_Notification_Frontend{
 		$pn_current_user_id=get_current_user_id()?get_current_user_id():0;
 		if($pn_current_user_id>0){
 			$pn_user_token = get_user_meta($pn_current_user_id, 'pnwoo_notification_token',true);
+			if(is_array($pn_user_token) && !empty($pn_user_token)){
+				$pn_user_token = array_filter($pn_user_token);
+				$pn_user_token = array_unique($pn_user_token);
+				if(count($pn_user_token) == 0){
+					$pn_token_exists=0;
+				}
+			}
 			if(!$pn_user_token || (is_array($pn_user_token) && empty($pn_user_token)))
 			{
 				$pn_token_exists=0;
@@ -187,7 +199,7 @@ class Push_Notification_Frontend{
 					'notification_popup_show_again'=>$pn_Settings['notification_popup_show_again'],
 					'popup_show_afternseconds'=> $pn_Settings['notification_popup_show_afternseconds'],
 					'popup_show_afternpageview'=> $pn_Settings['notification_popup_show_afternpageview'],
-					'pn_token_exists' =>$pn_token_exists,
+					'pn_token_exists' =>apply_filters('pn_token_exists',$pn_token_exists),
 					);
         return $settings;
 	}
@@ -495,11 +507,12 @@ class Push_Notification_Frontend{
 		    top: auto;';
 				break;
 		}
-		$custom_bg_color = isset($settings['popup_display_setings_bg_color'])?$settings['popup_display_setings_bg_color']:'#222';
-		$custom_txt_color = isset($settings['popup_display_setings_title_color'])?$settings['popup_display_setings_title_color']:'#fff';
-		$activate_btn_color = isset($settings['popup_display_setings_ok_color'])?$settings['popup_display_setings_ok_color']:'#8ab4f8';
-		$decline_btn_color = isset($settings['popup_display_setings_no_thanks_color'])?$settings['popup_display_setings_no_thanks_color']:'#5f6368';
-		$border_radius =  isset($settings['popup_display_setings_border_radius'])?$settings['popup_display_setings_border_radius']:'4';
+		$is_pro = (PN_Server_Request::getProStatus()=='active')?true:false;
+		$custom_bg_color = (isset($settings['popup_display_setings_bg_color']) && $is_pro)?$settings['popup_display_setings_bg_color']:'#222';
+		$custom_txt_color = (isset($settings['popup_display_setings_title_color'])&& $is_pro)?$settings['popup_display_setings_title_color']:'#fff';
+		$activate_btn_color = (isset($settings['popup_display_setings_ok_color'])&& $is_pro)?$settings['popup_display_setings_ok_color']:'#8ab4f8';
+		$decline_btn_color = (isset($settings['popup_display_setings_no_thanks_color'])&& $is_pro)?$settings['popup_display_setings_no_thanks_color']:'#5f6368';
+		$border_radius =  (isset($settings['popup_display_setings_border_radius'])&& $is_pro)?$settings['popup_display_setings_border_radius']:'4';
 		echo '<style>.pn-wrapper{
 			box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
 		    font-size: 14px;
@@ -576,13 +589,13 @@ class Push_Notification_Frontend{
     font-weight: 600;
 }
 </style><div class="pn-wrapper">';
-				if(isset($settings['notification_pop_up_icon']) && !empty($settings['notification_pop_up_icon'])){
+				if(isset($settings['notification_pop_up_icon']) && !empty($settings['notification_pop_up_icon']) && PN_Server_Request::getProStatus()=='active'){
 					echo '<span style=" top: 0; vertical-align: top; "><img src="'.esc_attr($settings['notification_pop_up_icon']).'" style=" max-width: 70px;"></span>';
 				}
 			   echo '<span class="pn-txt-wrap pn-select-box">
 			   		<div class="pn-msg-box">
 				   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>';
-				   		if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'top'){
+				   		if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'top' && PN_Server_Request::getProStatus()=='active'){
 				   			echo '<span class="pn-btns">
 				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
 				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
@@ -618,7 +631,7 @@ class Push_Notification_Frontend{
 
 		   			}
 
-					   if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom'){
+					   if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom' && PN_Server_Request::getProStatus()=='active'){
 						echo '<span class="pn-btns" style="float:right;margin-top:20px;">
 						<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
 							'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
@@ -648,8 +661,10 @@ class Push_Notification_Frontend{
 		if(is_object($userData) && isset($userData->ID)){
 			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
-		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): array();
+		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): $token_ids;
+			$token_ids2  = maybe_unserialize($token_ids);
 		 	$token_ids[] = esc_attr($response['data']['id']);
+			$token_ids = array_slice(array_unique($token_ids), -5); // keep only last 5 push token
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 		}
 		$pn_save_url_token = apply_filters('push_notification_url_tokens',$url,true);
@@ -722,6 +737,23 @@ class Push_Notification_Frontend{
 				)
 			);
 
+	}
+
+	public function after_login_transient($user_login, $user){
+		$user_id = $user->ID;
+		$transient_key = 'pn_token_exists_' . $user_id;
+		set_transient($transient_key, true, 12 * HOUR_IN_SECONDS);
+	}
+
+	public function pn_token_exists($status){
+		$user_id = get_current_user_id();
+		$transient_key = 'pn_token_exists_' . $user_id;
+		$transient_value = get_transient($transient_key);
+		if($transient_value){
+			delete_transient($transient_key);
+			return 0;
+		}
+		return $status;
 	}
 }
 
