@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.4
-Stable tag: 1.33
+Stable tag: 1.34
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -53,6 +53,17 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.34 (29 May 2024) =
+* Added: Ability to change default Notification icon URL #90
+* Added: Option to customise the push notification banner. #76
+* Enhancement: Add loader on campaigns pagination #92
+* Enhancement : Make checkboxes selection on its label clicked #91
+* Fixed: Notice: Trying to get property 'slug' of non-object #97
+* Fixed: Conflict issue with ultimate membership notification. #109
+
+1.33.1 (09 May 2024)
+Fixed: Issue with plugin activation. #103
 
 = 1.33 (16 March 2024) =
 * Added: Notification types preview with selection #86 #79
