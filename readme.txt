@@ -54,7 +54,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
-= 1.34 (29 May 2024) =
+= 1.34 (31 May 2024) =
 * Added: Ability to change default Notification icon URL #90
 * Added: Option to customise the push notification banner. #76
 * Enhancement: Add loader on campaigns pagination #92
