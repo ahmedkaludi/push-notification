@@ -23,10 +23,12 @@ const notificationOptions = {
 				}
 				messageCount += 1;
 				setBadge(messageCount);
-			return self.registration.showNotification(notificationTitle, notificationOptions);
+
+	return self.registration.showNotification(notificationTitle, notificationOptions);
 	
 
 });
+
 
 self.addEventListener("notificationclose", function(e) {
 var notification = e.notification;
@@ -43,21 +45,34 @@ var primarykey = notification.data.primarykey;
 
 self.addEventListener("notificationclick", function(e) {
 var notification = e.notification;
-var action = e.action;
-if (action === "close") {
-  notification.close();
-} else {
-  clients.openWindow(notification.data.url);
-  notification.close();
-}
-	messageCount -= 1;
-	unreadCount -= 1;
-	if(messageCount>0 && unreadCount > 0){
-		setBadge(messageCount);
-	}else{
-		clearBadge();
-	}
+messageCount -= 1;
+unreadCount -= 1;
+
+e.waitUntil(
+	clients.openWindow(notification.data.url).then(function(windowClient) {
+		fetch(pnScriptSetting.ajax_url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: `campaign=${notification.data.currentCampaign}&nonce=${pnScriptSetting.nonce}&action=pn_noteclick_subscribers`
+		});
+
+		if(messageCount>0 && unreadCount > 0){
+				setBadge(messageCount);
+		}else{
+				clearBadge();
+		}
+	})
+);
+
+notification.close(); // Close the notification
+
+console.log("Clicked notification: " + notification.data);
 });  
+
+
+
 
 function setBadge(...args) {
   if (navigator.setAppBadge) {

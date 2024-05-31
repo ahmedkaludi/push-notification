@@ -421,6 +421,7 @@ jQuery(document).ready(function($){
 	});
 
 	jQuery("body").on("click",".js_custom_pagination", function(e){
+		jQuery("#pn_cam_loading").css("display","block");
 	        e.preventDefault();
 	        var page = jQuery(this).attr('page');
 			jQuery.ajax({
@@ -428,10 +429,12 @@ jQuery(document).ready(function($){
 			method: "post",
 			dataType: 'html',
 				data:{action:'pn_get_compaigns',page:page,nonce: pn_setings.remote_nonce},
-				success:function(response){                       
+				success:function(response){              
+				jQuery("#pn_cam_loading").css("display","none");         
 					jQuery("#pn_campaings_custom_div").html(response);
 				},
-				error: function(response){                    
+				error: function(response){   
+				jQuery("#pn_cam_loading").css("display","none");                 
 					console.log(response);
 				}
 			});           
@@ -453,6 +456,38 @@ jQuery(document).ready(function($){
             jQuery("#notification-imageurl").val(attachment.url);
             jQuery("#js_pn_banner").addClass('notification-banner');
 			jQuery('.notification-banner').css('background-image','url('+attachment.url+')');
+        })
+        .open();
+    });
+	jQuery(".pn_not_icon").click(function(e) {  // upload_image_url
+        e.preventDefault();
+        var pwaforwpMediaUploader = wp.media({
+            title: pn_setings.uploader_title,
+            button: {
+                text: pn_setings.uploader_button
+            },
+            multiple: false,  // Set this to true to allow multiple files to be selected
+                        library:{type : 'image'}
+        })
+        .on("select", function() {
+            var attachment = pwaforwpMediaUploader.state().get("selection").first().toJSON();
+            jQuery("#notification_icon").val(attachment.url);            
+        })
+        .open();
+    });
+   jQuery(".pn_pop_up_not_icon").click(function(e) {  // upload_image_url
+        e.preventDefault();
+        var pwaforwpMediaUploader = wp.media({
+            title: pn_setings.uploader_title,
+            button: {
+                text: pn_setings.uploader_button
+            },
+            multiple: false,  // Set this to true to allow multiple files to be selected
+                        library:{type : 'image'}
+        })
+        .on("select", function() {
+            var attachment = pwaforwpMediaUploader.state().get("selection").first().toJSON();
+            jQuery("#notification_pop_up_icon").val(attachment.url);            
         })
         .open();
     });
@@ -481,14 +516,22 @@ jQuery(document).ready(function($){
 	 if(jQuery(this).val()=='custom-select'){
 		 jQuery('#notification-custom-select').parent().show();
 		 jQuery('#notification-custom-upload').parent().hide();
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
 	 else if(jQuery(this).val()=='custom-upload'){
 		 jQuery('#notification-custom-select').parent().hide();
 		 jQuery('#notification-custom-upload').parent().show();  
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
+	 else if(jQuery(this).val()=='custom-page-subscribed'){
+		jQuery('#notification-custom-select').parent().hide();
+		jQuery('#notification-custom-upload').parent().hide();  
+		jQuery('#notification-custom-page-subscribed').parent().show();
+	}
 	 else{
 		 jQuery('#notification-custom-select').parent().hide();
 		 jQuery('#notification-custom-upload').parent().hide();  
+		 jQuery('#notification-custom-page-subscribed').parent().hide();
 	 }
 		
 	});
@@ -500,6 +543,7 @@ jQuery(document).ready(function($){
 		var icon_url = jQuery('#notification-icon').val();
 		var message  = jQuery('#notification-message').val();
 		var send_type  = jQuery('#notification-send-type').val();
+		var page_subscribed  = jQuery('#notification-custom-page-subscribed').val();
 		var select_subs  = jQuery('#notification-custom-select').val();
 		var subs_csv  = document.getElementById('notification-custom-upload');
 		var target_ajax_url="pn_send_notification";
@@ -515,7 +559,7 @@ jQuery(document).ready(function($){
 			user_ids=select_subs.join(',');
 		}
 
-		if(send_type=='custom-select' || send_type=='custom-upload' )
+		if(send_type=='custom-select' || send_type=='custom-upload' || send_type=='custom-page-subscribed' )
 		{
 			target_ajax_url = 'campaign_for_individual_tokens';
 		}
@@ -538,6 +582,7 @@ jQuery(document).ready(function($){
 				notification_schedule:notification_schedule,
 				notification_date:notification_date,
 				notification_time:notification_time,
+				page_subscribed:page_subscribed
 				},
 			success: function(response){
 				
@@ -584,6 +629,10 @@ jQuery(document).ready(function($){
 		
 	})
 	jQuery("#notification-custom-select").select2();
+
+
+    	$('.my-color-field').wpColorPicker();
+
 });
 
 function pnCsvToArray(str, delimiter = ",") {
@@ -767,3 +816,16 @@ jQuery("#pn_campaings_custom_div").on('click',".pn_js_read_less",function() {
     jQuery(this).parents("td").find('.full_text').hide();
     jQuery(this).parents("td").find('.less_text').show();
 });
+
+jQuery("#pn_url_capture").change(function(){
+	pn_url_capture_manual();
+});
+pn_url_capture_manual();
+function pn_url_capture_manual(){
+	let capture =jQuery('#pn_url_capture').val();
+	if(capture == 'manual'){
+		jQuery('#pn_url_capture_manual').parent().parent().show();
+	}else{
+		jQuery('#pn_url_capture_manual').parent().parent().hide();
+	}
+}

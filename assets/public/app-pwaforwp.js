@@ -211,9 +211,10 @@ function pushnotification_load_messaging(){
 	  var catArraystr = [...optioArr].join(',');
 	  var grabOs = pushnotificationFCMGetOS();
 	  var browserClient = pushnotificationFCMbrowserclientDetector();
+	  var currentUrl = window.location.href;
 	  xhttp.open("POST", pnScriptSetting.ajax_url, true);
 	  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	  xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
+	  xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers&url='+currentUrl);
   }              
   
   

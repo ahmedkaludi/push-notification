@@ -8,7 +8,7 @@ const messaging = firebase.messaging();
 		if("serviceWorker" in navigator) {
 				navigator.serviceWorker.register(swsource, {scope: pnScriptSetting.scope}).then(function(reg){
 					messaging.useServiceWorker(reg);
-					pushnotification_load_messaging();
+					pushnotification_load_messaging(reg);
 					console.log('Congratulations!!Service Worker Registered ServiceWorker scope: ', reg.scope);
 																									
 				}).catch(function(err) {
@@ -19,7 +19,7 @@ const messaging = firebase.messaging();
 		}
 	})
 firebase.analytics();	  
-function pushnotification_load_messaging(){
+function pushnotification_load_messaging(reg){
   // [START refresh_token]
   // Callback fired if Instance ID token is updated.
   messaging.onTokenRefresh(() => {
@@ -117,8 +117,8 @@ function pushnotification_load_messaging(){
 	messaging.onMessage(function(payload) {
 		console.log('Message received. ', payload);
 
-		notificationTitle = payload.data.title;
-		notificationOptions = {
+		let notificationTitle = payload.data.title;
+		let notificationOptions = {
 		body: payload.data.body,
 		icon: payload.data.icon,
 		image: payload.data.image,
@@ -129,19 +129,17 @@ function pushnotification_load_messaging(){
 			url : payload.data.url
 		  },
 		}
-		var notification = new Notification(notificationTitle, notificationOptions); 
-			notification.onclick = function(event) {
-			event.preventDefault();
-			window.open(payload.data.url, '_blank');
-			
-			var xhttp = new XMLHttpRequest();
-			xhttp.open("POST", pnScriptSetting.ajax_url, true);
-	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhttp.send('campaign='+payload.data.currentCampaign+'&nonce='+pnScriptSetting.nonce+'&action=pn_noteclick_subscribers');
-			
-			notification.close();
-			}
+
+		reg.showNotification(notificationTitle, notificationOptions);  // show notification in foreground  for pwa
 	});
+
+	if (navigator.clearAppBadge) {
+		navigator.clearAppBadge();
+	  } else if (navigator.clearExperimentalAppBadge) {
+		navigator.clearExperimentalAppBadge();
+	  } else if (window.ExperimentalBadge) {
+		window.ExperimentalBadge.clear();
+	  }
 }
 
 function push_notification_getRegToken(argument){
@@ -207,9 +205,10 @@ function push_notification_saveToken(currentToken){
     var catArraystr = [...optioArr].join(',');
 	var grabOs = pushnotificationFCMGetOS();
 	var browserClient = pushnotificationFCMbrowserclientDetector();
+	var currentUrl = window.location.href;
 	xhttp.open("POST", pnScriptSetting.ajax_url, true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers');
+	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers&url='+currentUrl);
 }              
 
 
