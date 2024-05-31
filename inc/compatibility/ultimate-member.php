@@ -152,7 +152,7 @@ class PN_Ultimate_Member{
 		$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 		$weblink = is_multisite()? get_site_url() : home_url();
 		$data = array("user_token"=>$auth_settings['user_token'],
-					"audience_token_id"=>$token_ids,
+					"audience_token_id"=>$all_tokens,
 					"title"=>sprintf( __( 'New Group Post from %s', 'push-notification' ), $author_name ),
 					"message"=> wp_strip_all_tags($content),
 					"link_url"=>$link_url	,
