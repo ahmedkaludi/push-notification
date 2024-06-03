@@ -1237,10 +1237,8 @@ class Push_Notification_Admin{
 								if(!is_array($new_notify)) {
 									$new_notify = array();
 								}
-								if($new_notify && is_array($new_notify)){
 									$new_notify[] = $wpdb->insert_id;
 									update_user_meta( $pn_user_id, 'um_new_notifications', $new_notify );
-								}
 							}
 							
 						}
