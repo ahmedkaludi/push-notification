@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.5
-Stable tag: 1.34
+Stable tag: 1.35
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -54,6 +54,10 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
+= 1.35 (06 June 2024) =
+* Fixed: On the install banner, the yes or no option is not showing.  #112
+* Fixed: Php error's on user end. #111
+
 = 1.34 (31 May 2024) =
 * Added: Ability to change default Notification icon URL #90
 * Added: Option to customise the push notification banner. #76
@@ -103,11 +107,5 @@ Fixed: Issue with plugin activation. #103
 * Added: Push Notification support in Web Apps for iOS (Pro API) #56
 * Added: Category Segmentation for push notification (Pro API)
 * Improvement : Test with WordPress 6.3 and update readme.txt #60
-
-= 1.27 (17 May 2023) =
-* Added: We need to create a dashboard report in WordPress, the same as we get in the push notification. #52
-* Added: Needs to create an option where users are able to upload an image from the media library. #53
-* Bug Fixed: Clicks are not getting counted in the push notification dashboard. #51
-* Enhancement: Checkbox should be clickable on label click #54
 
 Full changelog available [ at changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)

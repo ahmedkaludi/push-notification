@@ -595,7 +595,7 @@ class Push_Notification_Frontend{
 			   echo '<span class="pn-txt-wrap pn-select-box">
 			   		<div class="pn-msg-box">
 				   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>';
-				   		if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'top' && PN_Server_Request::getProStatus()=='active'){
+				   		if((isset($settings['notification_botton_position']) && $settings['notification_botton_position'] != 'bottom') || !isset($settings['notification_botton_position'])){
 				   			echo '<span class="pn-btns">
 				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
 				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
@@ -661,16 +661,22 @@ class Push_Notification_Frontend{
 		if(is_object($userData) && isset($userData->ID)){
 			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
-		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): $token_ids;
-			$token_ids2  = maybe_unserialize($token_ids);
+			$token_ids  = maybe_unserialize($token_ids);
+			if(!$token_ids || !is_array($token_ids)){
+				$token_ids = array();
+			}
 		 	$token_ids[] = esc_attr($response['data']['id']);
 			$token_ids = array_slice(array_unique($token_ids), -5); // keep only last 5 push token
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
+
+			
 		}
+
 		$pn_save_url_token = apply_filters('push_notification_url_tokens',$url,true);
 		if($pn_save_url_token){
 			$this->pn_add_url_token(esc_url($url),esc_attr($response['data']['id']));
 		}
+		
 	}
 	function amp_header_button_css(){
 		ob_start();
