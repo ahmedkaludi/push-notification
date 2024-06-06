@@ -661,7 +661,6 @@ class Push_Notification_Frontend{
 		if(is_object($userData) && isset($userData->ID)){
 			$userid = $userData->ID;
 		 	$token_ids = get_user_meta($userid, 'pnwoo_notification_token', true);
-		 	$token_ids = ($token_ids && !is_array($token_ids))? json_decode($token_ids): $token_ids;
 			$token_ids  = maybe_unserialize($token_ids);
 			if(!$token_ids || !is_array($token_ids)){
 				$token_ids = array();
