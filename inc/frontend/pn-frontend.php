@@ -669,10 +669,12 @@ class Push_Notification_Frontend{
 			$token_ids = array_slice(array_unique($token_ids), -5); // keep only last 5 push token
 		 	update_user_meta($userid, 'pnwoo_notification_token', $token_ids);
 
-			 $pn_save_url_token = apply_filters('push_notification_url_tokens',$url,true);
-			 if($pn_save_url_token){
-				 $this->pn_add_url_token(esc_url($url),esc_attr($response['data']['id']));
-			 }
+			
+		}
+
+		$pn_save_url_token = apply_filters('push_notification_url_tokens',$url,true);
+		if($pn_save_url_token){
+			$this->pn_add_url_token(esc_url($url),esc_attr($response['data']['id']));
 		}
 		
 	}
