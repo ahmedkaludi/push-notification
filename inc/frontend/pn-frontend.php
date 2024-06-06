@@ -595,7 +595,7 @@ class Push_Notification_Frontend{
 			   echo '<span class="pn-txt-wrap pn-select-box">
 			   		<div class="pn-msg-box">
 				   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>';
-				   		if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'top' && PN_Server_Request::getProStatus()=='active'){
+				   		if((isset($settings['notification_botton_position']) && $settings['notification_botton_position'] != 'bottom') || !isset($settings['notification_botton_position'])){
 				   			echo '<span class="pn-btns">
 				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
 				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
