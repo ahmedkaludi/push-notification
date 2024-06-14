@@ -1176,11 +1176,11 @@ class Push_Notification_Admin{
 							}
 							if($user && isset($user->ID)){
 								$token_ids = get_user_meta($user->ID, 'pnwoo_notification_token',true);
-								$user_ids[] = $user->ID;
+								if($token_ids){
+									$user_ids[] = $token_ids;
+								}
 							}
-							
 						}
-						
 						if(is_array($token_ids) && !empty($token_ids)){
 							$push_notify_token = array_merge($push_notify_token,$token_ids);
 						}
@@ -1194,9 +1194,20 @@ class Push_Notification_Admin{
 
 				if($send_type=='custom-page-subscribed'){
 					$authData = push_notification_auth_settings();
-					if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated']!=1){
+					if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated'] ==1){
 						$push_notify_token =pn_get_tokens_by_url($page_subscribed);
 					}
+				}
+
+				if(empty($push_notify_token)){
+					if($send_type=='custom-select'){
+						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
+					}else if($send_type=='custom-upload'){
+						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the csv list', 'push-notification')));
+					}else{
+						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found', 'push-notification')));
+					}
+					
 				}
 
 				$payload =array(
@@ -1881,7 +1892,7 @@ function push_notification_pro_notifyform_before(){
 		  <select id="notification-custom-page-subscribed" class="regular-text js_pn_select" placeholder="'.esc_html__('Select Page','push-notification').'">';
 		  if(!empty($pn_token_urls)){
 			  foreach($pn_token_urls as $url){
-				  echo '<option value="'.esc_url($url).'" data-url="'.basename($url).'">'.esc_attr(pn_get_page_title_by_url($url)).'</option>';			
+				  echo '<option value="'.esc_url($url).'" data-url="'.basename($url).'">'.esc_attr(pn_get_page_title_by_url($url)).'('.esc_url($url).')</option>';			
 			  }
 		  }else{
 			echo '<option value="">'.esc_html__('No Subscribed Page Found','push-notification').'</option>';	

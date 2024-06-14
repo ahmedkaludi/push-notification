@@ -735,7 +735,7 @@ class Push_Notification_Frontend{
 			return $wpdb->insert(
 				$wpdb->prefix.'pn_token_urls',
 				array(
-					'url' => esc_url($url),
+					'url' => esc_url($this->pn_standardize_url($url)),
 					'status' => 'active',
 					'token' => $token,
 					'created_at' => current_time('mysql'),
@@ -760,6 +760,25 @@ class Push_Notification_Frontend{
 			return 0;
 		}
 		return $status;
+	}
+
+	public function pn_standardize_url($url) {
+
+		$parsedUrl = parse_url($url);
+
+		$standardUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+
+		if (isset($parsedUrl['port']) && 
+		   (($parsedUrl['scheme'] === 'http' && $parsedUrl['port'] != 80) || 
+		   ($parsedUrl['scheme'] === 'https' && $parsedUrl['port'] != 443))) {
+			$standardUrl .= ':' . $parsedUrl['port'];
+		}
+	
+		if (isset($parsedUrl['path'])) {
+			$standardUrl .= $parsedUrl['path'];
+		}
+	
+		return $standardUrl;
 	}
 }
 

@@ -559,6 +559,10 @@ jQuery(document).ready(function($){
 			user_ids=select_subs.join(',');
 		}
 
+		if(send_type == 'custom-upload'){
+			user_ids = sessionStorage.getItem('pnTmpCsvData');
+		}
+
 		if(send_type=='custom-select' || send_type=='custom-upload' || send_type=='custom-page-subscribed' )
 		{
 			target_ajax_url = 'campaign_for_individual_tokens';
