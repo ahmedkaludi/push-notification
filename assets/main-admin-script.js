@@ -657,8 +657,10 @@ function pnCsvToArray(str, delimiter = ",") {
 	const arr = rows.map(function (row) {
 	  const values = row.split(delimiter);
 	  const el = headers.reduce(function (object, header, index) {
-		object[header] = values[index].trim();
-		return object;
+		if(values[index]){
+			object[header] = values[index].trim();
+			return object;
+		}
 	  }, {});
 	  return el;
 	});
