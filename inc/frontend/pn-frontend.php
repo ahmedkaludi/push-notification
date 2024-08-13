@@ -10,10 +10,7 @@ class Push_Notification_Frontend{
 
 	public function pn_manifest_config(){
 		return array(
-			"gcm_sender_id"=> "103953800507",
-			"start_url"=> "/",
-			"name"=> get_bloginfo( 'name' ),
-			"display"=> "standalone"
+			"gcm_sender_id"=> "103953800507"
 		);
 	}
 
