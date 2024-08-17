@@ -57,25 +57,38 @@ function push_notification_add_action_links($actions, $plugin_file, $plugin_data
 }
 
 register_activation_hook( PUSH_NOTIFICATION_PLUGIN_FILE, 'push_notification_on_activate' );
-function push_notification_on_activate($network_wide){
+
+function push_notification_on_activate( $network_wide ) {
 	/** Setup notification feature in PWA-for-wp*/
-	$pwaforwp_settings = get_option( 'pwaforwp_settings'); 
-	if(isset($pwaforwp_settings['notification_feature']) && $pwaforwp_settings['notification_feature']==0){
+	$pwaforwp_settings = get_option( 'pwaforwp_settings');
+
+	if ( isset( $pwaforwp_settings['notification_feature'] ) && $pwaforwp_settings['notification_feature'] == 0 ) {
+
 		$pwaforwp_settings['notification_feature'] = 1;
-		update_option( 'pwaforwp_settings', $pwaforwp_settings,false); 
+		update_option( 'pwaforwp_settings', $pwaforwp_settings, false ); 
+		
 	}
-
-	global $wpdb;
-
+	
     if ( is_multisite() && $network_wide ) {
-        $blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
-        foreach ( $blog_ids as $blog_id ) {
-            switch_to_blog( $blog_id );
-            push_notification_on_install();
-            restore_current_blog();
-        }
+
+        $sites = get_sites();
+
+		if ( $sites ) {
+
+			foreach ( $sites as $site ) {
+
+				switch_to_blog( $site->blog_id );
+				push_notification_on_install();
+				restore_current_blog();
+	
+			}
+
+		}
+        
     } else {
+
         push_notification_on_install();
+
     }
 
 	/**
@@ -84,57 +97,60 @@ function push_notification_on_activate($network_wide){
 	 */
 	$auth_settings = get_option( 'push_notification_auth_settings', array() );
 	//Push notification Check
-    if(isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1){
+    if ( isset( $auth_settings['user_token'] ) && isset( $auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1 ) {
     	//pwaforamp check
-    	if( function_exists('pwaforwp_required_file_creation') ){
+    	if ( function_exists('pwaforwp_required_file_creation') ) {
+
 			$pwaSettings = pwaforwp_defaultSettings();
-			if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+
+			if ( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io' ) {
+
 				pwaforwp_required_file_creation();
+
 			}
 		}
 
     }
 }
-/**
- * After activate plugin path to redirect
- * @plugin name of current activation plugin 
- */
-// function push_notification_after_activation_redirect( $plugin ) {
-//     if( $plugin == plugin_basename( PUSH_NOTIFICATION_PLUGIN_FILE ) ) {
-// 		wp_safe_redirect( admin_url( 'admin.php?page=push-notification' ) );
-//         exit();
-//     }
-// }
-// add_action( 'activated_plugin', 'push_notification_after_activation_redirect' );
-
 
 /**
  * TO compatible with older < 1.3 of pushnotification
  */
-add_action("plugins_loaded", 'push_notification_older_version_compatibility');
-function push_notification_older_version_compatibility(){
+
+add_action( 'plugins_loaded', 'push_notification_older_version_compatibility' );
+
+function push_notification_older_version_compatibility() {
+
 	$configCompatible = get_transient( 'push_notification_older_version' );
 
-	if(!$configCompatible){
+	if ( ! $configCompatible ) {
+
 		$auth_settings = push_notification_auth_settings();
-		if( isset($auth_settings['user_token']) && isset($auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1 && !isset($auth_settings['messageManager']) ){
+
+		if ( isset( $auth_settings['user_token'] ) && isset( $auth_settings['token_details']['validated']) && $auth_settings['token_details']['validated'] == 1 && ! isset($auth_settings['messageManager'] ) ) {
+
 			$response = PN_Server_Request::varifyUser($auth_settings['user_token']);
 			set_transient( 'push_notification_older_version', 1 );
+
 		}
+
 	}
 }
 
 
-function push_notification_pro_checker(){
+function push_notification_pro_checker() {
    
-	$_pro_checker      = get_transient('push_notification_pro_checker');
+	$_pro_checker      = get_transient( 'push_notification_pro_checker' );
 
-	if(!$_pro_checker)
-	{
+	if ( ! $_pro_checker ) {
+	
 		$auth_settings = push_notification_auth_settings();
-		if(!empty($auth_settings['user_token'])){
+
+		if ( ! empty( $auth_settings['user_token'] ) ) {
+
 			PN_Server_Request::getProStatus(true);
-			set_transient('push_notification_pro_checker',true,86400);
+			set_transient( 'push_notification_pro_checker', true, 86400 );
+
 		}
 	}      
 }
@@ -154,8 +170,10 @@ $icon_url => icon link url optional
 
 */
 
-function pn_send_push_notificatioin_filter($user_id=null, $title="", $message="", $link_url="", $icon_url="", $image_url=""){
-	if (!empty($user_id) && !empty($title) && !empty($message) && !empty($link_url)) {
+function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $message = "", $link_url = "", $icon_url = "", $image_url = "" ) {
+
+	if ( ! empty( $user_id) && !empty($title) && !empty($message) && !empty($link_url)) {
+
 		$verifyUrl = 'campaign/pn_send_push_filter';
 		$audience_token_id = get_user_meta($user_id, 'pnwoo_notification_token',true);
 		if ( is_multisite() ) {
@@ -198,13 +216,13 @@ function push_notification_on_install(){
 	if($wpdb->has_cap('collation') AND !empty($wpdb->collate)) {
 		$charset_collate .= " COLLATE {$wpdb->collate}";
 	}
-
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared	
 	$found_engine = $wpdb->get_var("SELECT ENGINE FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = '".DB_NAME."' AND `TABLE_NAME` = '{$wpdb->prefix}posts';");
 
 	if(strtolower($found_engine) == 'innodb') {
 		$engine = ' ENGINE=InnoDB';
 	}
-
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$found_tables = $wpdb->get_col("SHOW TABLES LIKE '{$wpdb->prefix}pn_token_urls%';");	
 
     if(!in_array("{$wpdb->prefix}pn_token_urls", $found_tables)) {

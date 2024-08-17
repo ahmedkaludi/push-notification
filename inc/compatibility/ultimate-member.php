@@ -115,7 +115,9 @@ class PN_Ultimate_Member{
 	global $wpdb;
 	$table_name = UM()->Groups()->setup()->db_groups_table;
 	$group_id = get_post_meta( $post_id, '_group_id', true );
-	$members = $wpdb->get_col( "SELECT `user_id1` FROM $table_name WHERE `group_id` = $group_id AND `status` = 'approved'" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching	 -- Reason: custom table
+	$members = $wpdb->get_col( $wpdb->prepare( "SELECT `user_id1` FROM %s WHERE `group_id` = %d AND `status` = 'approved'" , $table_name,  $group_id ) );	
+
 	$all_tokens = array();
 
 	if ( empty( $members ) ) {

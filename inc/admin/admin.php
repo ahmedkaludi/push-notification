@@ -1251,6 +1251,7 @@ class Push_Notification_Admin{
 					 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API')){
 
 						foreach($user_ids as $pn_user_id){
+							// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
 							$insert = $wpdb->insert(
 								$table_name,
 								array(
@@ -1919,16 +1920,22 @@ function push_notification_pro_notifyform_before(){
 				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
 				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
 				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>';
-	if(isset($notification_settings['pn_url_capture']) && ($notification_settings['pn_url_capture']=='auto' || $notification_settings['pn_url_capture']=='manual')){
+
+	if ( isset( $notification_settings['pn_url_capture']) && ($notification_settings['pn_url_capture'] == 'auto' || $notification_settings['pn_url_capture'] == 'manual' ) ) {
+
 	 echo '<option value="custom-page-subscribed">'.esc_html__('Select Page','push-notification').'</option>';
-	}				
+
+	}
+
 	echo '</select>
 		  </div>';
 		  
-		  $users = get_users(array(
-			'meta_key'     => 'pnwoo_notification_token',
-		));
-		$today_date = gmdate('Y-m-d', strtotime("+1 day"));
+		  $users = get_users( array(
+								// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+								'meta_key'     => 'pnwoo_notification_token',
+							) );
+
+		$today_date = gmdate( 'Y-m-d', strtotime( '+1 day' ) );
 
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
@@ -1940,16 +1947,21 @@ function push_notification_pro_notifyform_before(){
 			}			
 		echo' </select>
 		  </div>';
+
 		$pn_token_urls = pn_get_all_unique_meta();
 
 		  echo '<div class="form-group" style="display:none">
 		  <label for="notification-custom-page-subscribed">'.esc_html__('Select Page Subscribed','push-notification').'</label>
 		  <select id="notification-custom-page-subscribed" class="regular-text js_pn_select" placeholder="'.esc_html__('Select Page','push-notification').'">';
-		  if(!empty($pn_token_urls)){
-			  foreach($pn_token_urls as $url){
+
+		  if ( ! empty( $pn_token_urls ) ) {
+
+			  foreach( $pn_token_urls as $url ) {
 				  echo '<option value="'.esc_url($url).'" data-url="'.basename($url).'">'.esc_attr(pn_get_page_title_by_url($url)).'('.esc_url($url).')</option>';			
+
 			  }
-		  }else{
+
+		  } else {
 			echo '<option value="">'.esc_html__('No Subscribed Page Found','push-notification').'</option>';	
 		  }			
 	  echo' </select>
@@ -2052,48 +2064,93 @@ function pn_select2_category_data(){
 
 }
 
-add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data');
+add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data' );
 
-function pn_get_all_unique_meta(){
-		global $wpdb;
-		// Query to get all unique values of user meta key "pnwoo_notification_token"
-		$unique_tokens = $wpdb->get_col(
-			$wpdb->prepare(
-				"
-				SELECT DISTINCT url
-				FROM %i
-				WHERE status = %s
-				",
-				$wpdb->prefix.'pn_token_urls',
-				'active'
-			)
-		);
-		$unique_urls=[];
-		foreach ($unique_tokens as $key => $value) {
-			$is_found = array_search($value,$unique_urls);
-			if ($is_found === false) {	
-				$unique_urls[]=$value;
+// Query to get all unique values of user meta key "pnwoo_notification_token"
+
+function pn_get_all_unique_meta() {
+
+		global $wpdb;		
+		$unique_urls   = [];
+		$cache_key     = 'pn_unique_tokens_cache_key';
+
+        $unique_tokens = wp_cache_get( $cache_key );
+
+		if ( false === $unique_tokens ) {
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
+			$unique_tokens = $wpdb->get_col(
+				$wpdb->prepare(
+					"
+					SELECT DISTINCT url
+					FROM %i
+					WHERE status = %s
+					",
+					$wpdb->prefix.'pn_token_urls',
+					'active'
+				)
+			);
+
+			wp_cache_set( $cache_key, $unique_tokens );
+
+		}		
+
+		if ( $unique_tokens ) {
+
+			foreach ( $unique_tokens as $value ) {
+
+				$is_found = array_search( $value, $unique_urls );
+	
+				if ( $is_found === false ) {	
+	
+					$unique_urls[] = $value;
+	
+				}
+	
 			}
+
 		}
+
 		return $unique_urls;
+
 	}
 	
-	function pn_get_page_title_by_url( $page_url = null ){
-		$page_id =url_to_postid($page_url);
-		if ($page_id) {
+	function pn_get_page_title_by_url( $page_url = null ) {
+
+		$page_id = url_to_postid( $page_url );
+
+		if ( $page_id ) {
 			// Get the page title
-			$page_title = get_the_title($page_id);
-		return $page_title;
+			$page_title = get_the_title( $page_id );
+
+			return $page_title;
 		} 
-		if($page_url ==  home_url()){
-			return esc_html__('Home','push-notification');
+
+		if ( $page_url ==  home_url() ) {
+
+			return esc_html__( 'Home','push-notification' );
+
 		}
+
 		return $page_url;
+
 	}
 	
-	function pn_get_tokens_by_url($url) {
-		$tokens =[];
+	function pn_get_tokens_by_url( $url ) {
+
 		global $wpdb; 
-		$tokens = $wpdb->get_col($wpdb->prepare("SELECT token FROM {$wpdb->prefix}pn_token_urls WHERE url = %s", $url));
+
+		$tokens = [];
+
+		$cache_key    = 'saswp_token_cache_key_'.$url;
+        $tokens       = wp_cache_get( $cache_key );
+
+		if ( false === $tokens ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$tokens = $wpdb->get_col( $wpdb->prepare( "SELECT token FROM {$wpdb->prefix}pn_token_urls WHERE url = %s", $url ) );
+			wp_cache_set( $cache_key, $tokens );
+		}
+				
 		return $tokens;
+
 	}

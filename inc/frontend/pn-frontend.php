@@ -758,34 +758,44 @@ class Push_Notification_Frontend{
 			}
 
 		}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reasone: Custom table
 			return $wpdb->insert(
 				$wpdb->prefix.'pn_token_urls',
 				array(
-					'url' => esc_url($this->pn_standardize_url($url)),
-					'status' => 'active',
-					'token' => $token,
-					'created_at' => current_time('mysql'),
-					'updated_at' => current_time('mysql')
+					'url' 		 => esc_url( $this->pn_standardize_url( $url ) ),
+					'status' 	 => 'active',
+					'token' 	 => $token,
+					'created_at' => current_time( 'mysql' ),
+					'updated_at' => current_time( 'mysql' )
 				)
 			);
 
 	}
 
-	public function after_login_transient($user_login, $user){
+	public function after_login_transient( $user_login, $user ) {
+
 		$user_id = $user->ID;
 		$transient_key = 'pn_token_exists_' . $user_id;
-		set_transient($transient_key, true, 12 * HOUR_IN_SECONDS);
+		set_transient( $transient_key, true, 12 * HOUR_IN_SECONDS );
+
 	}
 
-	public function pn_token_exists($status){
-		$user_id = get_current_user_id();
-		$transient_key = 'pn_token_exists_' . $user_id;
-		$transient_value = get_transient($transient_key);
-		if($transient_value){
-			delete_transient($transient_key);
+	public function pn_token_exists( $status ) {
+
+		$user_id 			= get_current_user_id();
+		$transient_key 		= 'pn_token_exists_' . $user_id;
+		$transient_value 	= get_transient( $transient_key );
+
+		if ( $transient_value ) {
+
+			delete_transient( $transient_key );
+			
 			return 0;
+
 		}
+
 		return $status;
+
 	}
 
 	public function pn_standardize_url($url) {
