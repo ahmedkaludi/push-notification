@@ -104,7 +104,7 @@ jQuery(document).ready(function($){
         var name = form.find('input[name="name"]').val();
         var email = form.find('input[name="email"]').val();
         var website = form.find('input[name="company"]').val();
-        jQuery.post(pn_setings.ajax_url, {action:'pn_subscribe_newsletter',name:name, email:email,website:website, nonce: pn_setings.remote_nonce},
+        jQuery.post( pn_setings.ajax_url, {action:'pn_subscribe_newsletter',name:name, email:email,website:website, nonce: pn_setings.remote_nonce},
           function(data) {
               jQuery.post (pn_setings.ajax_url, {
                       pointer: 'pushnotification_subscribe_pointer',
@@ -112,13 +112,9 @@ jQuery(document).ready(function($){
               }, function(){
                 location.reload();
               });
-          }
-        );
+          }, 'json' );
     });
     /*Newsletter submission End*/
-
-
-
 
 	jQuery("#user_auth_vadation").click(function(){
 		var self = jQuery(this);

@@ -74,14 +74,16 @@ class PN_Ultimate_Member{
 			}	
 			$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 			$weblink = is_multisite()? get_site_url() : home_url();
-			$data = array("user_token"=>$auth_settings['user_token'],
-						"audience_token_id"=>$token_ids,
-						"title"=>sprintf( __( 'New message from %s', 'push-notification' ), $vars['member'] ),
-						"message"=> wp_strip_all_tags($content),
-						"link_url"=>$link_url	,
-						"icon_url"=> $icon_url,
-						"image_url"=> $image_url,
-						"website"=>   $weblink,
+
+			$data = array(
+						"user_token"		=> $auth_settings['user_token'],
+						"audience_token_id"	=> $token_ids,
+						"title"				=> esc_html( /* translators: %s: member */ sprintf( __( 'New message from %s', 'push-notification' ), $vars['member'] ) ),
+						"message"			=> wp_strip_all_tags($content),
+						"link_url"			=> $link_url,
+						"icon_url"			=> $icon_url,
+						"image_url"			=> $image_url,
+						"website"			=> $weblink,
 			);
 	
 			$postdata = array('body'=> $data);
@@ -151,14 +153,16 @@ class PN_Ultimate_Member{
 		}	
 		$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 		$weblink = is_multisite()? get_site_url() : home_url();
-		$data = array("user_token"=>$auth_settings['user_token'],
-					"audience_token_id"=>$all_tokens,
-					"title"=>sprintf( __( 'New Group Post from %s', 'push-notification' ), $author_name ),
-					"message"=> wp_strip_all_tags($content),
-					"link_url"=>$link_url	,
-					"icon_url"=> $icon_url,
-					"image_url"=> $image_url,
-					"website"=>   $weblink,
+
+		$data = array(
+					"user_token"		=> $auth_settings['user_token'],
+					"audience_token_id" => $all_tokens,
+					"title"				=> esc_html( /* translators: %s: author name */ sprintf( __( 'New Group Post from %s', 'push-notification' ), $author_name ) ),
+					"message"			=> wp_strip_all_tags( $content ),
+					"link_url"			=> $link_url,
+					"icon_url"			=> $icon_url,
+					"image_url"			=> $image_url,
+					"website"			=> $weblink,
 		);
 
 		$postdata = array('body'=> $data);
@@ -228,14 +232,16 @@ class PN_Ultimate_Member{
 	
 			$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 			$weblink = is_multisite()? get_site_url() : home_url();
-			$data = array("user_token"=>$auth_settings['user_token'],
-						"audience_token_id"=>$token_ids,
-						"title"=>sprintf( __( 'New Post from %s', 'push-notification' ), $vars['member'] ),
-						"message"=> wp_strip_all_tags($content),
-						"link_url"=>$link_url	,
-						"icon_url"=> $icon_url,
-						"image_url"=> $image_url,
-						"website"=>   $weblink,
+
+			$data = array(
+						"user_token"		=> $auth_settings['user_token'],
+						"audience_token_id"	=> $token_ids,
+						"title"				=> esc_html( /* translators: %s: member */ sprintf( __( 'New Post from %s', 'push-notification' ), $vars['member'] ) ),
+						"message"			=> wp_strip_all_tags($content),
+						"link_url"			=> $link_url	,
+						"icon_url"			=> $icon_url,
+						"image_url"			=> $image_url,
+						"website"			=> $weblink,
 			);
 	
 			$postdata = array('body'=> $data);

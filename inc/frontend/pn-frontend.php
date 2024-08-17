@@ -119,49 +119,69 @@ class Push_Notification_Frontend{
 	}
 
 	function load_service_worker(WP_Query $query ){
+
 		if ( $query->is_main_query() && $query->get( 'push_notification_sw' ) ) {
+
 			header("Service-Worker-Allowed: /");
 			header("Content-Type: application/javascript");
 			header('Accept-Ranges: bytes');
-			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
+			$messagesw_escaped = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
-			echo $messageSw;
-                exit;
+			$messagesw_escaped = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messagesw_escaped);
+			/* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped  */
+			echo $messagesw_escaped;
+            exit;
+
 		}
+
 		if ( $query->is_main_query() && $query->get( 'push_notification_amp_js' ) ) {
+
 			header("Content-Type: application/javascript");
 			header('Accept-Ranges: bytes');
-			$messageSw = $this->pn_get_layout_files('messaging-sw.js');
+			$messagesw_escaped = $this->pn_get_layout_files('messaging-sw.js');
 			$settings = $this->json_settings();
-			$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
-			echo $messageSw;
-                exit;
+			$messagesw_escaped = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messagesw_escaped);
+			/* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped  */
+			echo $messagesw_escaped;
+            exit;
+
 		}
 
 	}
 
 	public function pn_get_layout_files($filePath){
+
 	    $fileContentResponse = @wp_remote_get(esc_url_raw(PUSH_NOTIFICATION_PLUGIN_URL.'assets/'.$filePath));
-	    if(wp_remote_retrieve_response_code($fileContentResponse)!=200){
-	      if(!function_exists('get_filesystem_method')){
+
+	    if ( wp_remote_retrieve_response_code( $fileContentResponse ) != 200 ) {
+
+	      if( ! function_exists('get_filesystem_method' ) ){
 	        require_once( ABSPATH . 'wp-admin/includes/file.php' );
 	      }
+
 	      $access_type = get_filesystem_method();
-	      if($access_type === 'direct')
-	      {
+
+	      if ( $access_type === 'direct' ) {
+	      
 			$file = PUSH_NOTIFICATION_PLUGIN_DIR.'assets/'.$filePath;
-	        $creds = request_filesystem_credentials($file, '', false, false, array());
+	        $creds = request_filesystem_credentials( $file, '', false, false, array() );
+
 	        if ( ! WP_Filesystem($creds) ) {
 	          return false;
 	        }   
+
 	        global $wp_filesystem;
 	        $htmlContentbody = $wp_filesystem->get_contents($file);
 	        return $htmlContentbody;
+
 	      }
+
 	      return false;
-	    }else{
+
+	    } else {
+
 	      return wp_remote_retrieve_body( $fileContentResponse );
+		  
 	    }
 	}
 
@@ -389,7 +409,7 @@ class Push_Notification_Frontend{
 		.pushnotification-class a:hover{color: white;}
 		.pushnotification-class a:before{
 			content:"";
-			background: url(\''.PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/bell.png\');
+			background: url(\''.esc_attr( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/bell.png\');
 		  	width: 24px;
 		    height: 20px;
 		    background-repeat: no-repeat;
@@ -467,7 +487,7 @@ class Push_Notification_Frontend{
 		if (isset($settings['notification_position']) && !empty($settings['notification_position'])) {
 			$position = $settings['notification_position'];
 		}
-		$cssPosition = '';
+		$css_position_escaped = '';
 		$setting_category = !empty($settings['category'])? $settings['category'] : [];
 		$selected_category =  !is_array($setting_category) ? explode(',',$setting_category) : $setting_category;
 		$catArray = !is_array($selected_category) ? explode(',',$selected_category) : $selected_category;
@@ -475,21 +495,21 @@ class Push_Notification_Frontend{
 		
 		switch ($position) {
 			case 'bottom-left':
-				$cssPosition = 'bottom: 0;
+				$css_position_escaped = 'bottom: 0;
 		    left: 0;
 		    margin: 20px;
 		    right: auto;
 		    top: auto;';
 				break;
 			case 'bottom-right':
-				$cssPosition = 'bottom: 0;
+				$css_position_escaped = 'bottom: 0;
 		    left: auto;
 		    margin: 20px;
 		    right: 0;
 		    top: auto;';
 				break;
 			case 'top-right':
-				$cssPosition = 'bottom: auto;
+				$css_position_escaped = 'bottom: auto;
 		    left: auto;
 		    margin: 20px;
 		    margin-top: 40px;
@@ -497,7 +517,7 @@ class Push_Notification_Frontend{
 		    top: 0;';
 				break;
 			case 'top-left':
-				$cssPosition = 'bottom: auto;
+				$css_position_escaped = 'bottom: auto;
 						    left: 0;
 						    margin: 20px;
 						    margin-top: 40px;
@@ -505,7 +525,7 @@ class Push_Notification_Frontend{
 						    top: 0;';
 				break;
 			default:
-				$cssPosition = 'bottom: 0;
+				$css_position_escaped = 'bottom: 0;
 		    left: 0;
 		    margin: 20px;
 		    right: auto;
@@ -534,7 +554,7 @@ class Push_Notification_Frontend{
 		    z-index:99999;
 		    text-align: left;
 		    position: fixed;
-		    '.$cssPosition.'
+		    '. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static values  */ $css_position_escaped.'
 		}
 .pn-wrapper .pn-txt-wrap {
     display: flex;
@@ -599,14 +619,14 @@ class Push_Notification_Frontend{
 				}
 			   echo '<span class="pn-txt-wrap pn-select-box">
 			   		<div class="pn-msg-box">
-				   		<span class="pn-msg">'.esc_html__($settings['popup_banner_message'], 'push-notification').'</span>';
+				   		<span class="pn-msg">'.esc_html($settings['popup_banner_message']).'</span>';
 				   		if((isset($settings['notification_botton_position']) && $settings['notification_botton_position'] != 'bottom') || !isset($settings['notification_botton_position'])){
 				   			echo '<span class="pn-btns">
 				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
-				   				'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
+				   				'.esc_html($settings['popup_banner_accept_btn']).'
 				   			</span>
 				   			<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
-				   				'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
+				   				'.esc_html($settings['popup_banner_decline_btn']).'
 				   			</span>
 				   		</span>';
 				   		}
@@ -639,10 +659,10 @@ class Push_Notification_Frontend{
 					   if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom' && PN_Server_Request::getProStatus()=='active'){
 						echo '<span class="pn-btns" style="float:right;margin-top:20px;">
 						<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
-							'.esc_html__($settings['popup_banner_accept_btn'], 'push-notification').'
+							'.esc_html($settings['popup_banner_accept_btn']).'
 						</span>
 						<span class="btn" id="pn-activate-permission_link_nothanks" tabindex="0" role="link" aria-label="no thanks link">
-							'.esc_html__($settings['popup_banner_decline_btn'], 'push-notification').'
+							'.esc_html($settings['popup_banner_decline_btn']).'
 						</span>
 					</span>';
 					}
@@ -698,10 +718,10 @@ class Push_Notification_Frontend{
 		header("Service-Worker-Allowed: /");
 		header("Content-Type: application/javascript");
 		header('Accept-Ranges: bytes');
-		$messageSw = $this->pn_get_layout_files('messaging-sw.js');
+		$messagesw_escaped = $this->pn_get_layout_files('messaging-sw.js');
 		$settings = $this->json_settings();
-		$messageSw = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messageSw);
-		$swJsContent .= PHP_EOL.$messageSw;
+		$messagesw_escaped = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messagesw_escaped);
+		$swJsContent .= PHP_EOL.$messagesw_escaped;
 		return $swJsContent;
 	}
 

@@ -14,15 +14,21 @@ if( !defined( 'ABSPATH' ) )
  * @return bool
  */
 function pn_is_plugins_page() {
-    if(function_exists('get_current_screen')){
+
+    if ( function_exists( 'get_current_screen' ) ) {
+
         $screen = get_current_screen();
-            if(is_object($screen)){
-                if($screen->id == 'plugins' || $screen->id == 'plugins-network'){
+
+            if ( is_object( $screen ) ) {
+
+                if ( $screen->id == 'plugins' || $screen->id == 'plugins-network' ) {
                     return true;
                 }
             }
     }
+
     return false;
+
 }
 
 /**
@@ -34,10 +40,10 @@ function pn_is_plugins_page() {
 
 function pn_add_deactivation_feedback_modal() {
 
-    if( is_admin() && pn_is_plugins_page()) {
+    if ( is_admin() && pn_is_plugins_page() ) {
 
         $current_user = wp_get_current_user();
-        if( !($current_user instanceof WP_User) ) {
+        if ( ! ( $current_user instanceof WP_User ) ) {
             $email = '';
         } else {
             $email = trim( $current_user->user_email );
@@ -104,21 +110,22 @@ function pn_send_feedback() {
 
     wp_die();
 }
+
 add_action( 'wp_ajax_pn_send_feedback', 'pn_send_feedback' );
-
-
 
 add_action( 'admin_enqueue_scripts', 'pn_enqueue_makebetter_email_js' );
 
-function pn_enqueue_makebetter_email_js(){
+function pn_enqueue_makebetter_email_js() {
  
-    if( is_admin() && pn_is_plugins_page()) {
-        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
-        wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$min}.js", array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION);
+    if ( is_admin() && pn_is_plugins_page() ) {
 
+        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
+
+        wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$min}.js", array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
         wp_enqueue_style( 'pn-make-better-css', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$min}.css", false , PUSH_NOTIFICATION_PLUGIN_VERSION);
 
     }
     
 }
-add_filter('admin_footer', 'pn_add_deactivation_feedback_modal');
+
+add_filter( 'admin_footer', 'pn_add_deactivation_feedback_modal' );

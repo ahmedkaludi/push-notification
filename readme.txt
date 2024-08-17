@@ -1,11 +1,12 @@
 === Push Notifications for WP & AMP ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 6.5
+Tested up to: 6.6
 Stable tag: 1.35
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
+Push Notifications for WP & AMP makes it easy to send Web Push notifications to your users for FREE with 2 Mins setup. 
 
 == Description ==
 Push Notifications for WP & AMP makes it easy to send Web Push notifications to your users for FREE with 2 Mins setup [Documentation](https://pushnotifications.helpscoutdocs.com/). 
