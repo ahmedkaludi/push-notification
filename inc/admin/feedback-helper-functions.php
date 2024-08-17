@@ -64,6 +64,7 @@ function pn_send_feedback() {
     
 
     if( isset( $_POST['data'] ) ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: Nonce is verified just below this lines
         parse_str( $_POST['data'], $form );
     }
     if(isset($form['nonce'])){

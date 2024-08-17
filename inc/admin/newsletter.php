@@ -21,7 +21,8 @@ class Push_Notification_Newsletter {
         if($object_name == 'pn_setings'){
                         
                 global $current_user;                
-		$tour     = array ();
+		        $tour     = array ();
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reasone: already nonce verified
                 $tab      = isset($_GET['tab']) ? esc_attr($_GET['tab']) : '';                   
                 
                 if (!array_key_exists($tab, $tour)) {                

@@ -1297,7 +1297,9 @@ class Push_Notification_Admin{
 			return;
 		}				
 		$post_notf_on = '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
 		if(isset($_POST['pn_send_notification_on_post'])){
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
 			$post_notf_on = sanitize_text_field($_POST['pn_send_notification_on_post']);
 		}			
 		if(isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_notf_on) || $post_notf_on !== 1)){
