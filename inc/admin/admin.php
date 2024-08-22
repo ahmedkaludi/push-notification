@@ -624,6 +624,9 @@ class Push_Notification_Admin{
 					<div class="row" id="pn_campaings_custom_div">
 					<h3>'.esc_html__('Campaigns', 'push-notification').'</h3>
 					<div class="table-responsive">
+					<a onclick="pn_delete_bulk_campaign(this)" class="button btn btn-danger pn_bulk_delete text-white mb-2" style="display: none">Bulk Delete</a>
+                    <a onclick="pn_delete_all_campaign(this)" class="button btn btn-danger pn_delete_all text-white mb-2" style="display: none">Delete All</a>
+					<br>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
@@ -1145,9 +1148,12 @@ class Push_Notification_Admin{
 			if ( ! current_user_can( 'manage_options' ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
+			
 			$auth_settings = push_notification_auth_settings();
-			$campaign_ids = (isset($_POST['campaign_ids']) && is_array($_POST['campaign_ids'])) ? array_map('sanitize_text_field', $_POST['campaign_ids']):array();
-			$campaign_ids = implode(',', $campaign_ids);
+			$campaign_ids = (isset($_POST['campaign_ids']) && is_array($_POST['campaign_ids'])) ? array_map('sanitize_text_field', $_POST['campaign_ids']):sanitize_text_field( $_POST['campaign_ids'] );
+			if($campaign_ids != 'all'){
+				$campaign_ids = implode(',', $campaign_ids);
+			}
 			if( isset( $auth_settings['user_token'] ) ){
 				$response = PN_Server_Request::deleteCampaigns( $auth_settings['user_token'], $campaign_ids );
 				wp_send_json($response);
