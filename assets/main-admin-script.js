@@ -629,10 +629,8 @@ jQuery(document).ready(function($){
 		
 	})
 	jQuery("#notification-custom-select").select2();
-
-
     	$('.my-color-field').wpColorPicker();
-
+		pn_for_wp_select2();		
 });
 
 function pnCsvToArray(str, delimiter = ",") {
@@ -738,7 +736,7 @@ function pn_for_wp_select2(){
 
     }
 }
-pn_for_wp_select2();
+
 
 icon_url_text =jQuery("#notification-iconurl").val();
 jQuery(".pn-notification-image").attr('src',icon_url_text);
@@ -830,4 +828,72 @@ function pn_url_capture_manual(){
 	}else{
 		jQuery('#pn_url_capture_manual').parent().parent().hide();
 	}
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const checkAll = document.querySelector('.pn_check_all');
+    const checkboxes = document.querySelectorAll('.pn_check_single');
+    checkAll.addEventListener('change', function() {
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = checkAll.checked; 
+        });
+    });
+    checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkAll.checked = allChecked; 
+        });
+    });
+});
+
+function pn_delete_campaign(self){
+
+	var selectedCampaigns = [];
+
+	jQuery(".pn_check_single:checked").each(function() {
+		selectedCampaigns.push(jQuery(this).val());
+	});
+
+	if (selectedCampaigns.length === 0) {
+		selectedCampaigns.push(self.getAttribute('data-id'));
+		jQuery(self).parent().parent().find('.pn_check_single').prop('checked', true);
+	}
+
+	// Show confirmation alert before proceeding
+    var confirmation = confirm('Are you sure you want to delete the selected campaign(s)?');
+    
+    if (!confirmation) {
+        return; // If user clicks "Cancel", stop the process
+    }
+
+	self.innerHTML='Deleting...';
+	jQuery.ajax({
+		url: ajaxurl,
+		method: "post",
+		dataType: 'json',
+		data: { 
+			action: 'pn_delete_campaign',
+			nonce: pn_setings.remote_nonce,
+			campaign_ids: selectedCampaigns 
+		},
+		success: function(response) {
+			if(response){
+			if (response.status == 200) {
+				self.innerHTML=response.message;
+				jQuery(".pn_check_single:checked").each(function() {
+					jQuery(this).parent().parent().remove();
+				});
+			} else {
+				self.innerHTML = response.message;
+			}
+		}
+		},
+		error: function(response) {
+			var messagediv = self.parents('fieldset').find(".resp_message");
+			messagediv.html(response.responseJSON.message);
+			messagediv.css({ "color": "red" });
+			self.innerHTML='Delete';
+		}
+	});
+
 }

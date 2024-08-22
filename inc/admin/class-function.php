@@ -176,7 +176,18 @@ class PN_Server_Request{
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
 	}
-
+	public static function deleteCampaigns($user_token, $campaign_ids){
+		$verifyUrl = 'campaign/delete';
+		if ( is_multisite() ) {
+			$weblink = get_site_url();              
+		}
+		else {
+			$weblink = home_url();
+		}    
+		$data = array("user_token"=>$user_token, "website"=> $weblink, "campaign_ids" => $campaign_ids);
+		$response = self::sendRequest($verifyUrl, $data, 'post');
+		return $response;
+	}
 
 
 	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url, $category){

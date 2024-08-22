@@ -21,6 +21,7 @@ class Push_Notification_Admin{
 		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 		
 		add_action('wp_ajax_pn_send_query_message', 'pn_send_query_message');
 		add_action('wp_ajax_pn_get_compaigns', array( $this, 'pn_get_compaigns' ));
+		add_action( 'wp_ajax_pn_delete_campaign', array( $this, 'pn_delete_campaigns' ) ); 
 		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
 		//on oreder status change
 		add_action('woocommerce_order_status_changed', array( $this, 'pn_order_send_notification'), 10, 4);
@@ -622,9 +623,11 @@ class Push_Notification_Admin{
 					</div>
 					<div class="row" id="pn_campaings_custom_div">
 					<h3>'.esc_html__('Campaigns', 'push-notification').'</h3>
+					<div class="table-responsive">
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
+								<th width="20px"><input type="checkbox" class="pn_check_all" value="all"></th>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
 								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
 								<th>'.esc_html__('Message', 'push-notification').'</th>
@@ -633,16 +636,17 @@ class Push_Notification_Admin{
 								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
 								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Actions', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
 						$current_count_start = 0;
 						$timezone_string = get_option('timezone_string');
-						if (empty($timezone_string)) {
-							$offset = get_option('gmt_offset');
-							$timezone_string = timezone_name_from_abbr('', $offset * 3600, 0);
+						$timezone = 'UTC';
+						if (!$timezone_string) {
+							$gmt_offset = get_option('gmt_offset');
+							$timezone = sprintf('%+d:00', $gmt_offset);
 						}
-						date_default_timezone_set($timezone_string);
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
 								$message = wp_strip_all_tags( $campaign['message'] );
@@ -655,14 +659,15 @@ class Push_Notification_Admin{
 								}else{
 									$message = nl2br($campaign['message']);
 								}
-								$time_in_seconds = new DateTime($campaign['created_at'], new DateTimeZone('UTC'));
+								$time_in_seconds = new DateTime($campaign['created_at'], new DateTimeZone($timezone) );
 								echo '<tr>
+									<td><input type="checkbox" class="pn_check_single" value="'.esc_attr($campaign['id']).'"></td>
 									<td>'.esc_html( $current_count_start+= 1 ).'</td>
 									<td>'.esc_html( $campaign['title'] ).'</td>
 									<td><p class="less_text">'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- alredy escaped  */ $message.'</p>                        
 									<p class="full_text" style="display:none;">'.esc_html( wp_strip_all_tags( $campaign['message'] ) ).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
 									</p></td>
-									<td>'.esc_html( gmdate( 'd-M-Y H:i:s', $time_in_seconds->format( 'U' ) ) ).'</td>
+									<td>'.esc_html( $time_in_seconds->format( 'Y-m-d H:i:s' )  ).'</td>
 									<td>';
 									if ( $campaign['status'] === 'Done' ) {
 										echo '<span class="badge badge-pill badge-success" style="color:green">'.esc_html($campaign['status']).'</span>';
@@ -701,13 +706,14 @@ class Push_Notification_Admin{
 									echo'</td><td>';
 									echo esc_html($clickCount);
 									echo'</td>';
+									echo'<td><a class="button pn_delete_button" onclick="pn_delete_campaign(this)" data-id="'.esc_attr($campaign['id']).'">Delete</a></td>';
 								
 								echo'</tr>';
 							}
 						}else{
-							echo'<tr><td colspan="7">'.esc_html__('No data found', 'push-notification').'</td></tr>';
+							echo'<tr><td colspan="10" align="center">'.esc_html__('No data found', 'push-notification').'</td></tr>';
 						}
-						echo'</tbody></table>';
+						echo'</tbody></table></div>';
 						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['next_page_url'])) {
 						if (empty($campaigns['campaigns']['prev_page_url'])) {
 							$pre_html_escaped = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
@@ -1128,7 +1134,27 @@ class Push_Notification_Admin{
 			}
 
 		}
-
+	}
+	public function pn_delete_campaigns(){
+		if(empty( $_POST['nonce'])){
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+		}
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+		}else{
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			}
+			$auth_settings = push_notification_auth_settings();
+			$campaign_ids = (isset($_POST['campaign_ids']) && is_array($_POST['campaign_ids'])) ? array_map('sanitize_text_field', $_POST['campaign_ids']):array();
+			$campaign_ids = implode(',', $campaign_ids);
+			if( isset( $auth_settings['user_token'] ) ){
+				$response = PN_Server_Request::deleteCampaigns( $auth_settings['user_token'], $campaign_ids );
+				wp_send_json($response);
+			}else{
+				wp_send_json(array("status"=> 503, 'message'=> esc_html__('User token not found', 'push-notification')));
+			}
+		}
 	}
 	public function pn_send_notification(){
 		if(empty( $_POST['nonce'])){
@@ -1218,7 +1244,7 @@ class Push_Notification_Admin{
 						$push_notify_token =pn_get_tokens_by_url($page_subscribed);
 					}
 				}
-
+				
 				if(empty($push_notify_token)){
 					if($send_type=='custom-select'){
 						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
@@ -1343,6 +1369,7 @@ class Push_Notification_Admin{
 								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
 								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Actions', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
@@ -1957,7 +1984,7 @@ function push_notification_pro_notifyform_before(){
 		  if ( ! empty( $pn_token_urls ) ) {
 
 			  foreach( $pn_token_urls as $url ) {
-				  echo '<option value="'.esc_url($url).'" data-url="'.basename($url).'">'.esc_attr(pn_get_page_title_by_url($url)).'('.esc_url($url).')</option>';			
+				  echo '<option value="'.esc_url($url).'" data-url="'.esc_url(basename($url)).'">'.esc_attr(pn_get_page_title_by_url($url)).'('.esc_url($url).')</option>';			
 
 			  }
 
@@ -2077,16 +2104,12 @@ function pn_get_all_unique_meta() {
         $unique_tokens = wp_cache_get( $cache_key );
 
 		if ( false === $unique_tokens ) {
-
+			$table_name = $wpdb->prefix.'pn_token_urls';
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
 			$unique_tokens = $wpdb->get_col(
 				$wpdb->prepare(
-					"
-					SELECT DISTINCT url
-					FROM %i
-					WHERE status = %s
-					",
-					$wpdb->prefix.'pn_token_urls',
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared --Reason : %i modifier is not used because of compatibility issue for WP versions
+					"SELECT DISTINCT url FROM {$table_name} WHERE status = %s", 
 					'active'
 				)
 			);
