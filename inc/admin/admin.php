@@ -626,7 +626,7 @@ class Push_Notification_Admin{
 					<div class="table-responsive">
 					<a onclick="pn_delete_bulk_campaign(this)" class="button btn btn-danger pn_bulk_delete text-white mb-2" style="display: none">Bulk Delete</a>
                     <a onclick="pn_delete_all_campaign(this)" class="button btn btn-danger pn_delete_all text-white mb-2" style="display: none">Delete All</a>
-					<br>
+					<br/><br/>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
