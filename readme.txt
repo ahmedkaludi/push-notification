@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.6
-Stable tag: 1.35
+Stable tag: 1.36
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -55,6 +55,13 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
+= 1.36 (24 Aug 2024) =
+* Fixed: conflict with superpwa #121
+* Fixed: CSV file not working properly. #114
+* Added: Added a feature to clean the logs in the Campaign tab in the dashboard #117
+* Enhancement: Few improvements required #122
+* Enhancement: Test with WordPress version 6.6
+
 = 1.35 (06 June 2024) =
 * Fixed: On the install banner, the yes or no option is not showing.  #112
 * Fixed: Php error's on user end. #111
@@ -102,11 +109,5 @@ Fixed: Issue with plugin activation. #103
 
 = 1.28.1 (11 Aug 2023) =
 * Bug Fixed: Fixed an escaping issue.
-
-= 1.28 (10 Aug 2023) =
-* Added: Feature which send custom notification to users.(Pro API) #58
-* Added: Push Notification support in Web Apps for iOS (Pro API) #56
-* Added: Category Segmentation for push notification (Pro API)
-* Improvement : Test with WordPress 6.3 and update readme.txt #60
 
 Full changelog available [ at changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)
