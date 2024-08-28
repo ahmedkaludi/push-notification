@@ -1185,7 +1185,6 @@ class Push_Notification_Admin{
 			$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
 			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
 			$page_subscribed = isset($_POST['page_subscribed'])?sanitize_text_field($_POST['page_subscribed']):'';
-
 			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field($_POST['notification_schedule']):'';
 
 			$notification_date = isset($_POST['notification_date'])?sanitize_text_field($_POST['notification_date']):'';
@@ -1241,25 +1240,24 @@ class Push_Notification_Admin{
 						}
 
 					}
-				
 				}
 
-				if($send_type=='custom-page-subscribed'){
-					$authData = push_notification_auth_settings();
-					if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated'] ==1){
-						$push_notify_token =pn_get_tokens_by_url($page_subscribed);
+				if( ! empty($send_type) ){
+					if($send_type=='custom-page-subscribed'){
+						$authData = push_notification_auth_settings();
+						if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated'] ==1){
+							$push_notify_token =pn_get_tokens_by_url($page_subscribed);
+						}
+					}				
+					if(empty($push_notify_token)){
+						if($send_type=='custom-select'){
+							wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
+						}else if($send_type=='custom-upload'){
+							wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the csv list', 'push-notification')));
+						}else{
+							wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found', 'push-notification')));
+						}
 					}
-				}
-				
-				if(empty($push_notify_token)){
-					if($send_type=='custom-select'){
-						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
-					}else if($send_type=='custom-upload'){
-						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the csv list', 'push-notification')));
-					}else{
-						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found', 'push-notification')));
-					}
-					
 				}
 
 				$payload =array(
