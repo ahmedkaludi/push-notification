@@ -149,17 +149,16 @@ class PN_Server_Request{
 
 		$push_notification_auth_settings = get_option('push_notification_details_settings', array());
 
-		if($response['status']==200){
+		if ( $response['status'] == 200 ) {
 
-			$push_notification_auth_settings['subscriber_count'] = sanitize_text_field($response['subscriber_count']);
-			$push_notification_auth_settings['active_count'] = sanitize_text_field($response['active_count']);
-			$push_notification_auth_settings['expired_count'] = sanitize_text_field($response['expired_count']);
-
-			$push_notification_auth_settings['updated_at'] = date('Y-m-d H:i:s');
+			$push_notification_auth_settings['subscriber_count'] = sanitize_text_field( $response['subscriber_count'] );
+			$push_notification_auth_settings['active_count']     = sanitize_text_field( $response['active_count'] );
+			$push_notification_auth_settings['expired_count']    = sanitize_text_field( $response['expired_count'] );
+			$push_notification_auth_settings['updated_at']       = gmdate( 'Y-m-d H:i:s' );
 
 		}
 
-		update_option('push_notification_details_settings', $push_notification_auth_settings, false);
+		update_option( 'push_notification_details_settings', $push_notification_auth_settings, false );
 
 		return $response;
 
@@ -177,7 +176,18 @@ class PN_Server_Request{
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
 	}
-
+	public static function deleteCampaigns($user_token, $campaign_ids){
+		$verifyUrl = 'campaign/delete';
+		if ( is_multisite() ) {
+			$weblink = get_site_url();              
+		}
+		else {
+			$weblink = home_url();
+		}    
+		$data = array("user_token"=>$user_token, "website"=> $weblink, "campaign_ids" => $campaign_ids);
+		$response = self::sendRequest($verifyUrl, $data, 'post');
+		return $response;
+	}
 
 
 	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url, $category){

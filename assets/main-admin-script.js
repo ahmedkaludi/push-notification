@@ -104,7 +104,7 @@ jQuery(document).ready(function($){
         var name = form.find('input[name="name"]').val();
         var email = form.find('input[name="email"]').val();
         var website = form.find('input[name="company"]').val();
-        jQuery.post(pn_setings.ajax_url, {action:'pn_subscribe_newsletter',name:name, email:email,website:website, nonce: pn_setings.remote_nonce},
+        jQuery.post( pn_setings.ajax_url, {action:'pn_subscribe_newsletter',name:name, email:email,website:website, nonce: pn_setings.remote_nonce},
           function(data) {
               jQuery.post (pn_setings.ajax_url, {
                       pointer: 'pushnotification_subscribe_pointer',
@@ -112,13 +112,9 @@ jQuery(document).ready(function($){
               }, function(){
                 location.reload();
               });
-          }
-        );
+          }, 'json' );
     });
     /*Newsletter submission End*/
-
-
-
 
 	jQuery("#user_auth_vadation").click(function(){
 		var self = jQuery(this);
@@ -559,6 +555,10 @@ jQuery(document).ready(function($){
 			user_ids=select_subs.join(',');
 		}
 
+		if(send_type == 'custom-upload'){
+			user_ids = sessionStorage.getItem('pnTmpCsvData');
+		}
+
 		if(send_type=='custom-select' || send_type=='custom-upload' || send_type=='custom-page-subscribed' )
 		{
 			target_ajax_url = 'campaign_for_individual_tokens';
@@ -629,10 +629,8 @@ jQuery(document).ready(function($){
 		
 	})
 	jQuery("#notification-custom-select").select2();
-
-
     	$('.my-color-field').wpColorPicker();
-
+		pn_for_wp_select2();		
 });
 
 function pnCsvToArray(str, delimiter = ",") {
@@ -653,8 +651,10 @@ function pnCsvToArray(str, delimiter = ",") {
 	const arr = rows.map(function (row) {
 	  const values = row.split(delimiter);
 	  const el = headers.reduce(function (object, header, index) {
-		object[header] = values[index].trim();
-		return object;
+		if(values[index]){
+			object[header] = values[index].trim();
+			return object;
+		}
 	  }, {});
 	  return el;
 	});
@@ -736,7 +736,7 @@ function pn_for_wp_select2(){
 
     }
 }
-pn_for_wp_select2();
+
 
 icon_url_text =jQuery("#notification-iconurl").val();
 jQuery(".pn-notification-image").attr('src',icon_url_text);
@@ -828,4 +828,177 @@ function pn_url_capture_manual(){
 	}else{
 		jQuery('#pn_url_capture_manual').parent().parent().hide();
 	}
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const checkAll = document.querySelector('.pn_check_all');
+    const checkboxes = document.querySelectorAll('.pn_check_single');
+	const bulkDelete = document.querySelector('.pn_bulk_delete');
+    const deleteAll = document.querySelector('.pn_delete_all');
+
+
+	checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            bulkDelete.style.display = 'none';
+            deleteAll.style.display = 'none';
+            checkboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    bulkDelete.style.display = 'inline-block';
+                    deleteAll.style.display = 'inline-block';
+                }
+            });
+        });
+    });
+
+
+    checkAll.addEventListener('change', function() {
+		if (checkAll.checked) {
+            bulkDelete.style.display = 'inline-block';
+            deleteAll.style.display = 'inline-block';
+        } else {
+            bulkDelete.style.display = 'none';
+            deleteAll.style.display = 'none';
+        }
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = checkAll.checked; 
+        });
+    });
+    checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkAll.checked = allChecked; 
+        });
+    });
+});
+
+function pn_delete_campaign(self){
+
+	var selectedCampaigns = [];
+
+	selectedCampaigns.push(self.getAttribute('data-id'));
+	
+
+	// Show confirmation alert before proceeding
+    var confirmation = confirm('Are you sure you want to delete the campaign?');
+    
+    if (!confirmation) {
+        return; 
+    }
+
+	self.innerHTML='Deleting...';
+	jQuery.ajax({
+		url: ajaxurl,
+		method: "post",
+		dataType: 'json',
+		data: { 
+			action: 'pn_delete_campaign',
+			nonce: pn_setings.remote_nonce,
+			campaign_ids: selectedCampaigns 
+		},
+		success: function(response) {
+			if(response){
+			if (response.status == 200) {
+				self.innerHTML=response.message;
+					jQuery(self).parent().parent().remove();
+			} else {
+				self.innerHTML = response.message;
+			}
+		}
+		},
+		error: function(response) {
+			var messagediv = self.parents('fieldset').find(".resp_message");
+			messagediv.html(response.responseJSON.message);
+			messagediv.css({ "color": "red" });
+			self.innerHTML='Delete';
+		}
+	});
+
+}
+
+
+function pn_delete_bulk_campaign(self){
+
+	var selectedCampaigns = [];
+
+	jQuery(".pn_check_single:checked").each(function() {
+		selectedCampaigns.push(jQuery(this).val());
+	});
+
+	if (selectedCampaigns.length === 0) {
+		alert('Please select at least one campaign to delete.');
+	}
+
+	// Show confirmation alert before proceeding
+    var confirmation = confirm('Are you sure you want to delete the selected campaign(s)?');
+    
+    if (!confirmation) {
+        return; // If user clicks "Cancel", stop the process
+    }
+
+	self.innerHTML='Deleting...';
+	jQuery.ajax({
+		url: ajaxurl,
+		method: "post",
+		dataType: 'json',
+		data: { 
+			action: 'pn_delete_campaign',
+			nonce: pn_setings.remote_nonce,
+			campaign_ids: selectedCampaigns 
+		},
+		success: function(response) {
+			if(response){
+			if (response.status == 200) {
+				self.innerHTML=response.message;
+				jQuery(".pn_check_single:checked").each(function() {
+					jQuery(this).parent().parent().remove();
+				});
+			} else {
+				self.innerHTML = response.message;
+			}
+		}
+		},
+		error: function(response) {
+			var messagediv = self.parents('fieldset').find(".resp_message");
+			messagediv.html(response.responseJSON.message);
+			messagediv.css({ "color": "red" });
+			self.innerHTML='Delete';
+		}
+	});
+
+}
+
+
+function pn_delete_all_campaign(self){
+    var confirmation = confirm('Are you sure you want to delete all the campaigns? This action cannot be undone.');
+    if (!confirmation) {
+        return; // If user clicks "Cancel", stop the process
+    }
+	self.innerHTML='Deleting all campaigns ...';
+	jQuery.ajax({
+		url: ajaxurl,
+		method: "post",
+		dataType: 'json',
+		data: { 
+			action: 'pn_delete_campaign',
+			nonce: pn_setings.remote_nonce,
+			campaign_ids: 'all' 
+		},
+		success: function(response) {
+			if(response){
+			if (response.status == 200) {
+				self.innerHTML=response.message;
+				window.location.reload();
+			} else {
+				self.innerHTML = response.message;
+			}
+		}
+		},
+		error: function(response) {
+			var messagediv = self.parents('fieldset').find(".resp_message");
+			messagediv.html(response.responseJSON.message);
+			messagediv.css({ "color": "red" });
+			self.innerHTML='Delete';
+		}
+	});
+
 }

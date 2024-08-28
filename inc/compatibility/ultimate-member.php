@@ -74,14 +74,16 @@ class PN_Ultimate_Member{
 			}	
 			$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 			$weblink = is_multisite()? get_site_url() : home_url();
-			$data = array("user_token"=>$auth_settings['user_token'],
-						"audience_token_id"=>$token_ids,
-						"title"=>sprintf( __( 'New message from %s', 'push-notification' ), $vars['member'] ),
-						"message"=> wp_strip_all_tags($content),
-						"link_url"=>$link_url	,
-						"icon_url"=> $icon_url,
-						"image_url"=> $image_url,
-						"website"=>   $weblink,
+
+			$data = array(
+						"user_token"		=> $auth_settings['user_token'],
+						"audience_token_id"	=> $token_ids,
+						"title"				=> esc_html( /* translators: %s: member */ sprintf( __( 'New message from %s', 'push-notification' ), $vars['member'] ) ),
+						"message"			=> wp_strip_all_tags($content),
+						"link_url"			=> $link_url,
+						"icon_url"			=> $icon_url,
+						"image_url"			=> $image_url,
+						"website"			=> $weblink,
 			);
 	
 			$postdata = array('body'=> $data);
@@ -113,7 +115,9 @@ class PN_Ultimate_Member{
 	global $wpdb;
 	$table_name = UM()->Groups()->setup()->db_groups_table;
 	$group_id = get_post_meta( $post_id, '_group_id', true );
-	$members = $wpdb->get_col( "SELECT `user_id1` FROM $table_name WHERE `group_id` = $group_id AND `status` = 'approved'" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching	 -- Reason: custom table
+	$members = $wpdb->get_col( $wpdb->prepare( "SELECT `user_id1` FROM %s WHERE `group_id` = %d AND `status` = 'approved'" , $table_name,  $group_id ) );	
+
 	$all_tokens = array();
 
 	if ( empty( $members ) ) {
@@ -151,14 +155,16 @@ class PN_Ultimate_Member{
 		}	
 		$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 		$weblink = is_multisite()? get_site_url() : home_url();
-		$data = array("user_token"=>$auth_settings['user_token'],
-					"audience_token_id"=>$all_tokens,
-					"title"=>sprintf( __( 'New Group Post from %s', 'push-notification' ), $author_name ),
-					"message"=> wp_strip_all_tags($content),
-					"link_url"=>$link_url	,
-					"icon_url"=> $icon_url,
-					"image_url"=> $image_url,
-					"website"=>   $weblink,
+
+		$data = array(
+					"user_token"		=> $auth_settings['user_token'],
+					"audience_token_id" => $all_tokens,
+					"title"				=> esc_html( /* translators: %s: author name */ sprintf( __( 'New Group Post from %s', 'push-notification' ), $author_name ) ),
+					"message"			=> wp_strip_all_tags( $content ),
+					"link_url"			=> $link_url,
+					"icon_url"			=> $icon_url,
+					"image_url"			=> $image_url,
+					"website"			=> $weblink,
 		);
 
 		$postdata = array('body'=> $data);
@@ -228,14 +234,16 @@ class PN_Ultimate_Member{
 	
 			$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 			$weblink = is_multisite()? get_site_url() : home_url();
-			$data = array("user_token"=>$auth_settings['user_token'],
-						"audience_token_id"=>$token_ids,
-						"title"=>sprintf( __( 'New Post from %s', 'push-notification' ), $vars['member'] ),
-						"message"=> wp_strip_all_tags($content),
-						"link_url"=>$link_url	,
-						"icon_url"=> $icon_url,
-						"image_url"=> $image_url,
-						"website"=>   $weblink,
+
+			$data = array(
+						"user_token"		=> $auth_settings['user_token'],
+						"audience_token_id"	=> $token_ids,
+						"title"				=> esc_html( /* translators: %s: member */ sprintf( __( 'New Post from %s', 'push-notification' ), $vars['member'] ) ),
+						"message"			=> wp_strip_all_tags($content),
+						"link_url"			=> $link_url	,
+						"icon_url"			=> $icon_url,
+						"image_url"			=> $image_url,
+						"website"			=> $weblink,
 			);
 	
 			$postdata = array('body'=> $data);
