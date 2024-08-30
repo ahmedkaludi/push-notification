@@ -1,3 +1,6 @@
+= 1.37 (30 Aug 2024) =
+* Fixed: No Active subscriber found when sending push notification #124
+
 = 1.36 (24 Aug 2024) =
 * Fixed: conflict with superpwa #121
 * Fixed: CSV file not working properly. #114
