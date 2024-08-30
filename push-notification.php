@@ -4,7 +4,7 @@ Plugin Name: Push Notification
 Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
-Version: 1.36
+Version: 1.37
 Author URI: http://pushnotifications.io/
 Text Domain: push-notification
 Domain Path: /languages
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define('PUSH_NOTIFICATION_PLUGIN_FILE',  __FILE__ );
 define('PUSH_NOTIFICATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('PUSH_NOTIFICATION_PLUGIN_URL', plugin_dir_url( __FILE__ ));
-define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.36');
+define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.37');
 define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 /**
@@ -252,4 +252,18 @@ function pn_plugin_upgrade_function($upgrader_object, $options) {
 			push_notification_on_install();
         }
     }
+}
+
+add_action('admin_footer', 'pn_add_footer_text');
+
+function pn_add_footer_text()
+{
+	$screen = get_current_screen();
+	if ($screen->id !== 'toplevel_page_push-notification') {
+		return;
+	}
+
+	echo '<div style="padding: 0 0 20px 15%;">
+        <p>' . esc_html__( 'If you like Push Notification, please', 'push-notification' ) . '&nbsp;' . esc_html__( "leave a" , 'super-progressive-web-apps' ) . '&nbsp;<a href="' . esc_url( 'https://wordpress.org/support/plugin/push-notification/reviews/?rate=5#new-post' ) . '" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a>&nbsp;' . esc_html__( "rating to support continued development. Thanks a bunch!" , 'push-notification' ) . '</p>
+    </div>';
 }

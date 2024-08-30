@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.6
-Stable tag: 1.36
+Stable tag: 1.37
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -54,6 +54,9 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.37 (30 Aug 2024) =
+* Fixed: No Active subscriber found when sending push notification #124
 
 = 1.36 (24 Aug 2024) =
 * Fixed: conflict with superpwa #121
@@ -107,7 +110,5 @@ Fixed: Issue with plugin activation. #103
 * Added: Need to add support to display badge on mobile PWA icon #821.
 * Bug Fixed: Push notification is not working on IOS. #66.
 
-= 1.28.1 (11 Aug 2023) =
-* Bug Fixed: Fixed an escaping issue.
 
 Full changelog available [ at changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)
