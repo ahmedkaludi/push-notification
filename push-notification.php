@@ -253,3 +253,17 @@ function pn_plugin_upgrade_function($upgrader_object, $options) {
         }
     }
 }
+
+add_action('admin_footer', 'pn_add_footer_text');
+
+function pn_add_footer_text()
+{
+	$screen = get_current_screen();
+	if ($screen->id !== 'toplevel_page_push-notification') {
+		return;
+	}
+
+	echo '<div style="padding: 0 0 20px 15%;">
+        <p>' . esc_html__( 'If you like Push Notification, please', 'push-notification' ) . '&nbsp;' . esc_html__( "leave a" , 'super-progressive-web-apps' ) . '&nbsp;<a href="' . esc_url( 'https://wordpress.org/support/plugin/push-notification/reviews/?rate=5#new-post' ) . '" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a>&nbsp;' . esc_html__( "rating to support continued development. Thanks a bunch!" , 'push-notification' ) . '</p>
+    </div>';
+}
