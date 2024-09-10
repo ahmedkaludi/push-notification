@@ -524,13 +524,13 @@ class Push_Notification_Admin{
 								'.esc_html($subscriber_count).'
 							</div>
 						</div>
-						<div class="pn-card">
+						<div class="pn-card" style="display:none;">
 							<div class="title-name">'.esc_html__('Active Subscribers', 'push-notification').':</div>
 							<div class="desc column-description" style="color:green;">
 								'.esc_html($active_count).'
 							</div>
 						</div>
-						<div class="pn-card">
+						<div class="pn-card" style="display:none;">
 							<div class="title-name">'.esc_html__('Expired Subscribers', 'push-notification').':</div>
 							<div class="desc column-description" style="color:red;">
 								'.esc_html($expired_count).'
@@ -636,9 +636,7 @@ class Push_Notification_Admin{
 								<th>'.esc_html__('Message', 'push-notification').'</th>
 								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
-								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
-								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
-								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
+								<th width="120px">'.esc_html__('Clicks', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Actions', 'push-notification').'</th>
 							</tr>
 						</thead>
@@ -646,6 +644,7 @@ class Push_Notification_Admin{
 						$current_count_start = 0;
 						$timezone_string = get_option('timezone_string');
 						$timezone = 'UTC';
+						$clickCount = 0;
 						if (!$timezone_string) {
 							$gmt_offset = get_option('gmt_offset');
 							$timezone = sprintf('%+d:00', $gmt_offset);
@@ -679,36 +678,9 @@ class Push_Notification_Admin{
 									}else{
 										echo '<span class="badge badge-pill badge-secondary" style="color:blue">'.esc_html($campaign['status']).'</span>';
 									}
-								echo'</td><td align="center">';
-
-								 	$resposeData = array();
-								 	$clickCount = 0;
-	                                if(isset($campaign['campaign_response'][0])){
-	                                	foreach ($campaign['campaign_response'] as $key => $campaign_response) {
-	                                		if ($campaign_response['meta_key'] == 'Response') {
-	                                			$resposeData = json_decode( $campaign['campaign_response'][0]['meta_value'], true);
-	                                		}else if($campaign_response['meta_key'] == 'Clicks'){
-	                                			$clickCount = $campaign_response['meta_value'];
-	                                		}
-	                                	}
-	                                }
-	                                $totalCount = 0;
-	                                $success = isset($resposeData['success'])? $resposeData['success'] : 0;
-	                                $failed = isset($resposeData['failure'])? $resposeData['failure'] : 0;
-	                                $totalCount += ($success + $failed);
-	                                echo esc_html($totalCount);
-	                                echo'</td><td>';
-	                                if($success !==0 && $totalCount !== 0){
-										$rate = ($success/$totalCount)*100;
-										echo number_format($rate, 2, '.', ',')."%";
-										echo "<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
-									}else{
-										echo "0%";
-										echo "<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
-									}
-									echo'</td><td>';
+								echo'</td><td>';
 									echo esc_html($clickCount);
-									echo'</td>';
+								echo'</td>';
 									echo'<td><a class="button pn_delete_button" onclick="pn_delete_campaign(this)" data-id="'.esc_attr($campaign['id']).'">Delete</a></td>';
 								
 								echo'</tr>';
@@ -1360,18 +1332,17 @@ class Push_Notification_Admin{
 		if(isset( $authData['user_token'] ) && !empty($authData['user_token']) ){
 			$campaigns = PN_Server_Request::getCompaignsData( $authData['user_token'],$page);
 		}
-
+		
+		
 		$campaigns_html_escaped = '<h3>'.esc_html__('Campaigns', 'push-notification').'</h3>
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
 								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
+								<th width="00px">'.esc_html__('Title', 'push-notification').'</th>
 								<th>'.esc_html__('Message', 'push-notification').'</th>
 								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
-								<th width="80px">'.esc_html__('Subscribers', 'push-notification').'</th>
-								<th width="100px">'.esc_html__('Rate', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Actions', 'push-notification').'</th>
 							</tr>
@@ -1380,7 +1351,16 @@ class Push_Notification_Admin{
 						$current_count_start = 0;
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
-								 
+								$clickCount = 0;
+								if(isset($campaign['campaign_response'][0])){
+									foreach ($campaign['campaign_response'] as $key => $campaign_response) {
+										if ($campaign_response['meta_key'] == 'Response') {
+											$resposeData = json_decode( $campaign['campaign_response'][0]['meta_value'], true);
+										}else if($campaign_response['meta_key'] == 'Clicks'){
+											$clickCount = $campaign_response['meta_value'];
+										}
+									}
+								}
 								$message = $campaign['message'];
 								if (strlen($message) > 100) {
 									$stringCut = substr($message, 0, 100);
@@ -1406,35 +1386,10 @@ class Push_Notification_Admin{
 									}else{
 										$campaigns_html_escaped.='<span class="badge badge-pill badge-secondary" style="color:blue">'.esc_html($campaign['status']).'</span>';
 									}
-								$campaigns_html_escaped.='</td><td align="'.esc_attr('center').'">';
-								 	$resposeData = array();
-								 	$clickCount = 0;
-	                                if(isset($campaign['campaign_response'][0])){
-	                                	foreach ($campaign['campaign_response'] as $key => $campaign_response) {
-	                                		if ($campaign_response['meta_key'] == 'Response') {
-	                                			$resposeData = json_decode( $campaign['campaign_response'][0]['meta_value'], true);
-	                                		}else if($campaign_response['meta_key'] == 'Clicks'){
-	                                			$clickCount = $campaign_response['meta_value'];
-	                                		}
-	                                	}
-	                                }
-	                                $totalCount = 0;
-	                                $success = isset($resposeData['success'])? $resposeData['success'] : 0;
-	                                $failed = isset($resposeData['failure'])? $resposeData['failure'] : 0;
-	                                $totalCount += ($success + $failed);
-	                                $campaigns_html_escaped.= esc_html($totalCount);
-	                                $campaigns_html_escaped.='</td><td>';
-	                                if($success !==0 && $totalCount !== 0){
-										$rate = ($success/$totalCount)*100;
-										$campaigns_html_escaped.= number_format($rate, 2, '.', ',')."%";
-										$campaigns_html_escaped.="<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
-									}else{
-										$campaigns_html_escaped.="0%";
-										$campaigns_html_escaped.="<br/>(<span style='color:green;'>".esc_html__('Success', 'push-notification').": ".esc_html($success). "</span><br/> <span style='color:red;'>".esc_html__('Failed', 'push-notification').": ".esc_html($failed)."</span>)";
-									}
 									$campaigns_html_escaped.='</td><td>';
 									$campaigns_html_escaped.=esc_html($clickCount);
 									$campaigns_html_escaped.='</td>';
+									$campaigns_html_escaped.='<td><a class="button pn_delete_button" onclick="pn_delete_campaign(this)" data-id="'.esc_attr($campaign['id']).'">Delete</a></td>';
 								$campaigns_html_escaped.='</tr>';
 							}
 						}else{
