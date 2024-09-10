@@ -56,7 +56,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 == Changelog ==
 
 = 1.38 (10 September 2024) =
-* Enhancement: FCM XMPP and HTTP legacy APIs were deprecated in June 2023 and will be removed in June 2024. Migrate to the HTTP v1 API #129
+* Enhancement: Few enhancement #129
 
 = 1.37 (30 Aug 2024) =
 * Fixed: No Active subscriber found when sending push notification #124
