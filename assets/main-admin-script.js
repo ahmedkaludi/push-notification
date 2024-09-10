@@ -850,19 +850,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-
-    checkAll.addEventListener('change', function() {
-		if (checkAll.checked) {
-            bulkDelete.style.display = 'inline-block';
-            deleteAll.style.display = 'inline-block';
-        } else {
-            bulkDelete.style.display = 'none';
-            deleteAll.style.display = 'none';
-        }
-        checkboxes.forEach(function(checkbox) {
-            checkbox.checked = checkAll.checked; 
-        });
-    });
+	if (checkAll) {
+		checkAll.addEventListener('change', function() {
+			if (checkAll.checked) {
+				bulkDelete.style.display = 'inline-block';
+				deleteAll.style.display = 'inline-block';
+			} else {
+				bulkDelete.style.display = 'none';
+				deleteAll.style.display = 'none';
+			}
+			checkboxes.forEach(function(checkbox) {
+				checkbox.checked = checkAll.checked; 
+			});
+		});
+	}
     checkboxes.forEach(function(checkbox) {
         checkbox.addEventListener('change', function() {
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);

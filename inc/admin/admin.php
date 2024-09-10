@@ -631,7 +631,6 @@ class Push_Notification_Admin{
 						<thead>
 							<tr>
 								<th width="20px"><input type="checkbox" class="pn_check_all" value="all"></th>
-								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
 								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
 								<th>'.esc_html__('Message', 'push-notification').'</th>
 								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
@@ -663,8 +662,7 @@ class Push_Notification_Admin{
 								}
 								$time_in_seconds = new DateTime($campaign['created_at'], new DateTimeZone($timezone) );
 								echo '<tr>
-									<td><input type="checkbox" class="pn_check_single" value="'.esc_attr($campaign['id']).'"></td>
-									<td>'.esc_html( $current_count_start+= 1 ).'</td>
+									<td style="padding-left:18px;"><input type="checkbox" class="pn_check_single" value="'.esc_attr($campaign['id']).'"></td>
 									<td>'.esc_html( $campaign['title'] ).'</td>
 									<td><p class="less_text">'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- alredy escaped  */ $message.'</p>                        
 									<p class="full_text" style="display:none;">'.esc_html( wp_strip_all_tags( $campaign['message'] ) ).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
@@ -686,7 +684,7 @@ class Push_Notification_Admin{
 								echo'</tr>';
 							}
 						}else{
-							echo'<tr><td colspan="10" align="center">'.esc_html__('No data found', 'push-notification').'</td></tr>';
+							echo'<tr><td colspan="7" align="center">'.esc_html__('No data found', 'push-notification').'</td></tr>';
 						}
 						echo'</tbody></table></div>';
 						if (isset($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['data']) && !empty($campaigns['campaigns']['next_page_url'])) {
@@ -1338,8 +1336,8 @@ class Push_Notification_Admin{
 					<table class="wp-list-table widefat fixed striped table-view-list">
 						<thead>
 							<tr>
-								<th width="20px">'.esc_html__('#', 'push-notification').'</th>
-								<th width="00px">'.esc_html__('Title', 'push-notification').'</th>
+								<th width="20px"><input type="checkbox" class="pn_check_all" value="all"></th>
+								<th width="200px">'.esc_html__('Title', 'push-notification').'</th>
 								<th>'.esc_html__('Message', 'push-notification').'</th>
 								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
@@ -1372,7 +1370,7 @@ class Push_Notification_Admin{
 									$message = nl2br($campaign['message']);
 								}
 								$campaigns_html_escaped.='<tr>
-									<td>'.esc_html($current_count_start+= 1).'</td>
+									<td style="padding-left:18px;"><input type="checkbox" class="pn_check_single" value="'.esc_attr($campaign['id']).'"></td>
 									<td>'.esc_html($campaign['title']).'</td>
 									<td><p class="less_text">'.$message.'</p>                        
 									<p class="full_text" style="display:none;">'.wp_strip_all_tags($campaign['message']).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
