@@ -1100,8 +1100,8 @@ class Push_Notification_Admin{
 			}
 			$auth_settings = push_notification_auth_settings();
 			if( isset( $auth_settings['user_token'] ) ){
-				 PN_Server_Request::getsubscribersData( $auth_settings['user_token'] );
-				 wp_send_json(array("status"=> 200, 'message'=>esc_html__('Data updated', 'push-notification')));
+				$response = PN_Server_Request::getsubscribersData( $auth_settings['user_token'] );
+				wp_send_json($response);
 			}else{
 				wp_send_json(array("status"=> 503, 'message'=> esc_html__('User token not found', 'push-notification')));
 			}
