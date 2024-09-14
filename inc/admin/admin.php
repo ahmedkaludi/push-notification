@@ -636,7 +636,7 @@ class Push_Notification_Admin{
 								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
 								<th width="120px">'.esc_html__('Clicks', 'push-notification').'</th>
-								<th width="80px">'.esc_html__('Actions', 'push-notification').'</th>
+								<th width="160px">'.esc_html__('Actions', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
@@ -679,7 +679,8 @@ class Push_Notification_Admin{
 								echo'</td><td>';
 									echo esc_html($clickCount);
 								echo'</td>';
-									echo'<td><a class="button pn_delete_button" onclick="pn_delete_campaign(this)" data-id="'.esc_attr($campaign['id']).'">Delete</a></td>';
+									echo'<td><a class="button pn_delete_button" onclick="pn_delete_campaign(this)" data-id="'.esc_attr($campaign['id']).'">Delete</a>
+									<a class="button pn_reuse_button" data-json="'.esc_attr(wp_json_encode($campaign)).'">Reuse</a></td>';
 								
 								echo'</tr>';
 							}
@@ -1342,7 +1343,7 @@ class Push_Notification_Admin{
 								<th width="120px">'.esc_html__('Sent on', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Clicks', 'push-notification').'</th>
-								<th width="80px">'.esc_html__('Actions', 'push-notification').'</th>
+								<th width="160px">'.esc_html__('Actions', 'push-notification').'</th>
 							</tr>
 						</thead>
 						<tbody>';
@@ -1387,7 +1388,9 @@ class Push_Notification_Admin{
 									$campaigns_html_escaped.='</td><td>';
 									$campaigns_html_escaped.=esc_html($clickCount);
 									$campaigns_html_escaped.='</td>';
-									$campaigns_html_escaped.='<td><a class="button pn_delete_button" onclick="pn_delete_campaign(this)" data-id="'.esc_attr($campaign['id']).'">Delete</a></td>';
+									$campaigns_html_escaped.='<td><a class="button pn_delete_button" onclick="pn_delete_campaign(this)" data-id="'.esc_attr($campaign['id']).'">Delete</a>
+									<a class="button pn_reuse_button" data-json="'.esc_attr(wp_json_encode($campaign)).'">Reuse</a>
+									</td>';
 								$campaigns_html_escaped.='</tr>';
 							}
 						}else{
