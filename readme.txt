@@ -57,6 +57,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 = 1.38 (10 September 2024) =
 * Enhancement: Few enhancement #129
+* Added: Added a feature to resend/reuse campaigns already created #127
 
 = 1.37 (30 Aug 2024) =
 * Fixed: No Active subscriber found when sending push notification #124
