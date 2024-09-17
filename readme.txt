@@ -55,7 +55,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
-= 1.38 (10 September 2024) =
+= 1.38 (17 September 2024) =
 * Enhancement: Few enhancement #129
 * Added: Added a feature to resend/reuse campaigns already created #127
 
