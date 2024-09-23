@@ -1256,11 +1256,11 @@ class Push_Notification_Admin{
 					'notification_date'=>$notification_date,
 				);
 				$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
-				$table_name = $wpdb->prefix . 'um_notifications';
+				
 				if($response){
-				 	wp_send_json($response);
+				 	
 					 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API')){
-
+						$table_name = $wpdb->prefix . 'um_notifications';
 						foreach($user_ids as $pn_user_id){
 							// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
 							$insert = $wpdb->insert(
@@ -1286,6 +1286,8 @@ class Push_Notification_Admin{
 						}
 						
 					 }
+
+					 wp_send_json($response);
 
 				}else{
 					wp_send_json(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));
