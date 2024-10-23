@@ -25,12 +25,15 @@ define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
  */
 add_action('plugins_loaded', 'push_notification_initialize');
 function push_notification_initialize(){
-	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";	
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/PnMetaBox.php";
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/newsletter.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/ultimate-member.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/feedback-helper-functions.php";
 	if(is_admin()){
+		if ( is_multisite()) {
+			require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/pn_multisite.php";
+		}
 		add_filter( 'plugin_action_links_' . PUSH_NOTIFICATION_PLUGIN_BASENAME,'push_notification_add_action_links', 10, 4);
 	}
 	if( !is_admin() || wp_doing_ajax() ){

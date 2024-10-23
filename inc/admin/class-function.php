@@ -47,7 +47,11 @@ class PN_Server_Request{
 
 			$push_notification_auth_settings['messageManager'] = $response['response']['messageManager'];
 
-			update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
+			if ( is_multisite() ) {
+				update_site_option('push_notification_auth_settings', $push_notification_auth_settings,false);
+			}else{
+				update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
+			}
 		}
 
 
@@ -88,18 +92,14 @@ class PN_Server_Request{
 		$verifyUrl = 'register/audience/token';
 
 		if ( is_multisite() ) {
-
-            $weblink = get_site_url();              
-
-        }
-
-        else {
-
+			$is_multisite = 'yes';
+            $weblink = get_site_url();
+			$push_notification_auth_settings = get_site_option( 'push_notification_auth_settings', array() ); 
+        } else {
+			$is_multisite = 'no';
             $weblink = home_url();
-
-        }    
-
-        $push_notification_auth_settings = get_option('push_notification_auth_settings');
+			$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() );
+        }
 
         $user_token = $push_notification_auth_settings['user_token'];
 
@@ -115,8 +115,9 @@ class PN_Server_Request{
 
 					'ip_address'=> $ip_address,
 
-					'category'=> $category
-
+					'category'=> $category,
+					
+					'is_multisite'=> $is_multisite
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');

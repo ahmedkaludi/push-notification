@@ -11,7 +11,9 @@ class Push_Notification_Admin{
 
 	public function init(){
 		add_action('admin_notices', array($this, 'admin_notices_opt') );
-		add_action( 'admin_menu', array( $this, 'add_menu_links') );
+		if (! is_network_admin()) {
+			add_action( 'admin_menu', array( $this, 'add_menu_links') );
+		}
 		add_action( 'admin_init', array( $this, 'settings_init') );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ) );
 		add_action( 'wp_ajax_pn_verify_user', array( $this, 'pn_verify_user' ) ); 
@@ -98,8 +100,7 @@ class Push_Notification_Admin{
 	}
 
 	function load_admin_scripts($hook_suffix){
-
-		if( $hook_suffix=='toplevel_page_push-notification' ) {
+		if( $hook_suffix=='toplevel_page_push-notification' || $hook_suffix == 'toplevel_page_push-notification-global-setting' ) {
 
 			$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '';	
 
@@ -160,15 +161,23 @@ class Push_Notification_Admin{
 			}
 	}
 	function admin_interface_render(){
-		// Authentication
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		?><div class="wrap push_notification-settings-wrap">
+		?>
+		<div class="wrap push_notification-settings-wrap">
 			<h1 class="page-title"><?php echo esc_html__('Push Notifications Options', 'push-notification'); ?></h1>
 			<div class="push-notification-main-wrapper">
 				<h2 class="nav-tab-wrapper push-notification-tabs">
 					<?php
+					if (is_multisite() && ! is_network_admin() ) {
+						?>
+						<div class="notice notice-error is-dismissible">
+							<h3><?php esc_html_e( 'You are using multisite, Use Network admin for push notification functionality', 'push-notification' ); ?></h3>
+						</div>
+						<?php
+						exit;
+					}
 					$authData = push_notification_auth_settings();
 					if( (isset($authData['token_details']) && $authData['token_details']['validated']==1) ){
 						$plugin_icon_color = "#008416;";
@@ -179,9 +188,11 @@ class Push_Notification_Admin{
 						echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.esc_attr( $plugin_icon_color ).'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
+						if ( ! is_network_admin()) {
 						if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
-							if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
-								echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+								if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
+									echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+								}
 							}
 						}
 						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
@@ -191,7 +202,7 @@ class Push_Notification_Admin{
 				</h2>
 			</div>
 
-				<form action="options.php" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
+				<form action="<?php echo esc_url(admin_url("options.php")); ?>" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
 					<div class="form-wrap">
 						<?php
 						settings_fields( 'push_notification_setting_dashboard_group' );
@@ -212,11 +223,13 @@ class Push_Notification_Admin{
 
 	public function settings_init(){
 		register_setting( 'push_notification_setting_dashboard_group', 'push_notification_settings' );
+		// register_setting( 'push_notification_setting_dashboard_group', 'push_notification_global_setting' );
 
 		add_settings_section('push_notification_dashboard_section',
-					 ' ', 
-					 '__return_false', 
-					 'push_notification_dashboard_section');
+			' ', 
+			'__return_false', 
+			'push_notification_dashboard_section'
+		);
 
 			add_settings_field(
 				'pn_key_validate_status',	// ID
@@ -225,10 +238,12 @@ class Push_Notification_Admin{
 				'push_notification_dashboard_section',	// Page slug
 				'push_notification_dashboard_section'	// Settings Section ID
 			);
-		add_settings_section('push_notification_segment_settings_section',
+			if ( ! is_network_admin()) {
+				add_settings_section('push_notification_segment_settings_section',
 					 esc_html__('Notification Segment','push-notification'), 
 					 '__return_false', 
 					 'push_notification_segment_settings_section');
+			}
 			add_settings_field(
 				'pn_key_segment_select',								// ID
 				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation', 'push-notification').'</b></label>',// Title
@@ -780,6 +795,11 @@ class Push_Notification_Admin{
 		$authData = push_notification_auth_settings();
 		if( !isset($authData['token_details']['validated']) 
 			|| (isset($authData['token_details']) && $authData['token_details']['validated']!=1) ){
+			?>
+				<script type="text/javascript">
+					localStorage.removeItem('activeTab');
+				</script>
+			<?php
 			echo "<fieldset>";
 			PN_Field_Generator::get_input_password('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
@@ -1087,7 +1107,12 @@ class Push_Notification_Admin{
 				$user_token = $auth_settings['user_token'];
 				$server_response = PN_Server_Request::inactivateWebsite($user_token);
 				if ($server_response['status']) {
-					delete_option('push_notification_auth_settings');
+					if ( is_multisite() ) {
+						delete_site_option('push_notification_auth_settings');
+					}else{
+						delete_option('push_notification_auth_settings');
+					}
+					
 					$request_response['status'] = 200;
 					$request_response['server_response'] = $server_response;
 					$request_response['message'] = esc_html__('API key removed successfully', 'push-notification');
@@ -1705,7 +1730,7 @@ if ( is_admin() || wp_doing_ajax() ) {
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 
 function push_notification_settings(){
-	$push_notification_settings = get_option( 'push_notification_settings', array() ); 
+	$push_notification_settings = get_option( 'push_notification_settings', array() );
 	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/bell-icon.png';
 	if(function_exists('pwaforwp_defaultSettings')){
 		$pwaforwpSettings = pwaforwp_defaultSettings();
@@ -1741,7 +1766,11 @@ function push_notification_settings(){
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
-	$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() ); 
+	if ( is_multisite() ) {
+		$push_notification_auth_settings = get_site_option( 'push_notification_auth_settings', array() );
+	}else{
+		$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() );
+	} 
 	return $push_notification_auth_settings;
 }
 function push_notification_details_settings(){
