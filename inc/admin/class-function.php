@@ -116,7 +116,7 @@ class PN_Server_Request{
 					'ip_address'=> $ip_address,
 
 					'category'=> $category,
-					
+
 					'is_multisite'=> $is_multisite
 				);
 
@@ -133,18 +133,14 @@ class PN_Server_Request{
 		$verifyUrl = 'audience/details';
 
 		if ( is_multisite() ) {
-
-            $weblink = get_site_url();              
-
-        }
-
-        else {
-
+            $weblink = get_site_url();
+			$is_multisite = 'yes'; 
+        } else {
+			$is_multisite = 'no';
             $weblink = home_url();
-
         }    
 
-		$data = array("user_token"=>$user_token, "website"=>   $weblink);
+		$data = array("user_token"=>$user_token, "website"=>   $weblink,'is_multisite' => $is_multisite);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 
@@ -168,12 +164,13 @@ class PN_Server_Request{
 	public static function getCompaignsData($user_token,$page = 1){
 		$verifyUrl = 'campaign/compaign-list';
 		if ( is_multisite() ) {
-            $weblink = get_site_url();              
-        }
-        else {
+            $weblink = get_site_url(); 
+			$is_multisite = 'yes';             
+        }else {
             $weblink = home_url();
+			$is_multisite = 'no';
         }    
-		$data = array("user_token"=>$user_token, "website"=> $weblink, "page" => $page);
+		$data = array("user_token"=>$user_token, "website"=> $weblink, "page" => $page,'is_multisite'=>$is_multisite);
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
 	}
@@ -290,15 +287,11 @@ class PN_Server_Request{
 		$verifyUrl = 'campaign/create';
 
 		if ( is_multisite() ) {
-
-            $weblink = get_site_url();              
-
-        }
-
-        else {
-
+            $weblink = get_site_url(); 
+			$is_multisite = 'yes';             
+        }else {
             $weblink = home_url();
-
+			$is_multisite = 'no';
         }   
 
 		if($payload['audience_token_url']=='campaign_for_individual_tokens'){
@@ -316,6 +309,7 @@ class PN_Server_Request{
 					'notification_schedule'=>$payload['notification_schedule'],
 					'notification_time'=>$payload['notification_time'],
 					'notification_date'=>$payload['notification_date'],
+					'is_multisite'=>$is_multisite,
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
