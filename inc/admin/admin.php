@@ -661,8 +661,9 @@ class Push_Notification_Admin{
 						$clickCount = 0;
 						if (!$timezone_string) {
 							$gmt_offset = get_option('gmt_offset');
-							$timezone = sprintf('%+d:00', $gmt_offset);
+							$timezone_string = sprintf('%+d:00', $gmt_offset);
 						}
+						
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
 								$clickCount = 0;
@@ -685,14 +686,16 @@ class Push_Notification_Admin{
 								}else{
 									$message = nl2br($campaign['message']);
 								}
-								$time_in_seconds = new DateTime($campaign['created_at'], new DateTimeZone($timezone) );
+
+								$local_datetime = new DateTime($campaign['created_at'], new DateTimeZone($timezone) );
+								$local_datetime->setTimezone(new DateTimeZone($timezone_string));
 								echo '<tr>
 									<td style="padding-left:18px;"><input type="checkbox" class="pn_check_single" value="'.esc_attr($campaign['id']).'"></td>
 									<td>'.esc_html( $campaign['title'] ).'</td>
 									<td><p class="less_text">'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- alredy escaped  */ $message.'</p>                        
 									<p class="full_text" style="display:none;">'.esc_html( wp_strip_all_tags( $campaign['message'] ) ).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
 									</p></td>
-									<td>'.esc_html( $time_in_seconds->format( 'Y-m-d H:i:s' )  ).'</td>
+									<td>'.esc_html( $local_datetime->format( 'Y-m-d H:i:s' )  ).'</td>
 									<td>';
 									if ( $campaign['status'] === 'Done' ) {
 										echo '<span class="badge badge-pill badge-success" style="color:green">'.esc_html($campaign['status']).'</span>';
