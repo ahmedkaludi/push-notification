@@ -90,6 +90,13 @@ class PN_Server_Request{
 	public static function registerSubscribers($token_id, $user_agent, $os, $ip_address, $category){
 
 		$verifyUrl = 'register/audience/token';
+		$notification_settings= push_notification_settings();
+		$lang_compatibility = 'no';
+		$language_code = 'en';
+		if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+			$lang_compatibility = 'yes';
+			$language_code = pll_current_language();
+        }
 
 		if ( is_multisite() ) {
 			$is_multisite = 'yes';
@@ -117,7 +124,9 @@ class PN_Server_Request{
 
 					'category'=> $category,
 
-					'is_multisite'=> $is_multisite
+					'is_multisite'=> $is_multisite,
+					'language_code'=> $language_code,
+					'lang_compatibility'=> $lang_compatibility,
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
@@ -202,7 +211,15 @@ class PN_Server_Request{
 
             $weblink = home_url();
 
-        }   
+        }
+
+		$notification_settings= push_notification_settings();
+		$lang_compatibility = 'no';
+		$language_code = 'en';
+		if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+			$lang_compatibility = 'yes';
+			$language_code = pll_current_language();
+        }
 
 		$data = array("user_token"=>$user_token, "website"=>   $weblink, 
 
@@ -216,7 +233,9 @@ class PN_Server_Request{
 
 					'image_url'=>$image_url,
 
-					'category'=>$category
+					'category'=>$category,
+					'language_code'=>$language_code,
+					'lang_compatibility'=>$lang_compatibility,
 
 				);
 
@@ -292,7 +311,14 @@ class PN_Server_Request{
         }else {
             $weblink = home_url();
 			$is_multisite = 'no';
-        }   
+        }
+		$notification_settings= push_notification_settings();
+		$lang_compatibility = 'no';
+		$language_code = 'en';
+		if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+			$lang_compatibility = 'yes';
+			$language_code = pll_current_language();
+        }
 
 		if($payload['audience_token_url']=='campaign_for_individual_tokens'){
 			$verifyUrl = 'campaign/single'; 
@@ -310,6 +336,8 @@ class PN_Server_Request{
 					'notification_time'=>$payload['notification_time'],
 					'notification_date'=>$payload['notification_date'],
 					'is_multisite'=>$is_multisite,
+					'language_code'=>$language_code,
+					'lang_compatibility'=>$lang_compatibility,
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');

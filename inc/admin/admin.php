@@ -10,6 +10,7 @@ class Push_Notification_Admin{
 	public function __construct(){}
 
 	public function init(){
+		
 		add_action('admin_notices', array($this, 'admin_notices_opt') );
 		if (! is_network_admin()) {
 			add_action( 'admin_menu', array( $this, 'add_menu_links') );
@@ -196,6 +197,7 @@ class Push_Notification_Admin{
 							}
 						}
 						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_compatibility') . '" link="pn_compatibility" class="nav-tab"><span class="dashicons dashicons-image-filter"></span> ' . esc_html__('Compatibality','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
 					?>
@@ -244,6 +246,11 @@ class Push_Notification_Admin{
 					 '__return_false', 
 					 'push_notification_segment_settings_section');
 			}
+			add_settings_section('push_notification_compatibility_settings_section',
+			esc_html__('Compatibility','push-notification'), 
+			'__return_false', 
+			'push_notification_compatibility_settings_section');
+
 			add_settings_field(
 				'pn_key_segment_select',								// ID
 				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation', 'push-notification').'</b></label>',// Title
@@ -274,6 +281,19 @@ class Push_Notification_Admin{
 				array( $this, 'pn_select_specific_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
+			add_settings_section('push_notification_compatibility_settings_section',
+			esc_html__('Compatibility','push-notification'), 
+			'__return_false', 
+			'push_notification_compatibility_settings_section');
+
+			add_settings_field(
+				'pn_polylang_compatibale',								// ID
+				'<label for="pn_polylang_compatibale"><b>'.esc_html__('Polylang', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_polylang_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
 
 		add_settings_section('push_notification_user_settings_section',
@@ -563,6 +583,13 @@ class Push_Notification_Admin{
 		echo '<div id="pn_segmentation" style="display:none" class="pn-tabs">
 		<section class="pn_general_wrapper">';
 				do_settings_sections( 'push_notification_segment_settings_section' );
+		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
+			</section>
+			</div>
+			';
+		echo '<div id="pn_compatibility" style="display:none" class="pn-tabs">
+		<section class="pn_general_wrapper">';
+				do_settings_sections( 'push_notification_compatibility_settings_section' );
 		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
 			</section>
 			</div>
@@ -863,6 +890,18 @@ class Push_Notification_Admin{
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_push_on_category_checkbox" name="push_notification_settings[on_category]"  value="1" '.esc_attr($on_category_checked).'/></div></div>';
+	}
+
+	public function pn_polylang_callback(){		
+		$notification = push_notification_settings();
+		$pn_polylang_compatibale = "";
+		if (isset($notification['pn_polylang_compatibale']) && $notification['pn_polylang_compatibale']) {
+			$pn_polylang_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_polylang_compatibale" name="push_notification_settings[pn_polylang_compatibale]"  value="1" '.esc_attr($pn_polylang_compatibale).'/>
+					<p class="help">'.esc_html__('Its allow you to send notification specific language user.', 'push-notification').'</p></div></div>';
 	}
 
 	public function pn_key_segment_on_categories_callback() {
@@ -1945,6 +1984,7 @@ function push_notification_pro_notifyform_before(){
 		return;
 	}
 	$notification_settings= push_notification_settings();
+	
 	echo '<div class="form-group">
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
 			<select id="notification-send-type" class="regular-text js_pn_select">
@@ -1960,6 +2000,19 @@ function push_notification_pro_notifyform_before(){
 
 	echo '</select>
 		  </div>';
+	if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+		$languages = pll_languages_list();
+		echo '<div class="form-group">
+				<label for="notification-send-type">'.esc_html__('Select Language','push-notification').'</label>
+				<select id="notification-send-type" class="regular-text js_pn_select">';
+					foreach ($languages as $key => $value) {
+						echo '<option value="'.$value.'">'.$value.'</option>';
+					}
+				echo '</select>
+		  </div>';
+	}
+
+	
 		  
 		  $users = get_users( array(
 								// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key

@@ -285,6 +285,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").show();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_compatibility").hide();
 	        }
 	        if(link == "pn_dashboard"){
 	        	jQuery("#pn_dashboard").show();
@@ -294,6 +295,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_compatibility").hide();
 	        } 
 	        if( link == "pn_segmentation") {
 	        	jQuery("#pn_dashboard").hide();
@@ -303,6 +305,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_segmentation").show();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_compatibility").hide();
 	        	
 	        }
 	        if( link == "pn_notification_bell") {
@@ -313,6 +316,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_compatibility").hide();
 	        }
 	        if( link == "pn_campaings") {
 	        	jQuery("#pn_dashboard").hide();
@@ -321,7 +325,18 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_notification_bell").hide();
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
+	        	jQuery("#pn_compatibility").hide();
 	        	jQuery("#pn_campaings").show();
+	        }
+	        if( link == "pn_compatibility") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_connect").hide();
+	        	jQuery("#pn_compatibility").show();
+	        	jQuery("#pn_campaings").hide();
 	        }
 	        if( link == "pn_help") {
 	        	jQuery("#pn_dashboard").hide();
@@ -331,6 +346,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").show();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_compatibility").hide();
 	        }
 	        
 	        localStorage.setItem('activeTab', $(e.target).attr('href'));
