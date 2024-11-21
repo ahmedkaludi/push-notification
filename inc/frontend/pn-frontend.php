@@ -73,6 +73,7 @@ class Push_Notification_Frontend{
 
 		
 		add_action( 'init', array($this, 'sw_template_query_var') );
+		add_action( 'init', array($this, 'pn_peepso_compatibility') );
 
 		add_action( 'wp_ajax_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) ); 
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
@@ -274,7 +275,7 @@ class Push_Notification_Frontend{
 	}
 
 	public function urls_https( $url ) {
-           return str_replace( 'http://', 'https://', $url );
+        return str_replace( 'http://', 'https://', $url );
 	}
 
 	public function register_manifest_rest_route() {
@@ -815,6 +816,284 @@ class Push_Notification_Frontend{
 		}
 	
 		return $standardUrl;
+	}
+
+	public function pn_peepso_send_notification($notification,$sender_info,$title,$message){
+		$auth_settings = push_notification_auth_settings();
+		$user_token = '';
+		if( isset( $auth_settings['user_token'] ) && ! empty( $auth_settings['user_token'] ) ){
+			$user_token = $auth_settings['user_token'];
+		}
+		$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
+
+		if ( is_multisite() ) {
+			$weblink = get_site_url();
+		} else {
+			$weblink = home_url();
+		}
+
+		$settings = push_notification_settings();
+		$user_email = $sender_info->user_email;
+
+	    $avatar_url = get_avatar_url($user_email, ['size' => 96]);
+
+		$data = array(
+					"user_token" =>	$user_token,
+
+					"audience_token_id"	=>	$notification,
+
+					"title"	 	=>		 $title,
+
+					"message" 	=>	 $message,
+
+					"link_url" 	=>	 $weblink,
+
+					"icon_url" 	=>	 $avatar_url,
+
+					"image_url" =>	 null,
+
+					"website" 	=>	 $weblink,
+
+				);
+
+		$postdata = array('body'=> $data);
+
+		$remoteResponse = wp_remote_post($verifyUrl, $postdata);
+
+		$this->pn_handle_error_log( $remoteResponse , 'peepso_friends_requests_after_add');
+	}
+	public function pn_peepso_compatibility(){
+
+		$settings = push_notification_settings();
+
+		if (isset($settings['pn_peepso_compatibale']) && $settings['pn_peepso_compatibale'] && class_exists('PeepSoFriends') && class_exists('PeepSoActivity') ) {
+
+			add_action('pn_tokenid_registration_id', function( $token_id, $response, $user_agent, $os, $ip_address ) {
+
+				$userData = wp_get_current_user();
+
+				if(isset($userData->ID)){
+
+					$userid = $userData->ID;
+
+					$notify_data = get_user_meta( $userid, 'peepso_pn_notification_token', $response['data']['id'] );
+
+					$tokenList = array();
+
+					if( ! is_array( $notify_data ) ){
+
+						$tokenList[] = $notify_data;
+
+					}else{
+
+						$tokenList = $notify_data;
+
+					}
+
+					if( ! in_array($response['data']['id'], $tokenList ) ) {
+
+						$tokenList[] = $response['data']['id']; 
+
+					}
+
+					update_user_meta($userid, 'peepso_pn_notification_token', $tokenList);
+
+				}
+
+			}, 10, 5);
+
+
+
+			//  notification on like
+			add_action('peepso_action_like_add', function($like) {
+				$msg = 'Its vikas User ' . get_current_user_id() . ' liked an activity {$like->like_external_id}';
+				error_log($msg);
+
+			}, 10, 1);
+
+
+
+			// notification on group invitation
+
+			add_action('peepso_action_group_user_invitation_send', function(PeepSoGroupUser $PeepSoGroupUser) {
+
+				$msg = 'User group invitation sent vik' . get_current_user_id() . ' invited user {$PeepSoGroupUser->$user_id} to group {$PeepSoGroupUser->$group_id}';
+
+				error_log($msg);;
+
+			}, 10, 1);
+
+			// notification on request accept
+
+			add_action('peepso_friends_requests_after_add', function($from, $to) {
+
+				$receiver_id = $to;
+				$notification = array();
+
+				$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+
+				if( ! is_array( $tokens ) ) {
+					$notification[] = $tokens;
+				}else{
+					$notification = array_merge($notification, $tokens);
+				}
+				$notification = array_filter($notification);
+
+				if( empty( $notification ) ) {
+					return ;
+				}
+
+				$sender_info = get_userdata($to);
+
+				$title	 	= esc_html__('PeepSo friend request', 'push-notification' );
+
+				$message 	= esc_html__('You have new friend request of'.$sender_info->display_name, 'push-notification' );
+
+				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+
+				
+			}, 10, 2);
+
+
+
+			add_action('peepso_friends_requests_after_accept', function($from, $to) {
+
+				$receiver_id = $from;
+
+				$notification = array();
+
+				$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+
+				if( ! is_array( $tokens ) ) {
+					$notification[] = $tokens;
+				}else{
+					$notification = array_merge($notification, $tokens);
+				}
+				$notification = array_filter($notification);
+
+				if( empty( $notification ) ) {
+					return ;
+				}
+
+				$sender_info = get_userdata($to);
+				$title	 	= esc_html__('PeepSo request accepted', 'push-notification' );
+				$message 	= esc_html__($sender_info->display_name.' accepted friend request.', 'push-notification' );
+
+				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+
+			}, 10, 2);
+
+
+
+			add_action('peepso_activity_after_add_post', function($post_id, $act_id) {
+				// $PeepSoActivity  = PeepSoActivity::get_instance();
+            	// $post_act = $PeepSoActivity->get_activity($act_id);
+				$post_obj = get_post($post_id);
+				if ($post_obj->post_type == 'peepso-message') {
+					$peepso_participants = new PeepSoMessageParticipants();
+					$current_participants = $peepso_participants->get_participants($post_obj->post_parent);
+
+					$receiver_id = $current_participants[1];
+					$notification = array();
+
+					$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+
+					if( ! is_array( $tokens ) ) {
+						$notification[] = $tokens;
+					}else{
+						$notification = array_merge($notification, $tokens);
+					}
+					$notification = array_filter($notification);
+
+					if( empty( $notification ) ) {
+						return ;
+					}
+
+					$sender_info = get_userdata($current_participants[0]);
+
+					$title	 	= esc_html__($sender_info->display_name.' sent message', 'push-notification' );
+
+					$message 	= esc_html( $post_obj->post_content );
+
+					$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+				}
+
+				if ($post_obj->post_type == 'peepso-post') {
+					$user_id = $post_obj->post_author;
+					$model = PeepSoFriendsModel::get_instance();
+					$friend_ids =	$model->get_friends($user_id);
+					$notification = [];
+					foreach ($friend_ids as $key => $receiver_id) {
+						$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+						if( ! is_array( $tokens ) ) {
+							$notification[] = $tokens;
+						}else{
+							$notification = array_merge($notification, $tokens);
+						}
+						$notification = array_filter($notification);
+					}
+
+					if( empty( $notification ) ) {
+						return ;
+					}
+					$sender_info = get_userdata($user_id);
+
+					$title	 	= esc_html__('PeepSo new post', 'push-notification' );
+
+					$message 	= esc_html__($sender_info->display_name. ' added new post' , 'push-notification' );
+
+					$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+				}
+
+			}, 10, 2);
+
+
+
+			add_action('peepso_after_add_comment', function($post_id, $act_id, $did_notify, $did_email) {
+
+				$peepso_activity = new PeepSoActivity();
+				$comment = $peepso_activity->get_comment($post_id);
+				$post_obj = $comment->post;
+				if ($post_obj->post_type == 'peepso-comment') {
+					$receiver_id = $post_obj->act_owner_id;
+					$notification = array();
+
+					$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+
+					if( ! is_array( $tokens ) ) {
+						$notification[] = $tokens;
+					}else{
+						$notification = array_merge($notification, $tokens);
+					}
+					$notification = array_filter($notification);
+
+					if( empty( $notification ) ) {
+						return ;
+					}
+
+					$sender_info = get_userdata($post_obj->post_author);
+
+					$title	 	= esc_html__($sender_info->display_name.' commented on post', 'push-notification' );
+
+					$message 	= esc_html( $post_obj->post_content );
+
+					$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+				}
+			}, 10, 4);
+
+		}
+
+	}
+
+	public function pn_handle_error_log($remoteResponse, $function_name) {
+		if( is_wp_error( $remoteResponse ) ){
+			$remoteData = array('status'=>401, "response"=>"pn could not connect to server");
+			error_log( $function_name );
+			error_log( print_r($remoteData,true ) );
+		}else{
+			$remoteData = wp_remote_retrieve_body($remoteResponse);
+			$remoteData = json_decode($remoteData, true);
+		}
 	}
 }
 

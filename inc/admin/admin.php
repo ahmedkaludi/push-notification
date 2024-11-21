@@ -295,6 +295,13 @@ class Push_Notification_Admin{
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_peepso_compatibale',								// ID
+				'<label for="pn_peepso_compatibale"><b>'.esc_html__('PeepSo', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_peepso_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
+			);
 
 		add_settings_section('push_notification_user_settings_section',
 					 ' ', 
@@ -902,6 +909,17 @@ class Push_Notification_Admin{
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_polylang_compatibale" name="push_notification_settings[pn_polylang_compatibale]"  value="1" '.esc_attr($pn_polylang_compatibale).'/>
 					<p class="help">'.esc_html__('Its allow you to send notification specific language user.', 'push-notification').'</p></div></div>';
+	}
+	public function pn_peepso_callback(){		
+		$notification = push_notification_settings();
+		$pn_peepso_compatibale = "";
+		if (isset($notification['pn_peepso_compatibale']) && $notification['pn_peepso_compatibale']) {
+			$pn_peepso_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_peepso_compatibale" name="push_notification_settings[pn_peepso_compatibale]"  value="1" '.esc_attr($pn_peepso_compatibale).'/>
+					<p class="help">'.esc_html__('Its allow you to send notification on below peepso events.', 'push-notification').'</p></div></div>';
 	}
 
 	public function pn_key_segment_on_categories_callback() {
