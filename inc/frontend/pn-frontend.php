@@ -965,7 +965,7 @@ class Push_Notification_Frontend{
 
 				$sender_info = get_userdata($to);
 
-				$title	 	= esc_html__('PeepSo friend request', 'push-notification' );
+				$title	 	= esc_html__('New friend request', 'push-notification' );
 
 				$message 	= esc_html__('You have new friend request of'.$sender_info->display_name, 'push-notification' );
 
@@ -996,7 +996,7 @@ class Push_Notification_Frontend{
 				}
 
 				$sender_info = get_userdata($to);
-				$title	 	= esc_html__('PeepSo request accepted', 'push-notification' );
+				$title	 	= esc_html__('Friend request accepted', 'push-notification' );
 				$message 	= esc_html__($sender_info->display_name.' accepted friend request.', 'push-notification' );
 
 				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
@@ -1058,7 +1058,7 @@ class Push_Notification_Frontend{
 					}
 					$sender_info = get_userdata($user_id);
 
-					$title	 	= esc_html__('PeepSo new post', 'push-notification' );
+					$title	 	= esc_html__('New post', 'push-notification' );
 
 					$message 	= esc_html__($sender_info->display_name. ' added new post' , 'push-notification' );
 
