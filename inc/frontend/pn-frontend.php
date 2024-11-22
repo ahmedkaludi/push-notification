@@ -915,11 +915,31 @@ class Push_Notification_Frontend{
 
 			// notification on group invitation
 
-			add_action('peepso_action_group_user_invitation_send', function(PeepSoGroupUser $PeepSoGroupUser) {
+			add_action('peepso_action_group_user_invitation_send', function($PeepSoGroupUser) {
+				
+				$receiver_id = $PeepSoGroupUser->user_id;
+				$notification = array();
 
-				$msg = 'User group invitation sent vik' . get_current_user_id() . ' invited user {$PeepSoGroupUser->$user_id} to group {$PeepSoGroupUser->$group_id}';
+				$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
 
-				error_log($msg);;
+				if( ! is_array( $tokens ) ) {
+					$notification[] = $tokens;
+				}else{
+					$notification = array_merge($notification, $tokens);
+				}
+				$notification = array_filter($notification);
+
+				if( empty( $notification ) ) {
+					return ;
+				}
+
+				$sender_info = get_userdata($PeepSoGroupUser->invited_by_id);
+
+				$title	 	= esc_html__('Group Invitation', 'push-notification' );
+
+				$message 	= esc_html__($sender_info->display_name. ' invite you to join group', 'push-notification' );
+
+				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
 
 			}, 10, 1);
 
