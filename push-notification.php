@@ -185,19 +185,21 @@ function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $messa
 			$weblink = home_url();
 		}
 		$auth_settings = push_notification_auth_settings();
-		if( isset($auth_settings['user_token']) && isset($audience_token_id[0]) ){
-			$data = array(
-						"user_token"		=>$auth_settings['user_token'],
-						"audience_token_id"	=>$audience_token_id[0],
-						"website"	=>$weblink,
-						'title'		=>$title,
-						'message'	=>$message,
-						'link_url'	=>$link_url,
-						'icon_url'	=>$icon_url,
-						'image_url'	=>$image_url
-					);		
-			$response = PN_Server_Request::pnSendPushNotificatioinFilter($data);
-		}
+		foreach($audience_token_id as $key=>$value) {
+            if( isset($auth_settings['user_token']) && !empty( $value ) ){
+                $data = array(
+                            "user_token"        =>$auth_settings['user_token'],
+                            "audience_token_id" =>$value,
+                            "website"   =>$weblink,
+                            'title'     =>$title,
+                            'message'   =>$message,
+                            'link_url'  =>$link_url,
+                            'icon_url'  =>$icon_url,
+                            'image_url' =>$image_url
+                        );
+                $response = PN_Server_Request::pnSendPushNotificatioinFilter($data);
+            }
+        }
 	}else{
 		$response['status'] = false;
 		$response['message'] = esc_html__('User id, title, link_url and message field are required','push-notification');
