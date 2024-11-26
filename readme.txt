@@ -21,6 +21,9 @@ Send push notifications automatically when a post is published or updated. You c
 * <strong>Notifications </strong>: Notifications appear as message alerts.
 * Publishing a post will trigger push notifications.
 * Update a post a draft will not trigger push notifications.
+* Compability with community by PeepSo plugin.
+* Compability with Polylang plugin.
+* Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
 
 = Pro Features: =
 * Send Notification as per Segmentation
