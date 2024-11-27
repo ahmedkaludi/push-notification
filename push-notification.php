@@ -1,6 +1,6 @@
 <?php
-/**
-Plugin Name: Push Notification
+/*
+Plugin Name: Push Notifications for WP
 Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
