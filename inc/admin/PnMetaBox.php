@@ -89,7 +89,7 @@ class PnMetaBox {
             
 		if ( ! isset( $_POST['set_send_push_notification_nonce'] ) )
 			return $post_id;		
-		if ( !wp_verify_nonce( $_POST['set_send_push_notification_nonce'], 'set_send_push_notification_data' ) )
+		if ( !wp_verify_nonce( sanitize_text_field( wp_unslash(  $_POST['set_send_push_notification_nonce'] ) ), 'set_send_push_notification_data' ) )
 			return $post_id;
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 			return $post_id;

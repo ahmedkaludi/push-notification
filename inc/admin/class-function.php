@@ -278,12 +278,12 @@ class PN_Server_Request{
 				$error_message = strtolower($remoteResponse->get_error_message());
 				$error_pos = strpos($error_message, 'operation timed out');
 				if($error_pos !== false){
-					$message = __('Request timed out, please try again');
+					$message = __('Request timed out, please try again','push-notification');
 				}else{
 					$message = esc_html($remoteResponse->get_error_message());
 				}
 			}else{
-				$message = "could not connect to server";
+				$message = __("could not connect to server",'push-notification');
 			}
 			$remoteData = array('status'=>401, "response"=>$message);
 

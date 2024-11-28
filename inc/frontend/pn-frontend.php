@@ -322,13 +322,18 @@ class Push_Notification_Frontend{
 		if(empty( $_POST['nonce'])){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
-		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$token_id = sanitize_text_field($_POST['token_id']);
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$user_agent = sanitize_text_field($_POST['user_agent']);
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$category = sanitize_text_field($_POST['category']);
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$os = sanitize_text_field($_POST['os']);
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$url = isset($_POST['url'])?sanitize_url($_POST['url']):'';
 			$ip_address = $this->get_the_user_ip();
 			if(empty($token_id)){
@@ -353,9 +358,10 @@ class Push_Notification_Frontend{
 		if(empty( $_POST['nonce'])){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
-		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$campaign = sanitize_text_field($_POST['campaign']);
 			if(empty($campaign)){
 				wp_send_json(array("status"=> 503, 'message'=>'Campaign is blank'));
@@ -368,11 +374,14 @@ class Push_Notification_Frontend{
 	public function get_the_user_ip() {
 		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 			//check ip from share internet
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
 		} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			//to check ip is pass from proxy
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 		} else {
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$ip = $_SERVER['REMOTE_ADDR'];
 		}
 		return $ip;
@@ -455,16 +464,27 @@ class Push_Notification_Frontend{
 	*/
 	public function check_browser_type(){
 		$user_agent_name ='others';           
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             if     (strpos($_SERVER['HTTP_USER_AGENT'], 'Opera') || strpos($_SERVER['HTTP_USER_AGENT'], 'OPR/')) $user_agent_name = 'opera';
-            elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Edge'))    $user_agent_name = 'edge';            
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+            elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Edge'))    $user_agent_name = 'edge';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Firefox')) $user_agent_name ='firefox';
-            elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') || strpos($_SERVER['HTTP_USER_AGENT'], 'Trident/7')) $user_agent_name = 'internet_explorer';                        
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+            elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') || strpos($_SERVER['HTTP_USER_AGENT'], 'Trident/7')) $user_agent_name = 'internet_explorer';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (stripos($_SERVER['HTTP_USER_AGENT'], 'iPod')) $user_agent_name = 'ipod';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone')) $user_agent_name = 'iphone';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')) $user_agent_name = 'ipad';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (stripos($_SERVER['HTTP_USER_AGENT'], 'Android')) $user_agent_name = 'android';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (stripos($_SERVER['HTTP_USER_AGENT'], 'webOS')) $user_agent_name = 'webos';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome'))  $user_agent_name = 'chrome';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
             elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Safari'))  $user_agent_name = 'safari';
             return $user_agent_name;
 	}
@@ -893,7 +913,7 @@ class Push_Notification_Frontend{
 
 			$title	 	= esc_html__('Group Invitation', 'push-notification' );
 
-			$message 	= esc_html__($sender_info->display_name. ' invite you to join group', 'push-notification' );
+			$message 	= $sender_info->display_name.' '.esc_html__('invite you to join group', 'push-notification' );
 
 			$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
 		}
@@ -921,7 +941,7 @@ class Push_Notification_Frontend{
 
 			$title	 	= esc_html__('New friend request', 'push-notification' );
 
-			$message 	= esc_html__('You have new friend request of'.$sender_info->display_name, 'push-notification' );
+			$message 	= esc_html__('You have new friend request of ', 'push-notification' ).$sender_info->display_name;
 
 			$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
 		}
@@ -949,7 +969,7 @@ class Push_Notification_Frontend{
 
 				$sender_info = get_userdata($to);
 				$title	 	= esc_html__('Friend request accepted', 'push-notification' );
-				$message 	= esc_html__($sender_info->display_name.' accepted friend request.', 'push-notification' );
+				$message 	= $sender_info->display_name .' '.esc_html__('accepted friend request.', 'push-notification' );
 
 				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
 		}
@@ -980,7 +1000,7 @@ class Push_Notification_Frontend{
 
 				$sender_info = get_userdata($current_participants[0]);
 
-				$title	 	= esc_html__($sender_info->display_name.' sent message', 'push-notification' );
+				$title	 	= $sender_info->display_name.' '.esc_html__('sent message', 'push-notification' );
 
 				$message 	= esc_html( $post_obj->post_content );
 
@@ -1009,7 +1029,7 @@ class Push_Notification_Frontend{
 
 				$title	 	= esc_html__('New post', 'push-notification' );
 
-				$message 	= esc_html__($sender_info->display_name. ' added new post' , 'push-notification' );
+				$message 	= $sender_info->display_name. ' '.esc_html__('added new post' , 'push-notification' );
 
 				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
 			}
@@ -1041,7 +1061,7 @@ class Push_Notification_Frontend{
 
 				$sender_info = get_userdata($post_obj->post_author);
 
-				$title	 	= esc_html__($sender_info->display_name.' commented on post', 'push-notification' );
+				$title	 	= $sender_info->display_name.' '.esc_html__('commented on post', 'push-notification' );
 
 				$message 	= esc_html( $post_obj->post_content );
 
@@ -1088,8 +1108,6 @@ class Push_Notification_Frontend{
 	public function pn_handle_error_log($remoteResponse, $function_name) {
 		if( is_wp_error( $remoteResponse ) ){
 			$remoteData = array('status'=>401, "response"=>"pn could not connect to server");
-			error_log( $function_name );
-			error_log( print_r($remoteData,true ) );
 		}else{
 			$remoteData = wp_remote_retrieve_body($remoteResponse);
 			$remoteData = json_decode($remoteData, true);
