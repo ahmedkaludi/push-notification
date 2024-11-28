@@ -601,7 +601,7 @@ class Push_Notification_Admin{
 		echo '<div id="pn_compatibility" style="display:none" class="pn-tabs">
 		<section class="pn_general_wrapper">';
 				do_settings_sections( 'push_notification_compatibility_settings_section' );
-				echo '<p>'.esc_html__("If you can’t find your preferred third party compatibility with Push Notifications For WP, then we’ll make the integration for you without any extra charge.",'push-notification').'<a href="https://pushnotifications.io/contact" target="_blank">'.esc_html__('Contact us', 'push-notification').'</a></p><br/>';
+				echo '<p>'.esc_html__("If you can’t find your preferred third party compatibility with Push Notifications For WP, then we’ll make the integration for you without any extra charge.",'push-notification').' <a href="https://pushnotifications.io/contact" target="_blank">'.esc_html__('Contact us', 'push-notification').'</a></p><br/>';
 		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
 			</section>
 			</div>
