@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.7
-Stable tag: 1.38
+Stable tag: 1.39
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -58,6 +58,16 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
+= 1.39 (28 November 2024) =
+* Enhancement: Mention self hosted in marketing #27
+* Enhancement: Reviewed and updated the code #119
+* Enhancement: Updated readme with new features list #130
+* Enhancement: Tested with WordPress version 6.7 #137
+* Added: Added a compability with Community by PeepSo plugin. #138
+* Added: Added a compatibility with Polylang. #135
+* Added: Added a feature to send notificatoin from one place to all network sites on multisite. #134
+* Added: Added an integration tab to help people integrate in other platforms other than wordpress #30
+
 = 1.38 (17 September 2024) =
 * Enhancement: Few enhancement #129
 * Added: Added a feature to resend/reuse campaigns already created #127
@@ -108,10 +118,5 @@ Fixed: Issue with plugin activation. #103
 * Added: Added Option to export Users from User's section in push notification #57.
 * Added: Added a filter/ function to send a push notification to specific users. #67.
 * Added: Added an option to schedule push notifications. #64.
-
-= 1.30 (18 October 2023) =
-* Added: Added Notification badge on the PWA icon #212.
-* Bug Fixed: Push notification is not working on IOS. #468
-
 
 Full changelog available [ at changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)
