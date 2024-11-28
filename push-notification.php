@@ -1,10 +1,10 @@
 <?php
-/**
-Plugin Name: Push Notification
+/*
+Plugin Name: Push Notifications for WP - Self Hosted Web Push Notifications
 Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
-Version: 1.38
+Version: 1.39
 Author URI: http://pushnotifications.io/
 Text Domain: push-notification
 Domain Path: /languages
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define('PUSH_NOTIFICATION_PLUGIN_FILE',  __FILE__ );
 define('PUSH_NOTIFICATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('PUSH_NOTIFICATION_PLUGIN_URL', plugin_dir_url( __FILE__ ));
-define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.38');
+define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.39');
 define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 /**
@@ -25,12 +25,15 @@ define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
  */
 add_action('plugins_loaded', 'push_notification_initialize');
 function push_notification_initialize(){
-	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/admin.php";	
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/PnMetaBox.php";
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/newsletter.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/ultimate-member.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/feedback-helper-functions.php";
 	if(is_admin()){
+		if ( is_multisite()) {
+			require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/pn_multisite.php";
+		}
 		add_filter( 'plugin_action_links_' . PUSH_NOTIFICATION_PLUGIN_BASENAME,'push_notification_add_action_links', 10, 4);
 	}
 	if( !is_admin() || wp_doing_ajax() ){
@@ -182,19 +185,21 @@ function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $messa
 			$weblink = home_url();
 		}
 		$auth_settings = push_notification_auth_settings();
-		if( isset($auth_settings['user_token']) && isset($audience_token_id[0]) ){
-			$data = array(
-						"user_token"		=>$auth_settings['user_token'],
-						"audience_token_id"	=>$audience_token_id[0],
-						"website"	=>$weblink,
-						'title'		=>$title,
-						'message'	=>$message,
-						'link_url'	=>$link_url,
-						'icon_url'	=>$icon_url,
-						'image_url'	=>$image_url
-					);		
-			$response = PN_Server_Request::pnSendPushNotificatioinFilter($data);
-		}
+		foreach($audience_token_id as $key=>$value) {
+            if( isset($auth_settings['user_token']) && !empty( $value ) ){
+                $data = array(
+                            "user_token"        =>$auth_settings['user_token'],
+                            "audience_token_id" =>$value,
+                            "website"   =>$weblink,
+                            'title'     =>$title,
+                            'message'   =>$message,
+                            'link_url'  =>$link_url,
+                            'icon_url'  =>$icon_url,
+                            'image_url' =>$image_url
+                        );
+                $response = PN_Server_Request::pnSendPushNotificatioinFilter($data);
+            }
+        }
 	}else{
 		$response['status'] = false;
 		$response['message'] = esc_html__('User id, title, link_url and message field are required','push-notification');
@@ -264,6 +269,6 @@ function pn_add_footer_text()
 	}
 
 	echo '<div style="padding: 0 0 20px 15%;">
-        <p>' . esc_html__( 'If you like Push Notification, please', 'push-notification' ) . '&nbsp;' . esc_html__( "leave a" , 'super-progressive-web-apps' ) . '&nbsp;<a href="' . esc_url( 'https://wordpress.org/support/plugin/push-notification/reviews/?rate=5#new-post' ) . '" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a>&nbsp;' . esc_html__( "rating to support continued development. Thanks a bunch!" , 'push-notification' ) . '</p>
+        <p>' . esc_html__( 'If you like Push Notification, please', 'push-notification' ) . '&nbsp;' . esc_html__( "leave a" , 'push-notification' ) . '&nbsp;<a href="' . esc_url( 'https://wordpress.org/support/plugin/push-notification/reviews/?rate=5#new-post' ) . '" target="_blank">&#9733;&#9733;&#9733;&#9733;&#9733;</a>&nbsp;' . esc_html__( "rating to support continued development. Thanks a bunch!" , 'push-notification' ) . '</p>
     </div>';
 }

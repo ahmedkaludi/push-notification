@@ -10,8 +10,11 @@ class Push_Notification_Admin{
 	public function __construct(){}
 
 	public function init(){
+		
 		add_action('admin_notices', array($this, 'admin_notices_opt') );
-		add_action( 'admin_menu', array( $this, 'add_menu_links') );
+		if (! is_network_admin()) {
+			add_action( 'admin_menu', array( $this, 'add_menu_links') );
+		}
 		add_action( 'admin_init', array( $this, 'settings_init') );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ) );
 		add_action( 'wp_ajax_pn_verify_user', array( $this, 'pn_verify_user' ) ); 
@@ -98,8 +101,7 @@ class Push_Notification_Admin{
 	}
 
 	function load_admin_scripts($hook_suffix){
-
-		if( $hook_suffix=='toplevel_page_push-notification' ) {
+		if( $hook_suffix=='toplevel_page_push-notification' || $hook_suffix == 'toplevel_page_push-notification-global-setting' ) {
 
 			$min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '';	
 
@@ -160,15 +162,23 @@ class Push_Notification_Admin{
 			}
 	}
 	function admin_interface_render(){
-		// Authentication
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		?><div class="wrap push_notification-settings-wrap">
+		?>
+		<div class="wrap push_notification-settings-wrap">
 			<h1 class="page-title"><?php echo esc_html__('Push Notifications Options', 'push-notification'); ?></h1>
 			<div class="push-notification-main-wrapper">
 				<h2 class="nav-tab-wrapper push-notification-tabs">
 					<?php
+					if (is_multisite() && ! is_network_admin() ) {
+						?>
+						<div class="notice notice-error is-dismissible">
+							<h3><?php esc_html_e( 'You are using multisite, Use Network admin for push notification functionality', 'push-notification' ); ?></h3>
+						</div>
+						<?php
+						exit;
+					}
 					$authData = push_notification_auth_settings();
 					if( (isset($authData['token_details']) && $authData['token_details']['validated']==1) ){
 						$plugin_icon_color = "#008416;";
@@ -179,19 +189,22 @@ class Push_Notification_Admin{
 						echo '<a href="' . esc_url('#pn_connect') . '" link="pn_connect" class="nav-tab nav-tab-active"><span class="dashicons dashicons-admin-plugins" style="color:'.esc_attr( $plugin_icon_color ).'"></span> ' . esc_html__('Connect','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
+						if ( ! is_network_admin()) {
 						if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
-							if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
-								echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+								if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
+									echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
+								}
 							}
 						}
 						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_compatibility') . '" link="pn_compatibility" class="nav-tab"><span class="dashicons dashicons-image-filter"></span> ' . esc_html__('Compatibality','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
 					?>
 				</h2>
 			</div>
 
-				<form action="options.php" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
+				<form action="<?php echo esc_url(admin_url("options.php")); ?>" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
 					<div class="form-wrap">
 						<?php
 						settings_fields( 'push_notification_setting_dashboard_group' );
@@ -212,11 +225,13 @@ class Push_Notification_Admin{
 
 	public function settings_init(){
 		register_setting( 'push_notification_setting_dashboard_group', 'push_notification_settings' );
+		// register_setting( 'push_notification_setting_dashboard_group', 'push_notification_global_setting' );
 
 		add_settings_section('push_notification_dashboard_section',
-					 ' ', 
-					 '__return_false', 
-					 'push_notification_dashboard_section');
+			' ', 
+			'__return_false', 
+			'push_notification_dashboard_section'
+		);
 
 			add_settings_field(
 				'pn_key_validate_status',	// ID
@@ -225,10 +240,17 @@ class Push_Notification_Admin{
 				'push_notification_dashboard_section',	// Page slug
 				'push_notification_dashboard_section'	// Settings Section ID
 			);
-		add_settings_section('push_notification_segment_settings_section',
+			if ( ! is_network_admin()) {
+				add_settings_section('push_notification_segment_settings_section',
 					 esc_html__('Notification Segment','push-notification'), 
 					 '__return_false', 
 					 'push_notification_segment_settings_section');
+			}
+			add_settings_section('push_notification_compatibility_settings_section',
+			esc_html__('Compatibility','push-notification'), 
+			'__return_false', 
+			'push_notification_compatibility_settings_section');
+
 			add_settings_field(
 				'pn_key_segment_select',								// ID
 				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation', 'push-notification').'</b></label>',// Title
@@ -259,6 +281,30 @@ class Push_Notification_Admin{
 				array( $this, 'pn_select_specific_categories_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
+			add_settings_section('push_notification_compatibility_settings_section',
+			esc_html__('Compatibility','push-notification'), 
+			'push_notification_compatibility_section_callback', 
+			'push_notification_compatibility_settings_section');
+
+			function push_notification_compatibility_section_callback() {
+				echo '<h4>' . esc_html__('Third party plugins & themes compatibility.', 'push-notification') . '</h4>';
+			}
+
+			add_settings_field(
+				'pn_polylang_compatibale',								// ID
+				'<label for="pn_polylang_compatibale"><b>'.esc_html__('Polylang Plugin', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_polylang_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_peepso_compatibale',								// ID
+				'<label for="pn_peepso_compatibale"><b>'.esc_html__('PeepSo Plugin', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_peepso_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
 
 		add_settings_section('push_notification_user_settings_section',
@@ -552,6 +598,14 @@ class Push_Notification_Admin{
 			</section>
 			</div>
 			';
+		echo '<div id="pn_compatibility" style="display:none" class="pn-tabs">
+		<section class="pn_general_wrapper">';
+				do_settings_sections( 'push_notification_compatibility_settings_section' );
+				echo '<p>'.esc_html__("If you can’t find your preferred third party compatibility with Push Notifications For WP, then we’ll make the integration for you without any extra charge.",'push-notification').' <a href="https://pushnotifications.io/contact" target="_blank">'.esc_html__('Contact us', 'push-notification').'</a></p><br/>';
+		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
+			</section>
+			</div>
+			';
 		if ( class_exists( 'WooCommerce' ) ) {
 			echo '<div id="pn_wc_settings_section" style="display:none;" class="pn-tabs">
 				<section style="margin-top:20px"><div class="postbox" style="padding:20px">';
@@ -646,8 +700,9 @@ class Push_Notification_Admin{
 						$clickCount = 0;
 						if (!$timezone_string) {
 							$gmt_offset = get_option('gmt_offset');
-							$timezone = sprintf('%+d:00', $gmt_offset);
+							$timezone_string = sprintf('%+d:00', $gmt_offset);
 						}
+						
 						if (!empty($campaigns['campaigns']['data'])) {
 	                        foreach ($campaigns['campaigns']['data'] as $key => $campaign){
 								$clickCount = 0;
@@ -670,14 +725,16 @@ class Push_Notification_Admin{
 								}else{
 									$message = nl2br($campaign['message']);
 								}
-								$time_in_seconds = new DateTime($campaign['created_at'], new DateTimeZone($timezone) );
+
+								$local_datetime = new DateTime($campaign['created_at'], new DateTimeZone($timezone) );
+								$local_datetime->setTimezone(new DateTimeZone($timezone_string));
 								echo '<tr>
 									<td style="padding-left:18px;"><input type="checkbox" class="pn_check_single" value="'.esc_attr($campaign['id']).'"></td>
 									<td>'.esc_html( $campaign['title'] ).'</td>
 									<td><p class="less_text">'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- alredy escaped  */ $message.'</p>                        
 									<p class="full_text" style="display:none;">'.esc_html( wp_strip_all_tags( $campaign['message'] ) ).' <a href="javascript:void(0)" class="pn_js_read_less">'.esc_html__('read less', 'push-notification').'</a> 
 									</p></td>
-									<td>'.esc_html( $time_in_seconds->format( 'Y-m-d H:i:s' )  ).'</td>
+									<td>'.esc_html( $local_datetime->format( 'Y-m-d H:i:s' )  ).'</td>
 									<td>';
 									if ( $campaign['status'] === 'Done' ) {
 										echo '<span class="badge badge-pill badge-success" style="color:green">'.esc_html($campaign['status']).'</span>';
@@ -780,6 +837,11 @@ class Push_Notification_Admin{
 		$authData = push_notification_auth_settings();
 		if( !isset($authData['token_details']['validated']) 
 			|| (isset($authData['token_details']) && $authData['token_details']['validated']!=1) ){
+			?>
+				<script type="text/javascript">
+					localStorage.removeItem('activeTab');
+				</script>
+			<?php
 			echo "<fieldset>";
 			PN_Field_Generator::get_input_password('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
@@ -840,6 +902,29 @@ class Push_Notification_Admin{
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_push_on_category_checkbox" name="push_notification_settings[on_category]"  value="1" '.esc_attr($on_category_checked).'/></div></div>';
+	}
+
+	public function pn_polylang_callback(){		
+		$notification = push_notification_settings();
+		$pn_polylang_compatibale = "";
+		if (isset($notification['pn_polylang_compatibale']) && $notification['pn_polylang_compatibale']) {
+			$pn_polylang_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_polylang_compatibale" name="push_notification_settings[pn_polylang_compatibale]"  value="1" '.esc_attr($pn_polylang_compatibale).'/>
+					<p class="help">'.esc_html__('It allows you to send notification based on languages.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+	}
+	public function pn_peepso_callback(){		
+		$notification = push_notification_settings();
+		$pn_peepso_compatibale = "";
+		if (isset($notification['pn_peepso_compatibale']) && $notification['pn_peepso_compatibale']) {
+			$pn_peepso_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_peepso_compatibale" name="push_notification_settings[pn_peepso_compatibale]"  value="1" '.esc_attr($pn_peepso_compatibale).'/>
+					<p class="help">'.esc_html__('It allows you to send notification based on peepso events. Such as posting in feed, chating and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	public function pn_key_segment_on_categories_callback() {
@@ -1026,23 +1111,26 @@ class Push_Notification_Admin{
 		if(empty( $_POST['nonce'])){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
-		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
-			$user_token = sanitize_text_field($_POST['user_token']);
-			$response = PN_Server_Request::varifyUser($user_token);
-			if( function_exists('pwaforwp_required_file_creation') ){
-				$pwaSettings = pwaforwp_defaultSettings();
-				if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
-					pwaforwp_required_file_creation();
-				}
-			}
 
-			wp_send_json($response);
-		}		
+			if ( isset( $_POST['user_token'] ) ) {
+				# code...
+				$user_token = sanitize_text_field( wp_unslash( $_POST['user_token'] ) );
+				$response = PN_Server_Request::varifyUser($user_token);
+				if( function_exists('pwaforwp_required_file_creation') ){
+					$pwaSettings = pwaforwp_defaultSettings();
+					if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+						pwaforwp_required_file_creation();
+					}
+				}
+				wp_send_json($response);
+			}
+		}
 
 		wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not identified','push-notification')));
 	}
@@ -1050,7 +1138,7 @@ class Push_Notification_Admin{
 		if(empty( $_POST['nonce'])){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
-		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
@@ -1068,15 +1156,13 @@ class Push_Notification_Admin{
 		$response = PN_Server_Request::varifyUser($authData['user_token']);
 		wp_send_json($response);
 		}
-		
 	}
 	public function pn_revoke_keys(){
-		
 		$request_response = array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification'));
 		if(empty( $_POST['nonce'])){
 			wp_send_json($request_response);
 		}
-		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json($request_response);
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
@@ -1087,7 +1173,12 @@ class Push_Notification_Admin{
 				$user_token = $auth_settings['user_token'];
 				$server_response = PN_Server_Request::inactivateWebsite($user_token);
 				if ($server_response['status']) {
-					delete_option('push_notification_auth_settings');
+					if ( is_multisite() ) {
+						delete_site_option('push_notification_auth_settings');
+					}else{
+						delete_option('push_notification_auth_settings');
+					}
+					
 					$request_response['status'] = 200;
 					$request_response['server_response'] = $server_response;
 					$request_response['message'] = esc_html__('API key removed successfully', 'push-notification');
@@ -1103,7 +1194,7 @@ class Push_Notification_Admin{
 		if(empty( $_POST['nonce'])){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
-		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
@@ -1123,7 +1214,7 @@ class Push_Notification_Admin{
 		if(empty( $_POST['nonce'])){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
-		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
@@ -1131,7 +1222,7 @@ class Push_Notification_Admin{
 			}
 			
 			$auth_settings = push_notification_auth_settings();
-			$campaign_ids = (isset($_POST['campaign_ids']) && is_array($_POST['campaign_ids'])) ? array_map('sanitize_text_field', $_POST['campaign_ids']):sanitize_text_field( $_POST['campaign_ids'] );
+			$campaign_ids = (isset($_POST['campaign_ids']) && is_array($_POST['campaign_ids'])) ? array_map('sanitize_text_field', wp_unslash( $_POST['campaign_ids'] ) ):sanitize_text_field( wp_unslash( $_POST['campaign_ids'] ) );
 			if($campaign_ids != 'all'){
 				$campaign_ids = implode(',', $campaign_ids);
 			}
@@ -1147,7 +1238,7 @@ class Push_Notification_Admin{
 		if(empty( $_POST['nonce'])){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}
-		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			if ( ! current_user_can( 'manage_options' ) ) {
@@ -1156,28 +1247,36 @@ class Push_Notification_Admin{
 			global $wpdb;
 			$auth_settings = push_notification_auth_settings();
 			$notification_settings = push_notification_settings();
-
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$title = sanitize_text_field(stripcslashes($_POST['title']));
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$message = sanitize_textarea_field(stripcslashes($_POST['message']));
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$link_url = esc_url_raw($_POST['link_url']);
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$image_url = esc_url_raw($_POST['image_url']);
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$icon_url = isset($_POST['icon_url'])?esc_url_raw($_POST['icon_url']):$notification_settings['notification_icon'];
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$audience_token_id = isset($_POST['audience_token_id'])?sanitize_text_field($_POST['audience_token_id']):'';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$page_subscribed = isset($_POST['page_subscribed'])?sanitize_text_field($_POST['page_subscribed']):'';
-			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field($_POST['notification_schedule']):'';
+			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field(wp_unslash($_POST['notification_schedule'])):'';
 
-			$notification_date = isset($_POST['notification_date'])?sanitize_text_field($_POST['notification_date']):'';
+			$notification_date = isset($_POST['notification_date'])?sanitize_text_field(wp_unslash($_POST['notification_date'])):'';
 
-			$notification_time = isset($_POST['notification_time'])?sanitize_text_field($_POST['notification_time']):'';
+			$notification_time = isset($_POST['notification_time'])?sanitize_text_field(wp_unslash($_POST['notification_time'])):'';
 			if($send_type=='custom-select'){
 				$audience_token_id = isset($audience_token_id)?explode(',',$audience_token_id):'';
 			}else if($send_type=='custom-upload'){
 				$audience_token_id = str_replace('\\','',$audience_token_id );
 				$audience_token_id = json_decode($audience_token_id,true);
 			}
-			
+
 			if(isset($notification_settings['utm_tracking_checkbox']) && $notification_settings['utm_tracking_checkbox']){
 				$utm_details = array(
 				    'utm_source'=> $notification_settings['notification_utm_source'],
@@ -1256,11 +1355,11 @@ class Push_Notification_Admin{
 					'notification_date'=>$notification_date,
 				);
 				$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
-				$table_name = $wpdb->prefix . 'um_notifications';
+				
 				if($response){
-				 	wp_send_json($response);
+				 	
 					 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API')){
-
+						$table_name = $wpdb->prefix . 'um_notifications';
 						foreach($user_ids as $pn_user_id){
 							// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
 							$insert = $wpdb->insert(
@@ -1287,6 +1386,8 @@ class Push_Notification_Admin{
 						
 					 }
 
+					 wp_send_json($response);
+
 				}else{
 					wp_send_json(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));
 				}
@@ -1312,7 +1413,7 @@ class Push_Notification_Admin{
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
 		if(isset($_POST['pn_send_notification_on_post'])){
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
-			$post_notf_on = sanitize_text_field($_POST['pn_send_notification_on_post']);
+			$post_notf_on = sanitize_text_field( wp_unslash( $_POST['pn_send_notification_on_post']) );
 		}			
 		if(isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_notf_on) || $post_notf_on !== 1)){
 			if ( $new_status !== $old_status) {
@@ -1326,13 +1427,14 @@ class Push_Notification_Admin{
 		if(empty( $_POST['nonce'])){
 			return;	
 		}
-		if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			return;	
 		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;	
 		}
-		$page = sanitize_text_field($_POST['page']);
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		$page =  sanitize_text_field( wp_unslash( $_POST['page'] ) );
 		$authData = push_notification_auth_settings();
 		if ($authData['token_details']['validated']!=1 ){
 			return;  
@@ -1647,7 +1749,7 @@ class Push_Notification_Admin{
 
 		}
 
-		if ( isset( $_POST['nonce'] ) &&  ! wp_verify_nonce( $_POST['nonce'], 'pn_notification' ) ) {
+		if ( isset( $_POST['nonce'] ) &&  ! wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification' ) ) {
 
 			wp_send_json( array( "status" => 503, "message" => esc_html__( 'Request not authorized', 'push-notification' ) ) );
 
@@ -1659,9 +1761,9 @@ class Push_Notification_Admin{
 
 		}
 		    $api_url 	= 'http://magazine3.company/wp-json/api/central/email/subscribe';
-			$name 		=  isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
-			$email 		=  isset( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : '';
-			$website 	=  isset( $_POST['website'] ) ? sanitize_url( $_POST['website'] ) : '';
+			$name 		=  isset( $_POST['name'] ) ?  sanitize_text_field( wp_unslash(  $_POST['name'] ) ) : '';
+			$email 		=  isset( $_POST['email'] ) ? sanitize_email(  wp_unslash( $_POST['email'] ) ) : '';
+			$website 	=  isset( $_POST['website'] ) ? sanitize_url(  wp_unslash( $_POST['website'] ) ) : '';
 
 		    $api_params = array(
 		        'name'    => $name,
@@ -1703,7 +1805,7 @@ if ( is_admin() || wp_doing_ajax() ) {
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 
 function push_notification_settings(){
-	$push_notification_settings = get_option( 'push_notification_settings', array() ); 
+	$push_notification_settings = get_option( 'push_notification_settings', array() );
 	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/bell-icon.png';
 	if(function_exists('pwaforwp_defaultSettings')){
 		$pwaforwpSettings = pwaforwp_defaultSettings();
@@ -1739,7 +1841,11 @@ function push_notification_settings(){
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
-	$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() ); 
+	if ( is_multisite() ) {
+		$push_notification_auth_settings = get_site_option( 'push_notification_auth_settings', array() );
+	}else{
+		$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() );
+	} 
 	return $push_notification_auth_settings;
 }
 function push_notification_details_settings(){
@@ -1864,7 +1970,7 @@ function pn_send_query_message(){
 	if(empty( $_POST['nonce'])){
 		return;	
 	}
-	if( isset( $_POST['nonce']) &&  !wp_verify_nonce($_POST['nonce'], 'pn_notification') ){
+	if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash(  $_POST['nonce'] ) ), 'pn_notification') ){
 		return;	
 	}
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -1874,9 +1980,12 @@ function pn_send_query_message(){
         if ($authData['token_details']['validated']!=1 ){
            return;  
         }
-        $message    = sanitize_textarea_field($_POST['message']);        
-        $customer_type    = sanitize_text_field($_POST['customer_type']);        
-        $email    = sanitize_email($_POST['email']);        
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+        $message    = sanitize_textarea_field($_POST['message']);
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+        $customer_type    = sanitize_text_field($_POST['customer_type']);
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+        $email    = sanitize_email($_POST['email']);
         $customer_type = empty($customer_type)? $customer_type : 'No';
         $message .= "<table>
         				<tr><td>".esc_html__('Are you existing Premium Customer?','push-notification')."</td><td>".esc_html($customer_type)."</td></tr>
@@ -1885,24 +1994,24 @@ function pn_send_query_message(){
         			</table>";
         $user       = wp_get_current_user();
         if($user){
-            $user_data  = $user->data;        
-            $user_email = $user_data->user_email;       
+            $user_data  = $user->data;
+            $user_email = $user_data->user_email;
             if($email){
                 $user_email = $email;
-            } 
+            }
             $to = 'team@magazine3.in';
             $subject = 'Push Notification Customer Query';
             $headers = 'From: '. esc_attr($user_email) . "\r\n" .
             'Reply-To: ' . esc_attr($user_email) . "\r\n";
-            // Load WP components, no themes.                      
+            // Load WP components, no themes.
             $sent = wp_mail($to, $subject, wp_strip_all_tags($message), $headers);
             if($sent){
-            wp_send_json(array('status'=>'t'));            
+            wp_send_json(array('status'=>'t'));
             }else{
-            wp_send_json(array('status'=>'f'));            
-            }            
-        }                        
-           wp_die();           
+            wp_send_json(array('status'=>'f'));
+            }
+        }
+        wp_die();
 }
 
 add_action('push_notification_pro_notifyform_before','push_notification_pro_notifyform_before');
@@ -1911,6 +2020,7 @@ function push_notification_pro_notifyform_before(){
 		return;
 	}
 	$notification_settings= push_notification_settings();
+	
 	echo '<div class="form-group">
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
 			<select id="notification-send-type" class="regular-text js_pn_select">
@@ -1926,6 +2036,19 @@ function push_notification_pro_notifyform_before(){
 
 	echo '</select>
 		  </div>';
+	if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+		$languages = pll_languages_list();
+		echo '<div class="form-group">
+				<label for="notification-send-type">'.esc_html__('Select Language','push-notification').'</label>
+				<select id="notification-send-type" class="regular-text js_pn_select">';
+					foreach ($languages as $key => $value) {
+						echo '<option value="'.esc_attr($value).'">'.esc_html($value).'</option>';
+					}
+				echo '</select>
+		  </div>';
+	}
+
+	
 		  
 		  $users = get_users( array(
 								// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
@@ -1953,10 +2076,10 @@ function push_notification_pro_notifyform_before(){
 
 		  if ( ! empty( $pn_token_urls ) ) {
 
-			  foreach( $pn_token_urls as $url ) {
-				  echo '<option value="'.esc_url($url).'" data-url="'.esc_url(basename($url)).'">'.esc_attr(pn_get_page_title_by_url($url)).'('.esc_url($url).')</option>';			
+			  	foreach( $pn_token_urls as $url ) {
+					echo '<option value="'.esc_url($url).'" data-url="'.esc_url(basename($url)).'">'.esc_attr(pn_get_page_title_by_url($url)).'('.esc_url($url).')</option>';
 
-			  }
+			  	}
 
 		  } else {
 			echo '<option value="">'.esc_html__('No Subscribed Page Found','push-notification').'</option>';	
@@ -1967,7 +2090,7 @@ function push_notification_pro_notifyform_before(){
 		echo '<div class="form-group" style="display:none">
 				<label for="notification-custom-upload">'.esc_html__('Upload subscriber list', 'push-notification').'</label>
 				<input type="file" id="notification-custom-upload" accept=".csv">
-				<p><b>'.esc_html__('Note : CSV should contain user email separated by commas ( , ) notification will be').' <br/>'.esc_html__('send to only emails that has subscribed to push notification','push-notification').' <a target="_blank" href="'.esc_url(PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv').'"
+				<p><b>'.esc_html__('Note : CSV should contain user email separated by commas ( , ) notification will be','push-notification').' <br/>'.esc_html__('send to only emails that has subscribed to push notification','push-notification').' <a target="_blank" href="'.esc_url(PUSH_NOTIFICATION_PLUGIN_URL.'assets/sample.csv').'"
 				>'.esc_html__('Sample CSV File','push-notification').'</a></b></p>
 			</div>';
 
@@ -2042,10 +2165,10 @@ function push_notification_category( $search, $saved_data ) {
 function pn_select2_category_data(){
 
 	if ( ! isset( $_GET['nonce'] ) ) {
-	  return; 
+		return;
 	}
 
-	if ( isset( $_GET['nonce']) &&  !wp_verify_nonce($_GET['nonce'], 'pn_notification') ) {
+	if ( isset( $_GET['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'pn_notification') ) {
 		return;
 	}
 
@@ -2053,7 +2176,7 @@ function pn_select2_category_data(){
 		return;
 	}
 	
-	$search        = isset( $_GET['q'] ) ? sanitize_text_field( $_GET['q'] ) : '';
+	$search        = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 	$result = push_notification_category($search,[]);
 	
 	wp_send_json(['results' => $result] );

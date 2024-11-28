@@ -22,7 +22,7 @@ class Push_Notification_Newsletter {
                         
                 global $current_user;                
 		        $tour     = array ();
-                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reasone: already nonce verified
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
                 $tab      = isset($_GET['tab']) ? esc_attr($_GET['tab']) : '';                   
                 
                 if (!array_key_exists($tab, $tour)) {                

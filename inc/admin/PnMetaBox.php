@@ -28,7 +28,7 @@ class PnMetaBox {
 		if (isset($settings['posttypes']) && !empty($settings['posttypes'])) {
 			$this->screen = $settings['posttypes'];
 		}
-		if(!empty($this->screen)){
+		if(!empty($this->screen) && isset($settings['on_publish']) && $settings['on_publish'] == '1'){
 			foreach ( $this->screen as $single_screen ) {
 				add_meta_box(
 					'send_push_on_current_post',
@@ -89,7 +89,7 @@ class PnMetaBox {
             
 		if ( ! isset( $_POST['set_send_push_notification_nonce'] ) )
 			return $post_id;		
-		if ( !wp_verify_nonce( $_POST['set_send_push_notification_nonce'], 'set_send_push_notification_data' ) )
+		if ( !wp_verify_nonce( sanitize_text_field( wp_unslash(  $_POST['set_send_push_notification_nonce'] ) ), 'set_send_push_notification_data' ) )
 			return $post_id;
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 			return $post_id;

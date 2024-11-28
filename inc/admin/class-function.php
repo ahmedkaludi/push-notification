@@ -47,7 +47,11 @@ class PN_Server_Request{
 
 			$push_notification_auth_settings['messageManager'] = $response['response']['messageManager'];
 
-			update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
+			if ( is_multisite() ) {
+				update_site_option('push_notification_auth_settings', $push_notification_auth_settings,false);
+			}else{
+				update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
+			}
 		}
 
 
@@ -86,20 +90,23 @@ class PN_Server_Request{
 	public static function registerSubscribers($token_id, $user_agent, $os, $ip_address, $category){
 
 		$verifyUrl = 'register/audience/token';
-
-		if ( is_multisite() ) {
-
-            $weblink = get_site_url();              
-
+		$notification_settings= push_notification_settings();
+		$lang_compatibility = 'no';
+		$language_code = 'en';
+		if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+			$lang_compatibility = 'yes';
+			$language_code = pll_current_language();
         }
 
-        else {
-
+		if ( is_multisite() ) {
+			$is_multisite = 'yes';
+            $weblink = get_site_url();
+			$push_notification_auth_settings = get_site_option( 'push_notification_auth_settings', array() ); 
+        } else {
+			$is_multisite = 'no';
             $weblink = home_url();
-
-        }    
-
-        $push_notification_auth_settings = get_option('push_notification_auth_settings');
+			$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() );
+        }
 
         $user_token = $push_notification_auth_settings['user_token'];
 
@@ -115,8 +122,11 @@ class PN_Server_Request{
 
 					'ip_address'=> $ip_address,
 
-					'category'=> $category
+					'category'=> $category,
 
+					'is_multisite'=> $is_multisite,
+					'language_code'=> $language_code,
+					'lang_compatibility'=> $lang_compatibility,
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
@@ -132,18 +142,14 @@ class PN_Server_Request{
 		$verifyUrl = 'audience/details';
 
 		if ( is_multisite() ) {
-
-            $weblink = get_site_url();              
-
-        }
-
-        else {
-
+            $weblink = get_site_url();
+			$is_multisite = 'yes'; 
+        } else {
+			$is_multisite = 'no';
             $weblink = home_url();
-
         }    
 
-		$data = array("user_token"=>$user_token, "website"=>   $weblink);
+		$data = array("user_token"=>$user_token, "website"=>   $weblink,'is_multisite' => $is_multisite);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 
@@ -167,12 +173,13 @@ class PN_Server_Request{
 	public static function getCompaignsData($user_token,$page = 1){
 		$verifyUrl = 'campaign/compaign-list';
 		if ( is_multisite() ) {
-            $weblink = get_site_url();              
-        }
-        else {
+            $weblink = get_site_url(); 
+			$is_multisite = 'yes';             
+        }else {
             $weblink = home_url();
+			$is_multisite = 'no';
         }    
-		$data = array("user_token"=>$user_token, "website"=> $weblink, "page" => $page);
+		$data = array("user_token"=>$user_token, "website"=> $weblink, "page" => $page,'is_multisite'=>$is_multisite);
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
 	}
@@ -204,7 +211,15 @@ class PN_Server_Request{
 
             $weblink = home_url();
 
-        }   
+        }
+
+		$notification_settings= push_notification_settings();
+		$lang_compatibility = 'no';
+		$language_code = 'en';
+		if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+			$lang_compatibility = 'yes';
+			$language_code = pll_current_language();
+        }
 
 		$data = array("user_token"=>$user_token, "website"=>   $weblink, 
 
@@ -218,7 +233,9 @@ class PN_Server_Request{
 
 					'image_url'=>$image_url,
 
-					'category'=>$category
+					'category'=>$category,
+					'language_code'=>$language_code,
+					'lang_compatibility'=>$lang_compatibility,
 
 				);
 
@@ -261,12 +278,12 @@ class PN_Server_Request{
 				$error_message = strtolower($remoteResponse->get_error_message());
 				$error_pos = strpos($error_message, 'operation timed out');
 				if($error_pos !== false){
-					$message = __('Request timed out, please try again');
+					$message = __('Request timed out, please try again','push-notification');
 				}else{
 					$message = esc_html($remoteResponse->get_error_message());
 				}
 			}else{
-				$message = "could not connect to server";
+				$message = __("could not connect to server",'push-notification');
 			}
 			$remoteData = array('status'=>401, "response"=>$message);
 
@@ -289,16 +306,19 @@ class PN_Server_Request{
 		$verifyUrl = 'campaign/create';
 
 		if ( is_multisite() ) {
-
-            $weblink = get_site_url();              
-
-        }
-
-        else {
-
+            $weblink = get_site_url(); 
+			$is_multisite = 'yes';             
+        }else {
             $weblink = home_url();
-
-        }   
+			$is_multisite = 'no';
+        }
+		$notification_settings= push_notification_settings();
+		$lang_compatibility = 'no';
+		$language_code = 'en';
+		if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
+			$lang_compatibility = 'yes';
+			$language_code = pll_current_language();
+        }
 
 		if($payload['audience_token_url']=='campaign_for_individual_tokens'){
 			$verifyUrl = 'campaign/single'; 
@@ -315,6 +335,9 @@ class PN_Server_Request{
 					'notification_schedule'=>$payload['notification_schedule'],
 					'notification_time'=>$payload['notification_time'],
 					'notification_date'=>$payload['notification_date'],
+					'is_multisite'=>$is_multisite,
+					'language_code'=>$language_code,
+					'lang_compatibility'=>$lang_compatibility,
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
