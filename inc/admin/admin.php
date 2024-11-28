@@ -285,19 +285,23 @@ class Push_Notification_Admin{
 
 			add_settings_section('push_notification_compatibility_settings_section',
 			esc_html__('Compatibility','push-notification'), 
-			'__return_false', 
+			'push_notification_compatibility_section_callback', 
 			'push_notification_compatibility_settings_section');
+
+			function push_notification_compatibility_section_callback() {
+				echo '<h4>' . esc_html__('Third party plugins & themes compatibility.', 'push-notification') . '</h4>';
+			}
 
 			add_settings_field(
 				'pn_polylang_compatibale',								// ID
-				'<label for="pn_polylang_compatibale"><b>'.esc_html__('Polylang', 'push-notification').'</b></label>',// Title
+				'<label for="pn_polylang_compatibale"><b>'.esc_html__('Polylang Plugin', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_polylang_callback'),// Callback
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_peepso_compatibale',								// ID
-				'<label for="pn_peepso_compatibale"><b>'.esc_html__('PeepSo', 'push-notification').'</b></label>',// Title
+				'<label for="pn_peepso_compatibale"><b>'.esc_html__('PeepSo Plugin', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_peepso_callback'),// Callback
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
@@ -597,6 +601,7 @@ class Push_Notification_Admin{
 		echo '<div id="pn_compatibility" style="display:none" class="pn-tabs">
 		<section class="pn_general_wrapper">';
 				do_settings_sections( 'push_notification_compatibility_settings_section' );
+				echo '<p>'.esc_html__("If you can’t find your preferred third party compatibility with Push Notifications For WP, then we’ll make the integration for you without any extra charge.",'push-notification').'<a href="https://pushnotifications.io/contact" target="_blank">'.esc_html__('Contact us', 'push-notification').'</a></p><br/>';
 		echo   '<input type="submit" value="'.esc_html__('Save Settings', 'push-notification').'" class="button pn-submit-button">
 			</section>
 			</div>
@@ -908,7 +913,7 @@ class Push_Notification_Admin{
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_polylang_compatibale" name="push_notification_settings[pn_polylang_compatibale]"  value="1" '.esc_attr($pn_polylang_compatibale).'/>
-					<p class="help">'.esc_html__('Its allow you to send notification specific language user.', 'push-notification').'</p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on languages.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 	public function pn_peepso_callback(){		
 		$notification = push_notification_settings();
@@ -919,7 +924,7 @@ class Push_Notification_Admin{
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_peepso_compatibale" name="push_notification_settings[pn_peepso_compatibale]"  value="1" '.esc_attr($pn_peepso_compatibale).'/>
-					<p class="help">'.esc_html__('Its allow you to send notification on below peepso events.', 'push-notification').'</p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on peepso events. Such as posting in feed, chating and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	public function pn_key_segment_on_categories_callback() {

@@ -73,7 +73,15 @@ class Push_Notification_Frontend{
 
 		
 		add_action( 'init', array($this, 'sw_template_query_var') );
-		add_action( 'init', array($this, 'pn_peepso_compatibility') );
+		add_action( 'pn_tokenid_registration_id', array($this, 'peepso_pn_tokenid_registration_id') ,10,5);
+
+		add_action( 'peepso_action_group_user_invitation_send', array($this, 'pn_peepso_action_group_user_invitation_send'),10,1 );
+
+		add_action( 'peepso_friends_requests_after_add', array($this, 'pn_peepso_friends_requests_after_add'),10,2);
+		add_action( 'peepso_friends_requests_after_accept', array($this, 'pn_peepso_friends_requests_after_accept'),10,2);
+
+		add_action( 'peepso_activity_after_add_post', array($this, 'pn_peepso_activity_after_add_post'),10,2);
+		add_action( 'peepso_after_add_comment', array($this, 'pn_peepso_after_add_comment'),10,4);
 
 		add_action( 'wp_ajax_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) ); 
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
@@ -862,123 +870,67 @@ class Push_Notification_Frontend{
 
 		$this->pn_handle_error_log( $remoteResponse , 'peepso_friends_requests_after_add');
 	}
-	public function pn_peepso_compatibility(){
-
+	public function pn_peepso_action_group_user_invitation_send($PeepSoGroupUser){
 		$settings = push_notification_settings();
-
 		if (isset($settings['pn_peepso_compatibale']) && $settings['pn_peepso_compatibale'] && class_exists('PeepSoFriends') && class_exists('PeepSoActivity') ) {
+			$receiver_id = $PeepSoGroupUser->user_id;
+			$notification = array();
 
-			add_action('pn_tokenid_registration_id', function( $token_id, $response, $user_agent, $os, $ip_address ) {
+			$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
 
-				$userData = wp_get_current_user();
+			if( ! is_array( $tokens ) ) {
+				$notification[] = $tokens;
+			}else{
+				$notification = array_merge($notification, $tokens);
+			}
+			$notification = array_filter($notification);
 
-				if(isset($userData->ID)){
+			if( empty( $notification ) ) {
+				return ;
+			}
 
-					$userid = $userData->ID;
+			$sender_info = get_userdata($PeepSoGroupUser->invited_by_id);
 
-					$notify_data = get_user_meta( $userid, 'peepso_pn_notification_token', $response['data']['id'] );
+			$title	 	= esc_html__('Group Invitation', 'push-notification' );
 
-					$tokenList = array();
+			$message 	= esc_html__($sender_info->display_name. ' invite you to join group', 'push-notification' );
 
-					if( ! is_array( $notify_data ) ){
+			$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+		}
+	}
+	public function pn_peepso_friends_requests_after_add($from, $to){
+		$settings = push_notification_settings();
+		if (isset($settings['pn_peepso_compatibale']) && $settings['pn_peepso_compatibale'] && class_exists('PeepSoFriends') && class_exists('PeepSoActivity') ) {
+			$receiver_id = $to;
+			$notification = array();
 
-						$tokenList[] = $notify_data;
+			$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
 
-					}else{
+			if( ! is_array( $tokens ) ) {
+				$notification[] = $tokens;
+			}else{
+				$notification = array_merge($notification, $tokens);
+			}
+			$notification = array_filter($notification);
 
-						$tokenList = $notify_data;
+			if( empty( $notification ) ) {
+				return ;
+			}
 
-					}
+			$sender_info = get_userdata($to);
 
-					if( ! in_array($response['data']['id'], $tokenList ) ) {
+			$title	 	= esc_html__('New friend request', 'push-notification' );
 
-						$tokenList[] = $response['data']['id']; 
+			$message 	= esc_html__('You have new friend request of'.$sender_info->display_name, 'push-notification' );
 
-					}
+			$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+		}
+	}
 
-					update_user_meta($userid, 'peepso_pn_notification_token', $tokenList);
-
-				}
-
-			}, 10, 5);
-
-
-
-			//  notification on like
-			add_action('peepso_action_like_add', function($like) {
-				$msg = 'Its vikas User ' . get_current_user_id() . ' liked an activity {$like->like_external_id}';
-				error_log($msg);
-
-			}, 10, 1);
-
-
-
-			// notification on group invitation
-
-			add_action('peepso_action_group_user_invitation_send', function($PeepSoGroupUser) {
-				
-				$receiver_id = $PeepSoGroupUser->user_id;
-				$notification = array();
-
-				$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
-
-				if( ! is_array( $tokens ) ) {
-					$notification[] = $tokens;
-				}else{
-					$notification = array_merge($notification, $tokens);
-				}
-				$notification = array_filter($notification);
-
-				if( empty( $notification ) ) {
-					return ;
-				}
-
-				$sender_info = get_userdata($PeepSoGroupUser->invited_by_id);
-
-				$title	 	= esc_html__('Group Invitation', 'push-notification' );
-
-				$message 	= esc_html__($sender_info->display_name. ' invite you to join group', 'push-notification' );
-
-				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
-
-			}, 10, 1);
-
-			// notification on request accept
-
-			add_action('peepso_friends_requests_after_add', function($from, $to) {
-
-				$receiver_id = $to;
-				$notification = array();
-
-				$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
-
-				if( ! is_array( $tokens ) ) {
-					$notification[] = $tokens;
-				}else{
-					$notification = array_merge($notification, $tokens);
-				}
-				$notification = array_filter($notification);
-
-				if( empty( $notification ) ) {
-					return ;
-				}
-
-				$sender_info = get_userdata($to);
-
-				$title	 	= esc_html__('New friend request', 'push-notification' );
-
-				$message 	= esc_html__('You have new friend request of'.$sender_info->display_name, 'push-notification' );
-
-				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
-
-				
-			}, 10, 2);
-
-
-
-			add_action('peepso_friends_requests_after_accept', function($from, $to) {
-
-				$receiver_id = $from;
+	public function pn_peepso_friends_requests_after_accept($from, $to){
+		$settings = push_notification_settings();
+		if (isset($settings['pn_peepso_compatibale']) && $settings['pn_peepso_compatibale'] && class_exists('PeepSoFriends') && class_exists('PeepSoActivity') ) {
+			$receiver_id = $from;
 
 				$notification = array();
 
@@ -1000,110 +952,138 @@ class Push_Notification_Frontend{
 				$message 	= esc_html__($sender_info->display_name.' accepted friend request.', 'push-notification' );
 
 				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
-
-			}, 10, 2);
-
-
-
-			add_action('peepso_activity_after_add_post', function($post_id, $act_id) {
-				// $PeepSoActivity  = PeepSoActivity::get_instance();
-            	// $post_act = $PeepSoActivity->get_activity($act_id);
-				$post_obj = get_post($post_id);
-				if ($post_obj->post_type == 'peepso-message') {
-					$peepso_participants = new PeepSoMessageParticipants();
-					$current_participants = $peepso_participants->get_participants($post_obj->post_parent);
-
-					$receiver_id = $current_participants[1];
-					$notification = array();
-
-					$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
-
-					if( ! is_array( $tokens ) ) {
-						$notification[] = $tokens;
-					}else{
-						$notification = array_merge($notification, $tokens);
-					}
-					$notification = array_filter($notification);
-
-					if( empty( $notification ) ) {
-						return ;
-					}
-
-					$sender_info = get_userdata($current_participants[0]);
-
-					$title	 	= esc_html__($sender_info->display_name.' sent message', 'push-notification' );
-
-					$message 	= esc_html( $post_obj->post_content );
-
-					$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
-				}
-
-				if ($post_obj->post_type == 'peepso-post') {
-					$user_id = $post_obj->post_author;
-					$model = PeepSoFriendsModel::get_instance();
-					$friend_ids =	$model->get_friends($user_id);
-					$notification = [];
-					foreach ($friend_ids as $key => $receiver_id) {
-						$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
-						if( ! is_array( $tokens ) ) {
-							$notification[] = $tokens;
-						}else{
-							$notification = array_merge($notification, $tokens);
-						}
-						$notification = array_filter($notification);
-					}
-
-					if( empty( $notification ) ) {
-						return ;
-					}
-					$sender_info = get_userdata($user_id);
-
-					$title	 	= esc_html__('New post', 'push-notification' );
-
-					$message 	= esc_html__($sender_info->display_name. ' added new post' , 'push-notification' );
-
-					$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
-				}
-
-			}, 10, 2);
-
-
-
-			add_action('peepso_after_add_comment', function($post_id, $act_id, $did_notify, $did_email) {
-
-				$peepso_activity = new PeepSoActivity();
-				$comment = $peepso_activity->get_comment($post_id);
-				$post_obj = $comment->post;
-				if ($post_obj->post_type == 'peepso-comment') {
-					$receiver_id = $post_obj->act_owner_id;
-					$notification = array();
-
-					$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
-
-					if( ! is_array( $tokens ) ) {
-						$notification[] = $tokens;
-					}else{
-						$notification = array_merge($notification, $tokens);
-					}
-					$notification = array_filter($notification);
-
-					if( empty( $notification ) ) {
-						return ;
-					}
-
-					$sender_info = get_userdata($post_obj->post_author);
-
-					$title	 	= esc_html__($sender_info->display_name.' commented on post', 'push-notification' );
-
-					$message 	= esc_html( $post_obj->post_content );
-
-					$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
-				}
-			}, 10, 4);
-
 		}
-
 	}
+	public function pn_peepso_activity_after_add_post($post_id, $act_id){
+		$settings = push_notification_settings();
+		if (isset($settings['pn_peepso_compatibale']) && $settings['pn_peepso_compatibale'] && class_exists('PeepSoFriends') && class_exists('PeepSoActivity') ) {
+			$post_obj = get_post($post_id);
+			if ($post_obj->post_type == 'peepso-message') {
+				$peepso_participants = new PeepSoMessageParticipants();
+				$current_participants = $peepso_participants->get_participants($post_obj->post_parent);
+
+				$receiver_id = $current_participants[1];
+				$notification = array();
+
+				$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+
+				if( ! is_array( $tokens ) ) {
+					$notification[] = $tokens;
+				}else{
+					$notification = array_merge($notification, $tokens);
+				}
+				$notification = array_filter($notification);
+
+				if( empty( $notification ) ) {
+					return ;
+				}
+
+				$sender_info = get_userdata($current_participants[0]);
+
+				$title	 	= esc_html__($sender_info->display_name.' sent message', 'push-notification' );
+
+				$message 	= esc_html( $post_obj->post_content );
+
+				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+			}
+
+			if ($post_obj->post_type == 'peepso-post') {
+				$user_id = $post_obj->post_author;
+				$model = PeepSoFriendsModel::get_instance();
+				$friend_ids =	$model->get_friends($user_id);
+				$notification = [];
+				foreach ($friend_ids as $key => $receiver_id) {
+					$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+					if( ! is_array( $tokens ) ) {
+						$notification[] = $tokens;
+					}else{
+						$notification = array_merge($notification, $tokens);
+					}
+					$notification = array_filter($notification);
+				}
+
+				if( empty( $notification ) ) {
+					return ;
+				}
+				$sender_info = get_userdata($user_id);
+
+				$title	 	= esc_html__('New post', 'push-notification' );
+
+				$message 	= esc_html__($sender_info->display_name. ' added new post' , 'push-notification' );
+
+				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+			}
+		}
+	}
+	public function pn_peepso_after_add_comment($post_id, $act_id, $did_notify, $did_email){
+		$settings = push_notification_settings();
+		if (isset($settings['pn_peepso_compatibale']) && $settings['pn_peepso_compatibale'] && class_exists('PeepSoFriends') && class_exists('PeepSoActivity') ) {
+			
+			$peepso_activity = new PeepSoActivity();
+			$comment = $peepso_activity->get_comment($post_id);
+			$post_obj = $comment->post;
+			if ($post_obj->post_type == 'peepso-comment') {
+				$receiver_id = $post_obj->act_owner_id;
+				$notification = array();
+
+				$tokens = get_user_meta($receiver_id, 'peepso_pn_notification_token', true);
+
+				if( ! is_array( $tokens ) ) {
+					$notification[] = $tokens;
+				}else{
+					$notification = array_merge($notification, $tokens);
+				}
+				$notification = array_filter($notification);
+
+				if( empty( $notification ) ) {
+					return ;
+				}
+
+				$sender_info = get_userdata($post_obj->post_author);
+
+				$title	 	= esc_html__($sender_info->display_name.' commented on post', 'push-notification' );
+
+				$message 	= esc_html( $post_obj->post_content );
+
+				$this->pn_peepso_send_notification($notification,$sender_info,$title,$message);
+			}
+		}
+	}
+	public function peepso_pn_tokenid_registration_id($token_id, $response, $user_agent, $os, $ip_address){
+		$settings = push_notification_settings();
+		if (isset($settings['pn_peepso_compatibale']) && $settings['pn_peepso_compatibale'] && class_exists('PeepSoFriends') && class_exists('PeepSoActivity') ) {
+			$userData = wp_get_current_user();
+
+			if(isset($userData->ID)){
+
+				$userid = $userData->ID;
+
+				$notify_data = get_user_meta( $userid, 'peepso_pn_notification_token', $response['data']['id'] );
+
+				$tokenList = array();
+
+				if( ! is_array( $notify_data ) ){
+
+					$tokenList[] = $notify_data;
+
+				}else{
+
+					$tokenList = $notify_data;
+
+				}
+
+				if( ! in_array($response['data']['id'], $tokenList ) ) {
+
+					$tokenList[] = $response['data']['id']; 
+
+				}
+
+				update_user_meta($userid, 'peepso_pn_notification_token', $tokenList);
+
+			}
+		}
+	}
+	
 
 	public function pn_handle_error_log($remoteResponse, $function_name) {
 		if( is_wp_error( $remoteResponse ) ){
