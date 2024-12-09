@@ -1,4 +1,4 @@
-# Push Notifications for WP - Self Hosted Web Push Notifications
+## Push Notifications for WP - Self Hosted Web Push Notifications
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.7
@@ -27,7 +27,7 @@ Send push notifications automatically when a post is published or updated. You c
 * Compability with Polylang plugin.
 * Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
 
-= Pro Features: =
+### Pro Features:
 * Send Notification as per Segmentation
 * Send Notification as per Categories
 * Send notification to iOS users
