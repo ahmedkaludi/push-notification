@@ -29,7 +29,6 @@ class Push_Notification_Admin{
 		//on oreder status change
 		add_action('woocommerce_order_status_changed', array( $this, 'pn_order_send_notification'), 10, 4);
 
-
 		/** pwaforwp installed than work with that */
 		if( function_exists('pwaforwp_init_plugin') ){
 			/** service worker change */
@@ -242,8 +241,8 @@ class Push_Notification_Admin{
 			);
 			if ( ! is_network_admin()) {
 				add_settings_section('push_notification_segment_settings_section',
-					 esc_html__('Notification Segment','push-notification'), 
-					 '__return_false', 
+					 esc_html__('Notification Segment','push-notification'),
+					 '__return_false',
 					 'push_notification_segment_settings_section');
 			}
 			add_settings_section('push_notification_compatibility_settings_section',
@@ -279,6 +278,22 @@ class Push_Notification_Admin{
 				'pn_select_custom_categories',								// ID
 				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_categories" '.$soc_display.'><b>'.esc_html__('On Selected Categories', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_select_specific_categories_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
+			add_settings_field(
+				'pn_display_popup_after_login',								// ID
+				esc_html__('Display Pop Up After Login', 'push-notification'),// Title
+				array( $this, 'pn_display_popup_after_login_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
+			add_settings_field(
+				'pn_select_custom_roles',								// ID
+				'<label for="pn_select_custom_roles" '.$soc_display.'><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_select_specific_roles_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
@@ -379,7 +394,7 @@ class Push_Notification_Admin{
 				array( $this, 'pn_key_position_select_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
-			);						
+			);
 			add_settings_field(
 				'pn_key_popup_message_select',								// ID
 				esc_html__('Popup Banner Message', 'push-notification'),// Title
@@ -927,6 +942,8 @@ class Push_Notification_Admin{
 					<p class="help">'.esc_html__('It allows you to send notification based on peepso events. Such as posting in feed, chating and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
+	
+
 	public function pn_key_segment_on_categories_callback() {
 
 		$segment_on_category_checked = "";
@@ -983,6 +1000,28 @@ class Push_Notification_Admin{
 					}
 			echo '</select></div></div>';
 	}
+	public function pn_select_specific_roles_callback() {
+			echo '<div id="pn_role_selector_wrapper" class="" style="display:block;">';
+			echo '<div class="pn-field_wrap">';
+			$settings = push_notification_settings();
+			$roles_val = isset($settings['roles'])?$settings['roles']:array();
+			$selected_roles = !is_array($roles_val) ? explode(',',$roles_val ) : $roles_val;
+			global $wp_roles;
+			if ( ! isset( $wp_roles ) ) {
+				$wp_roles = new WP_Roles();
+			}
+			$roles = $wp_roles->roles;
+			echo "<div class=''>";
+				echo '<select name="push_notification_settings[roles][]" id="notification-custom-roles" class="regular-text" multiple>';
+					foreach ($roles as $role_key => $role) {
+						$selected_option ='';
+						if (in_array(strtolower($role['name']),$selected_roles)) {
+							$selected_option ='selected=selected';
+						}
+						echo '<option value="'.esc_attr(strtolower($role['name']) ).'"  '.esc_attr($selected_option).'>'. esc_html( $role['name'] ).'</option>';
+					}
+			echo '</select></div></div>';
+	}
 	public function pn_utm_tracking_callback() {
 
 		$notification = push_notification_settings();
@@ -1026,6 +1065,13 @@ class Push_Notification_Admin{
 			'bottom-left'=> esc_html__('Bottom Left', 'push-notification'),
 		);
 		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
+	}
+	public function pn_display_popup_after_login_callback(){		
+		$notification = push_notification_settings();
+		$name = 'pn_display_popup_after_login';
+		$value = 1;$class = $id = 'pn_display_popup_after_login';
+
+		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
 	}
 
 	public function pn_key_url_capture_select_callback(){		

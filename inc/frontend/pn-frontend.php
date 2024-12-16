@@ -349,6 +349,22 @@ class Push_Notification_Frontend{
 				$user_agent = $this->check_browser_type();
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
+			$settings = push_notification_settings();
+			if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && is_user_logged_in() ) {
+				$roles_val = $settings['roles'];
+				if ( !empty( $roles_val )) {
+					$selected_roles = !is_array($roles_val) ? explode(',',$roles_val ) : $roles_val;
+					$user = wp_get_current_user();
+					$current_roles = (array) $user->roles;
+					if (!empty(array_intersect($current_roles, $selected_roles))) {
+						if ( isset($response['status']) && $response['status'] == 200 ) {
+							$website_ids = get_option('pn_website_ids',[]);
+							array_push($website_ids, $response['data']['id']);
+							update_option('pn_website_ids', $website_ids);
+						}
+					}
+				}
+			}
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address, $url);
 			wp_send_json($response);
 		
@@ -513,6 +529,23 @@ class Push_Notification_Frontend{
 	}
 	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
+		if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && ! is_user_logged_in() ) {
+			return false;
+		}else{
+			if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && is_user_logged_in() ) {
+				$roles_val = $settings['roles'];
+				if ( !empty( $roles_val )) {
+					$selected_roles = !is_array($roles_val) ? explode(',',$roles_val ) : $roles_val;
+					$user = wp_get_current_user();
+					$current_roles = (array) $user->roles;
+					if (empty(array_intersect($current_roles, $selected_roles))) {
+						return false;
+					}
+				}else{
+					return false;
+				}
+			}
+		}
 		$position = "";
 		if (isset($settings['notification_position']) && !empty($settings['notification_position'])) {
 			$position = $settings['notification_position'];
@@ -661,30 +694,29 @@ class Push_Notification_Frontend{
 				   		</span>';
 				   		}
 			   		echo '</div>';
-			   		if(!empty($settings['on_category']) && $settings['on_category'] == 1){
-				   		echo '<div id="pn-activate-permission-categories-text">
-			   				'.esc_html__('On which category would you like to receive?', 'push-notification').'
-			   			</div>
-				   		<div class="pn-categories-multiselect">
-				   			<div id="pn-categories-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
-							if($all_category){
-			   			 		echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
-							}
-							if(!empty($catArray)){
-								foreach ($catArray as $key=>$value) {
-									if (is_string($value)) {
-										$catslugdata ='';
-										if(is_object(get_category($value))){
-										$catslugdata = get_category($value)->slug;
-										}
-										echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr($catslugdata).'" />'.esc_html(get_cat_name($value)).'</label>';
-									}
-								}
-							}
-				   			echo '</div>
-			   			</div>';
-
-		   			}
+						if(!empty($settings['on_category']) && $settings['on_category'] == 1){
+							 echo '<div id="pn-activate-permission-categories-text">
+								 '.esc_html__('On which category would you like to receive?', 'push-notification').'
+							 </div>
+							 <div class="pn-categories-multiselect">
+								 <div id="pn-categories-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
+							  if($all_category){
+									  echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
+							  }
+							  if(!empty($catArray)){
+								  foreach ($catArray as $key=>$value) {
+									  if (is_string($value)) {
+										  $catslugdata ='';
+										  if(is_object(get_category($value))){
+										  $catslugdata = get_category($value)->slug;
+										  }
+										  echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr($catslugdata).'" />'.esc_html(get_cat_name($value)).'</label>';
+									  }
+								  }
+							  }
+								 echo '</div>
+							 </div>';
+						}
 
 					   if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom' && PN_Server_Request::getProStatus()=='active'){
 						echo '<span class="pn-btns" style="float:right;margin-top:20px;">

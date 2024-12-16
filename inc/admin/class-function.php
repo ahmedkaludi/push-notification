@@ -323,6 +323,15 @@ class PN_Server_Request{
 		if($payload['audience_token_url']=='campaign_for_individual_tokens'){
 			$verifyUrl = 'campaign/single'; 
 		}
+		$settings = $notification_settings;
+		if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && is_user_logged_in() ) {
+			$roles_val = $settings['roles'];
+			if ( !empty( $roles_val )) {
+				$website_ids = get_option('pn_website_ids',[]);
+				$verifyUrl = 'campaign/single';
+				$payload['audience_token_id'] = $website_ids;
+			}
+		}
 		$data = array("user_token"=>$payload['user_token'], 
 					"website"=>   $weblink, 
 					'title'=>$payload['title'], 

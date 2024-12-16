@@ -271,6 +271,22 @@ jQuery(document).ready(function($){
 		}
 	});
 
+	jQuery('#pn_display_popup_after_login').click(function(){
+		var parent_tr = jQuery("#pn_role_selector_wrapper").parents('tr');
+		if(jQuery(this).prop("checked")==true){
+			parent_tr.show();
+		}else{
+			parent_tr.hide();
+		}
+	});
+	if(jQuery('#pn_display_popup_after_login').prop("checked")==true){
+		var parent_tr = jQuery("#pn_role_selector_wrapper").parents('tr');
+		parent_tr.show();
+	}else{
+		var parent_tr = jQuery("#pn_role_selector_wrapper").parents('tr');
+		parent_tr.hide();
+	}
+
 
 	jQuery(".push-notification-tabs a").click(function(e){
 	        e.preventDefault();
@@ -441,15 +457,14 @@ jQuery(document).ready(function($){
 			method: "post",
 			dataType: 'html',
 				data:{action:'pn_get_compaigns',page:page,nonce: pn_setings.remote_nonce},
-				success:function(response){              
-				jQuery("#pn_cam_loading").css("display","none");         
+				success:function(response){
+				jQuery("#pn_cam_loading").css("display","none");
 					jQuery("#pn_campaings_custom_div").html(response);
 				},
-				error: function(response){   
-				jQuery("#pn_cam_loading").css("display","none");                 
-					console.log(response);
+				error: function(response){
+				jQuery("#pn_cam_loading").css("display","none");
 				}
-			});           
+			});
 	        
 	});
 
@@ -524,7 +539,6 @@ jQuery(document).ready(function($){
     });
 
 	jQuery("#notification-send-type").change(function(){
-		console.log(jQuery(this).val());
 	 if(jQuery(this).val()=='custom-select'){
 		 jQuery('#notification-custom-select').parent().show();
 		 jQuery('#notification-custom-upload').parent().hide();
@@ -645,8 +659,17 @@ jQuery(document).ready(function($){
 		
 	})
 	jQuery("#notification-custom-select").select2();
-    	$('.my-color-field').wpColorPicker();
-		pn_for_wp_select2();		
+	
+	$('.my-color-field').wpColorPicker();
+	pn_for_wp_select2();
+	
+	function initializeSelect2() {
+		if (jQuery('#notification-custom-roles').length > 0) {
+			jQuery('#notification-custom-roles').select2();
+			clearInterval(interval); // Stop checking after initialization
+		}
+	}
+	var interval = setInterval(initializeSelect2, 1500);
 });
 
 function pnCsvToArray(str, delimiter = ",") {
@@ -716,9 +739,8 @@ function pn_for_wp_select2(){
     if($select2.length > 0){
         jQuery($select2).each(function(i, obj) {
             var currentP = jQuery(this);  
-            var $defaultSelected = currentP.find("option[value]:is([selected])");  
-            var $defaultResults = currentP.find("option[value]");  
-            
+            var $defaultSelected = currentP.find("option[value]:is([selected])");
+            var $defaultResults = currentP.find("option[value]");
             var defaultResults = [];
             $defaultResults.each(function () {
                 var $option = jQuery(this);
