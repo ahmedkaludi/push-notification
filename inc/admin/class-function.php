@@ -327,7 +327,7 @@ class PN_Server_Request{
 		if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && is_user_logged_in() ) {
 			$roles_val = $settings['roles'];
 			if ( !empty( $roles_val )) {
-				$website_ids = get_option('pn_website_ids',[]);
+				$website_ids = get_option('pn_website_token_ids',[]);
 				$verifyUrl = 'campaign/single';
 				$payload['audience_token_id'] = $website_ids;
 			}

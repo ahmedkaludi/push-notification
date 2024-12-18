@@ -358,9 +358,9 @@ class Push_Notification_Frontend{
 					$current_roles = (array) $user->roles;
 					if (!empty(array_intersect($current_roles, $selected_roles))) {
 						if ( isset($response['status']) && $response['status'] == 200 ) {
-							$website_ids = get_option('pn_website_ids',[]);
+							$website_ids = get_option('pn_website_token_ids',[]);
 							array_push($website_ids, $response['data']['id']);
-							update_option('pn_website_ids', $website_ids);
+							update_option('pn_website_token_ids', $website_ids);
 						}
 					}
 				}
