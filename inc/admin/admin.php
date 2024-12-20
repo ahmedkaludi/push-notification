@@ -303,8 +303,11 @@ class Push_Notification_Admin{
 			'push_notification_compatibility_section_callback', 
 			'push_notification_compatibility_settings_section');
 
-			function push_notification_compatibility_section_callback() {
-				echo '<h4>' . esc_html__('Third party plugins & themes compatibility.', 'push-notification') . '</h4>';
+			if (!function_exists('push_notification_compatibility_section_callback')) {
+				function push_notification_compatibility_section_callback() {
+					echo '<h4>' . esc_html__('Third party plugins & themes compatibility.', 'push-notification') . '</h4>';
+
+				}
 			}
 
 			add_settings_field(
