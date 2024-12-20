@@ -391,6 +391,26 @@ class Push_Notification_Admin{
 					 esc_html__('Notification Subscription Popup','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
+			if(function_exists('superpwa_addons_status')){
+				add_settings_field(
+								'pn_key_showon_apk_only',								// ID
+								esc_html__('Show only On SuperPWA APK', 'push-notification'),// Title
+								array( $this, 'pn_key_showon_apk_only_callback'),// Callback
+								'push_notification_user_settings_section',	// Page slug
+								'push_notification_notification_settings_section'	// Settings Section ID
+					);
+			} else if(function_exists('pwaforwp_defaultSettings')){
+				$pwaSettings = pwaforwp_defaultSettings();
+				if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+				add_settings_field(
+								'pn_key_showon_apk_only',								// ID
+								esc_html__('Show only On PWAforWP APK', 'push-notification'),// Title
+								array( $this, 'pn_key_showon_apk_only_callback'),// Callback
+								'push_notification_user_settings_section',	// Page slug
+								'push_notification_notification_settings_section'	// Settings Section ID
+					);
+				}
+			}
 			add_settings_field(
 				'pn_key_message_position_select',								// ID
 				esc_html__('Where would you like to display Pop Up', 'push-notification'),// Title
@@ -1073,6 +1093,14 @@ class Push_Notification_Admin{
 		$notification = push_notification_settings();
 		$name = 'pn_display_popup_after_login';
 		$value = 1;$class = $id = 'pn_display_popup_after_login';
+
+		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
+	}
+
+	public function pn_key_showon_apk_only_callback(){		
+		$notification = push_notification_settings();
+		$name = 'pn_key_showon_apk_only';
+		$value = 1;$class = $id = 'pn_key_showon_apk_only';
 
 		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
 	}

@@ -63,6 +63,20 @@ function pushnotification_load_messaging(){
 		  if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
 			  return false;
 		  }
+		  if(pnScriptSetting.superpwa_apk_only == '1'){
+			let superpwa_apk = sessionStorage.getItem('superpwa_mode');
+			if(superpwa_apk != 'apk'){
+				return false;
+			}
+		  }
+
+		  if(pnScriptSetting.pwaforwp_apk_only == '1'){
+			let pwaforwp_apk = sessionStorage.getItem('pwaforwp_mode');
+			if(pwaforwp_apk != 'apk'){
+				return false;
+			}
+		  }
+
 		 var wrapper = document.getElementsByClassName("pn-wrapper");
 		setTimeout(function() {
 			if(wrapper){ wrapper[0].style.display="flex"; }

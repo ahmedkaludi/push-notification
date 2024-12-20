@@ -224,6 +224,19 @@ class Push_Notification_Frontend{
 				$pn_token_exists=0;
 			}
 		}
+		$superpwa_apk_only = $pwaforwp_apk_only = false;
+		if(isset($pn_Settings['pn_key_showon_apk_only']) && $pn_Settings['pn_key_showon_apk_only'] == 1){
+			
+			if(function_exists('superpwa_addons_status')){
+				$superpwa_apk_only = true;
+			}
+			if(function_exists('pwaforwp_defaultSettings')){
+				$pwaSettings = pwaforwp_defaultSettings();
+				if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+					$pwaforwp_apk_only = true;
+				}
+			}
+		}
         $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
 					'pn_config'=> $messageConfig,
@@ -235,6 +248,8 @@ class Push_Notification_Frontend{
 					'popup_show_afternseconds'=> $pn_Settings['notification_popup_show_afternseconds'],
 					'popup_show_afternpageview'=> $pn_Settings['notification_popup_show_afternpageview'],
 					'pn_token_exists' =>apply_filters('pn_token_exists',$pn_token_exists),
+					'superpwa_apk_only' => $superpwa_apk_only,
+					'pwaforwp_apk_only' => $pwaforwp_apk_only
 					);
         return $settings;
 	}
