@@ -302,6 +302,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").show();
 				jQuery("#pn_campaings").hide();
 				jQuery("#pn_compatibility").hide();
+				jQuery("#pn_visibility").hide();
 	        }
 	        if(link == "pn_dashboard"){
 	        	jQuery("#pn_dashboard").show();
@@ -312,6 +313,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
 				jQuery("#pn_compatibility").hide();
+				jQuery("#pn_visibility").hide();
 	        } 
 	        if( link == "pn_segmentation") {
 	        	jQuery("#pn_dashboard").hide();
@@ -322,6 +324,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
 				jQuery("#pn_compatibility").hide();
+				jQuery("#pn_visibility").hide();
 	        	
 	        }
 	        if( link == "pn_notification_bell") {
@@ -333,6 +336,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
 				jQuery("#pn_compatibility").hide();
+				jQuery("#pn_visibility").hide();
 	        }
 	        if( link == "pn_campaings") {
 	        	jQuery("#pn_dashboard").hide();
@@ -342,6 +346,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
 	        	jQuery("#pn_compatibility").hide();
+	        	jQuery("#pn_visibility").hide();
 	        	jQuery("#pn_campaings").show();
 	        }
 	        if( link == "pn_compatibility") {
@@ -352,6 +357,18 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
 	        	jQuery("#pn_compatibility").show();
+	        	jQuery("#pn_visibility").hide();
+	        	jQuery("#pn_campaings").hide();
+	        }
+	        if( link == "pn_visibility") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_connect").hide();
+	        	jQuery("#pn_compatibility").hide();
+	        	jQuery("#pn_visibility").show();
 	        	jQuery("#pn_campaings").hide();
 	        }
 	        if( link == "pn_help") {
@@ -363,6 +380,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
 				jQuery("#pn_compatibility").hide();
+				jQuery("#pn_visibility").hide();
 	        }
 	        
 	        localStorage.setItem('activeTab', $(e.target).attr('href'));
@@ -380,9 +398,8 @@ jQuery(document).ready(function($){
 		jQuery("#pn_help").hide();
 		jQuery("#pn_connect").hide();
 		jQuery("#pn_campaings").hide();
-		
 		localStorage.setItem('activeTab', $(e.target).attr('href'));
-});
+	});
 
 	jQuery(".pn_push_segment_category_checkbox").click(function(){
 		chkCategory();
@@ -502,7 +519,7 @@ jQuery(document).ready(function($){
         })
         .open();
     });
-   jQuery(".pn_pop_up_not_icon").click(function(e) {  // upload_image_url
+   	jQuery(".pn_pop_up_not_icon").click(function(e) {  // upload_image_url
         e.preventDefault();
         var pwaforwpMediaUploader = wp.media({
             title: pn_setings.uploader_title,
@@ -519,7 +536,7 @@ jQuery(document).ready(function($){
         .open();
     });
 
-		jQuery(".upload_icon_url").click(function(e) {  // upload_image_url
+	jQuery(".upload_icon_url").click(function(e) {  // upload_image_url
         e.preventDefault();
         var pwaforwpMediaUploader = wp.media({
             title: pn_setings.uploader_title,
@@ -670,6 +687,8 @@ jQuery(document).ready(function($){
 		}
 	}
 	var interval = setInterval(initializeSelect2, 1500);
+
+	
 });
 
 function pnCsvToArray(str, delimiter = ",") {
@@ -1084,3 +1103,113 @@ jQuery(document).on('click',".pn_reuse_button",function(e) {
 	localStorage.setItem('activeTab', jQuery(".push-notification-tabs").find('.js_notification').attr('href'));
 
 });
+
+// Pn Visibility start
+function pn_get_include_pages() {
+	console.log(111111)
+	var include_type = jQuery(".visibility_options_select_include").val();
+	jQuery(".pn-visibility-loader").css("display","flex");
+	var data = {action:"pn_include_visibility_setting_callback",nonce: pn_setings.remote_nonce, include_type:include_type};
+	jQuery.ajax({
+		url: ajaxurl,
+		type: 'post',
+		data: data,
+		success: function(response) {
+			var jd = jQuery.parseJSON(response);
+			if (jd.success == 1) {
+				jQuery(".visibility_include_select_type").html(jd.option);
+				jQuery(".pn-visibility-loader").css("display","none");
+				pn_select2(include_type);
+			}
+		}
+	});
+}
+function pn_add_included_condition(){
+	var include_targeting_type = jQuery(".visibility_options_select_include").val();
+	var include_targeting_data = jQuery(".visibility_include_select_type").val();
+	jQuery(".include_error").html('&nbsp;');
+	jQuery(".include_type_error").html('&nbsp;');
+	var duplicate_error = false;
+	jQuery('.visibility-include-target-item-list > span').each(function () {
+		var include_targeting_data_value = jQuery(this).find('input[name="include_targeting_data"]').val();
+		if (include_targeting_data == include_targeting_data_value) {
+			jQuery(".include_type_error").html('Data alredy selected').css('color','red');
+			duplicate_error =  true;
+		}
+	})
+	if(include_targeting_type==''){
+		jQuery(".include_error").html('Please select visibility type').css('color','red');
+		setTimeout(function(){
+			jQuery(".include_error").html('&nbsp;');
+		},5000);
+		return false;
+	}
+	if(include_targeting_data==''){
+		jQuery(".include_type_error").html('Please select type').css('color','red');
+		setTimeout(function(){
+			jQuery(".include_type_error").html('&nbsp;');
+		},5000);
+		return false;
+	}
+	if (duplicate_error == false) {
+		var data = {action:"pn_include_visibility_condition_callback",nonce: pn_setings.remote_nonce, include_targeting_type:include_targeting_type,include_targeting_data:include_targeting_data};
+		jQuery(".pn-visibility-loader").css("display","flex");
+		jQuery.ajax({
+				url: ajaxurl,
+				type: 'post',
+				data: data,
+			  
+				success: function(response) {
+					var jd = jQuery.parseJSON(response);
+					if (jd.success == 1) {
+						jQuery(".visibility-include-target-item-list").append(jd.option);
+						jQuery(".pn-visibility-loader").css("display","none");
+					} 
+	
+				}
+			});
+		
+	}
+}
+
+function pn_removeIncluded_visibility(sr){
+	jQuery(".pn-visibility-target-icon-"+sr).empty();
+}
+
+function pn_select2(type){
+    var $select2 = jQuery('.pn-select2');
+    
+    if($select2.length > 0){
+        jQuery($select2).each(function(i, obj) {
+            var currentP = jQuery(this);  
+            var $defaultResults = jQuery('option[value]:not([selected])', currentP);  
+            
+            var defaultResults = [];
+            $defaultResults.each(function () {
+                var $option = jQuery(this);
+                defaultResults.push({
+                    id: $option.attr('value'),
+                    text: $option.text()
+                });
+            });
+            var ajaxnewurl = ajaxurl + '?action=superpwa_get_select2_data_by_cat&nonce='+pn_setings.remote_nonce+'&type='+type;
+
+            currentP.select2({           
+                ajax: {             
+                    url: ajaxnewurl,
+                    delay: 250, 
+                    cache: false,
+                },            
+                minimumInputLength: 2, 
+                minimumResultsForSearch : 50,
+                dataAdapter: jQuery.fn.select2.amd.require('select2/data/extended-ajax'),
+                defaultResults: defaultResults
+            });
+
+        });
+
+    }                    
+    
+}
+
+// Pn Visibility end

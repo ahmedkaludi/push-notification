@@ -542,8 +542,14 @@ class Push_Notification_Frontend{
 		</div>
 		<?php
 	}
+
 	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
+
+		if (! $this->pn_display_status($settings)) {
+			return;
+		}
+
 		if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && ! is_user_logged_in() ) {
 			return false;
 		}else{
@@ -560,6 +566,49 @@ class Push_Notification_Frontend{
 					return false;
 				}
 			}
+		}
+		if ( isset($settings['pn_revoke_subscription_popup']) && $settings['pn_revoke_subscription_popup'] && isset($_COOKIE['pn_notification_block']) && $_COOKIE['pn_notification_block']) {
+			?>
+			<style>
+				.pn-bell-container {
+					position: fixed;
+					bottom: 20px;
+					right: 20px;
+					display: flex;
+					align-items: center;
+					z-index: 1000;
+				}
+				.pn-bell-button {
+					background-color: #007bff;
+					color: white;
+					border: none;
+					border-radius: 50%;
+					width: 60px;
+					height: 60px;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+					cursor: pointer;
+				}
+				.pn-bell-button:hover {
+					background-color: #0056b3;
+				}
+				.pn-bell-icon {
+					font-size: 24px;
+				}
+				.pn-bell-label {
+					margin-right: 10px;
+					font-size: 16px;
+					color: #333;
+				}
+			</style>
+			<div class="pn-bell-container">
+				<button class="pn-bell-button" title="Enable Popup">
+					<span class="dashicons dashicons-bell"></span>
+				</button>
+			</div>
+			<?php
 		}
 		$position = "";
 		if (isset($settings['notification_position']) && !empty($settings['notification_position'])) {
@@ -1122,6 +1171,200 @@ class Push_Notification_Frontend{
 			$remoteData = wp_remote_retrieve_body($remoteResponse);
 			$remoteData = json_decode($remoteData, true);
 		}
+	}
+
+	function pn_display_status($settings){
+		if(isset($settings['include_targeting_data']) && isset($settings['include_targeting_type']) && !empty($settings['include_targeting_type'])){
+			$expo_include_type = array();
+			$expo_include_data = array();
+	
+			if (!empty($settings['include_targeting_type'])) {
+				$expo_include_type = $settings['include_targeting_type'];
+			}
+			if (!empty($settings['include_targeting_data'])) {
+				$expo_include_data = $settings['include_targeting_data'];
+			}
+			
+			$current_page_type = get_post_type();
+			// $current_page_title = get_the_title();
+			$current_page_title = single_post_title("",false);
+	
+			$is_desplay = 0;
+	
+			if(!empty(get_the_category()[0]->cat_name)){
+				if(in_array(get_the_category()[0]->cat_name,$expo_include_data)){
+					$current_page_type= 'post_category';
+					$current_page_title =  get_the_category()[0]->cat_name;
+				}
+			}
+
+			if(in_array('tags',$expo_include_type)){
+				$tag = get_queried_object();
+				if(in_array($tag->name,$expo_include_data)){
+					$current_page_title =  $tag->name;
+					$current_page_type = 'tags';
+				}
+			}
+	
+			if(in_array('taxonomy',$expo_include_type)){
+				$tag = get_queried_object();
+				if(in_array($tag->name,$expo_include_data)){
+					$current_page_title =  $tag->name;
+					$current_page_type = 'taxonomy';
+				}
+			}
+	
+			if(in_array('page_template',$expo_include_type)){
+				$page_template = wp_get_theme()->get_page_templates();
+				if(!empty($page_template) && is_array($page_template)){
+				foreach ($page_template as $key => $value) {
+					if(in_array($value,$expo_include_data)){
+						$current_page_title =  $value;
+						$current_page_type = 'page_template';
+					}
+				}}
+			}
+	
+			if(function_exists('is_user_logged_in') && is_user_logged_in() ) {
+				$user = wp_get_current_user();
+				if(in_array($user->roles,$expo_include_data)){
+					$current_page_title =  $user->roles;
+					$current_page_type = 'user_type';
+				}
+			}
+				   
+			if(in_array($current_page_type,$expo_include_type)){
+				$find_from = $this->pn_get_data_by_type($current_page_type,'including');
+				if (in_array($current_page_title, $find_from)) {
+					$is_desplay = 1; 
+				}
+			}
+	
+			if (in_array('post_type',$expo_include_type)) {
+				$find_from = $this->pn_get_data_by_type('post_type','including');
+				if(in_array($current_page_type,$find_from)){
+						$is_desplay = 1;
+				}
+			}
+	
+			if(in_array('globally',$expo_include_type)){
+				$is_desplay = 1; 
+			}
+			/*Include code end */
+			return $is_desplay;
+		}
+		return 1;
+	}
+
+	function pn_get_data_by_type($include_type='post',$search=null){
+		$result = array();
+		$posts_per_page = 50;
+		
+		if($include_type == 'post' || $include_type == 'page'){
+			$args = array(
+				'post_type' => $include_type,
+				'post_status' => 'publish',
+				'posts_per_page' => $posts_per_page,
+			);
+			if(!empty($search)){
+				$args['s']	= $search;
+			}
+	
+			$meta_query = new WP_Query($args);        
+				
+			  if($meta_query->have_posts()) {
+				while($meta_query->have_posts()) {
+					$meta_query->the_post();
+					$result[] = array('id' => get_the_ID(), 'text' => get_the_title());
+				  }
+				wp_reset_postdata();
+			  }
+			
+		}
+		if(in_array($include_type, array('post_type','globally'))) {
+			if($include_type == 'post_type'){
+				$args['public'] = true;
+				if(!empty($search)){
+					$args['name']	= $search;
+				}
+				  $get_option = get_post_types( $args, 'names');
+			}
+			if($include_type == 'globally'){ 
+				$get_option = array('Globally');
+			}
+			if(!empty($get_option) && is_array($get_option)){        
+			foreach ($get_option as $options_array) {
+				$result[] = array('id' => $options_array, 'text' => $options_array);
+			}}
+		}
+	
+		 if($include_type == 'post_category'){
+			$args = array( 
+				'hide_empty' => true,
+				'number'     => $posts_per_page, 
+			);
+	
+			if(!empty($search)){
+				$args['name__like'] = $search;
+			}
+			$get_option = get_terms( 'category', $args);
+			// $get_option = get_categories($args);
+			if(!empty($get_option) && is_array($get_option)){   
+				foreach ($get_option as $options_array) {
+					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+				}
+			}
+		   
+		}
+	
+		if($include_type == 'taxonomy'){
+			$args = array( 
+				'hide_empty' => true,
+				'number'     => $posts_per_page, 
+			);
+	
+			if(!empty($search)){
+				$args['name__like'] = $search;
+			}
+			$get_option = get_terms($args);
+			if(!empty($get_option) && is_array($get_option)){  
+				foreach ($get_option as $options_array) {
+					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+				}
+			}
+		}
+	
+		if($include_type == 'tags'){
+			$args['hide_empty'] = false;
+			$get_option = get_tags($args);
+			if(!empty($get_option) && is_array($get_option)){  
+				foreach ($get_option as $options_array) {
+					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+				}
+			}
+		}
+	
+		if($include_type == 'user_type'){ 
+			$get_options = array("administrator"=>"Administrator", "editor"=>"Editor", "author"=>"Author", "contributor"=>"Contributor","subscriber"=>"Subscriber");
+			$get_option = $get_options;
+			if(!empty($get_option) && is_array($get_option)){   
+				foreach ($get_option as $key => $value) {
+					$result[] = array('id' => $key, 'text' => $value);
+				}
+			}
+	
+		}
+	
+		if($include_type == 'page_template'){ 
+			$get_option = wp_get_theme()->get_page_templates();
+			if(!empty($get_option) && is_array($get_option)){   
+				foreach ($get_option as $key => $value) {
+					$result[] = array('id' => $value, 'text' => $value);
+				}
+			}
+		}
+	
+		return $result;
 	}
 }
 

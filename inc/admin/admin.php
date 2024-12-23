@@ -197,6 +197,7 @@ class Push_Notification_Admin{
 						}
 						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_compatibility') . '" link="pn_compatibility" class="nav-tab"><span class="dashicons dashicons-image-filter"></span> ' . esc_html__('Compatibality','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_visibility') . '" link="pn_visibility" class="nav-tab"><span class="dashicons dashicons-visibility"></span> ' . esc_html__('Visibility','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
 					}
 					?>
@@ -241,14 +242,26 @@ class Push_Notification_Admin{
 			);
 			if ( ! is_network_admin()) {
 				add_settings_section('push_notification_segment_settings_section',
-					 esc_html__('Notification Segment','push-notification'),
-					 '__return_false',
-					 'push_notification_segment_settings_section');
+					esc_html__('Notification Segment','push-notification'),
+					'__return_false',
+					'push_notification_segment_settings_section');
 			}
 			add_settings_section('push_notification_compatibility_settings_section',
 			esc_html__('Compatibility','push-notification'), 
 			'__return_false', 
 			'push_notification_compatibility_settings_section');
+
+			add_settings_section('push_notification_visibility_settings_section',
+			esc_html__('Visibility','push-notification'), 
+			'push_notification_visibility_section_callback',
+			'push_notification_visibility_settings_section');
+
+			if (!function_exists('push_notification_visibility_section_callback')) {
+				function push_notification_visibility_section_callback() {
+					echo '<h4>' . esc_html__('Which page would you like to visible push notificaion popup to subscribe.', 'push-notification') . '</h4>';
+
+				}
+			}
 
 			add_settings_field(
 				'pn_key_segment_select',								// ID
@@ -411,6 +424,14 @@ class Push_Notification_Admin{
 					);
 				}
 			}
+
+			add_settings_field(
+				'pn_revoke_subscription_popup',								// ID
+				esc_html__('Display popup bell on deny', 'push-notification'),// Title
+				array( $this, 'pn_revoke_subscription_popup_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
 			add_settings_field(
 				'pn_key_message_position_select',								// ID
 				esc_html__('Where would you like to display Pop Up', 'push-notification'),// Title
@@ -644,6 +665,99 @@ class Push_Notification_Admin{
 			</section>
 			</div>
 			';
+		echo '<div id="pn_visibility" style="display:none" class="pn-tabs">
+		<section class="pn_general_wrapper">';
+				do_settings_sections( 'push_notification_visibility_settings_section' );
+        $settings = push_notification_settings();
+
+        if (!isset($settings['include_targeting_type']) && !isset($settings['include_targeting_data'])) {
+            $settings['include_targeting_type'][] ='globally';
+            $settings['include_targeting_data'][] ='Globally';
+            update_option( 'push_notification_settings', $settings );
+        }
+
+        $arrayOPT = array(
+            'post_type'     => 'Post Type',
+            'globally'      => 'Globally',
+            'post'          => 'Post',
+            'post_category' => 'Post Category',
+            'page'          => 'Page',
+            'taxonomy'      => 'Taxonomy Terms',
+            'tags'          => 'Tags',
+            'page_template' => 'Page Template',
+            'user_type'     => 'Logged in User Type'
+        );
+        ?>
+        <style>
+            .select2-container .select2-selection--single {
+                height:40px !important;
+                vertical-align: middle;
+            }
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 37px !important;
+            }
+            .select2-container{z-index:999999}
+        </style>
+        <div class="wrap js_visibility_div">
+            <table class="form-table" role="presentation">
+		    <tbody>
+                <tr>
+                    <th><?php echo esc_html__('Included On', 'push-notification'); ?> <i class="dashicons dashicons-insert"></i></th>
+                </tr>
+                <tr>
+                    <td colspan="3">
+
+                        <div class="visibility-include-target-item-list">
+                            <?php $rand = time() . rand(000, 999);
+							// echo '<pre>';
+							// print_r($settings);
+
+                            if (!empty($settings['include_targeting_type']) && is_array($settings['include_targeting_type'])) {
+                                $expo_include_type = $settings['include_targeting_type'];
+                                $expo_include_data = (isset($settings['include_targeting_data'])) ? $settings['include_targeting_data'] :[];
+                                for ($i = 0; $i < count($expo_include_type); $i++) {
+                                    $or_string = '';
+                                    if ($i !== 0) {
+                                        $or_string = '<b>OR</b>';
+                                    }
+                                    echo '<span class="pn-visibility-target-icon-' . esc_attr($rand) . '">'.$or_string.'<input type="hidden" name="push_notification_settings[include_targeting_type][]" value="' . esc_attr($expo_include_type[$i]) . '">
+									<input type="hidden" name="push_notification_settings[include_targeting_data][]" value="' . esc_attr($expo_include_data[$i]) . '">';
+                                    $expo_include_type_test = pn_RemoveExtraValue($expo_include_type[$i]);
+                                    $expo_include_data_test = pn_RemoveExtraValue($expo_include_data[$i]);
+                                    echo '<span class="pn-visibility-target-item"><span class="visibility-include-target-label">' . esc_html($expo_include_type_test . ' - ' . $expo_include_data_test) . '</span>
+                            		<span class="pn-visibility-target-icon" data-index="0"><span class="dashicons dashicons-no-alt " aria-hidden="true" onclick="pn_removeIncluded_visibility(' . esc_js($rand) . ')"></span></span></span></span>';
+                                    $rand++;
+                                }
+                            } ?>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <select id="push_notification_settings[visibility_included_post_options]" class="regular-text pn_visibility_options_select visibility_options_select_include"  onchange="pn_get_include_pages()">
+                            <option value=""><?php echo esc_html__("Select Visibility Type", 'push-notification'); ?></option>
+                            <?php if (is_array($arrayOPT) && !empty($arrayOPT)) {
+                                foreach ($arrayOPT as $key => $opval) { ?>
+                                    <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($opval); ?></option>
+                            <?php }
+                            } ?>
+                        </select>
+                        <div class="include_error">&nbsp;</div>
+                    </td>
+                    <td class="visibility_options_select">
+                        <select id="push_notification_settings[visibility_included_options]" class="regular-text pn_visibility_options_select visibility_include_select_type pn-select2">
+                            <option value=""><?php echo esc_html__("Select Visibility Type", 'push-notification'); ?></option>
+                        </select>
+                        <div class="include_type_error">&nbsp;</div>
+                    </td>
+                    <td class="include-btn-box"><a class="button-primary" onclick="pn_add_included_condition()"><?php echo esc_html__('ADD', 'push-notification'); ?></a></td>
+                </tr>
+            </tbody>
+            </table>
+			<input type="submit" value="<?php echo esc_html__('Save Settings', 'push-notification'); ?>" class="button pn-submit-button">
+			</div></section>
+		</div>
+		<?php
 		if ( class_exists( 'WooCommerce' ) ) {
 			echo '<div id="pn_wc_settings_section" style="display:none;" class="pn-tabs">
 				<section style="margin-top:20px"><div class="postbox" style="padding:20px">';
@@ -870,6 +984,8 @@ class Push_Notification_Admin{
 		        </div>
 				';
 	}
+
+	
 
 	public function pn_key_validate_status_callback(){
 		$authData = push_notification_auth_settings();
@@ -1101,6 +1217,13 @@ class Push_Notification_Admin{
 		$notification = push_notification_settings();
 		$name = 'pn_key_showon_apk_only';
 		$value = 1;$class = $id = 'pn_key_showon_apk_only';
+
+		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
+	}
+	public function pn_revoke_subscription_popup_callback(){		
+		$notification = push_notification_settings();
+		$name = 'pn_revoke_subscription_popup';
+		$value = 1;$class = $id = 'pn_revoke_subscription_popup';
 
 		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
 	}
@@ -2347,3 +2470,275 @@ function pn_get_all_unique_meta() {
 		return $tokens;
 
 	}
+
+	add_action("wp_ajax_pn_include_visibility_condition_callback", 'pn_include_visibility_condition_callback');
+
+	function pn_include_visibility_condition_callback() {
+		if(empty( $_POST['nonce'])){
+			return;	
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
+			return;	
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;	
+		}
+
+		$include_targeting_type = sanitize_text_field($_POST['include_targeting_type']);
+		$include_targeting_data = sanitize_text_field($_POST['include_targeting_data']);
+
+		$rand = time() . rand(000, 999);
+		$option = "";
+		$option .= '<span class="pn-visibility-target-icon-' . esc_attr($rand) . '">
+		<input type="hidden" name="push_notification_settings[include_targeting_type][]" value="' . esc_attr($include_targeting_type) . '">
+		<input type="hidden" name="push_notification_settings[include_targeting_data][]" value="' . esc_attr($include_targeting_data) . '">';
+		$include_targeting_type = pn_RemoveExtraValue($include_targeting_type);
+		$include_targeting_data = pn_RemoveExtraValue($include_targeting_data);
+		$option .= '<span class="pn-visibility-target-item"><span class="visibility-include-target-label">' . esc_html($include_targeting_type . ' - ' . $include_targeting_data) . '</span>
+			<span class="pn-visibility-target-icon" data-index="0"><span class="dashicons dashicons-no-alt " aria-hidden="true" onclick="pn_removeIncluded_visibility(' . esc_attr($rand) . ')"></span></span></span></span>';
+
+		$data = array('success' => 1, 'message' => esc_html__('Success', 'push-notification'), 'option' => $option);
+		echo wp_json_encode($data);
+		exit;
+	}
+
+	add_action("wp_ajax_pn_include_visibility_setting_callback", 'pn_include_visibility_setting_callback');
+	function pn_include_visibility_setting_callback() {
+		if(empty( $_POST['nonce'])){
+			return;	
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
+			return;	
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;	
+		}
+		$include_type = sanitize_text_field($_POST['include_type']);
+
+		if($include_type == 'post' || $include_type == 'page'){
+			$args = array(
+				'post_type' => $include_type,
+				'post_status' => 'publish',
+				'posts_per_page' => 50,
+			);  
+			$query = new WP_Query($args);
+			$option ='<option value="">Select '.esc_html($include_type).' Type</option>';
+			while ($query->have_posts()) : $query->the_post();
+						
+				$option .= '<option value="'.get_the_title().'">'.get_the_title().'</option>';
+				endwhile; 
+			wp_reset_postdata();
+		}
+		if(in_array($include_type, array('post_type','globally'))) {
+			if($include_type == 'post_type'){
+				// $get_option = array('post', 'page', 'product');
+				$get_option = get_post_types();;
+				$option ='<option value="">'.esc_html__( 'Select Post Type', 'push-notification' ).'</option>';
+			}
+			if($include_type == 'globally'){ 
+				$get_option = array('Globally');
+				$option ='<option value="">'.esc_html__( 'Select Global Type', 'push-notification' ).'</option>';
+			}
+			if(!empty($get_option) && is_array($get_option)){        
+			foreach ($get_option as $options_array) {
+				$option .= '<option value="'.esc_attr($options_array).'">'.esc_html($options_array).'</option>';
+			}}
+		}
+
+		if($include_type == 'post_category'){
+			$get_option = get_categories(array(
+			'hide_empty' => false,
+			));
+			$option ='<option value="">'.esc_html__( 'Select Post Category', 'push-notification' ).'</option>';
+			if(!empty($get_option) && is_array($get_option)){   
+			foreach ($get_option as $options_array) {
+				$option .= '<option value="'.esc_attr($options_array->name).'">'.esc_html($options_array->name).'</option>';
+			}}
+		
+		}
+		if($include_type == 'taxonomy'){ 
+			$get_option = get_terms( array(
+			'hide_empty' => true,
+			) );
+			$option ='<option value="">'.esc_html__( 'Select Taxonomy', 'push-notification' ).'</option>';
+			if(!empty($get_option) && is_array($get_option)){  
+			foreach ($get_option as $options_array) {
+				$option .= '<option value="'.esc_attr($options_array->name).'">'.esc_html($options_array->name).'</option>';
+			}}
+		}
+
+		if($include_type == 'tags'){ 
+			$get_option = get_tags(array(
+			'hide_empty' => false
+			));
+			$option ='<option value="">'.esc_html__( 'Select Tag', 'push-notification' ).'</option>';
+			if(!empty($get_option) && is_array($get_option)){  
+			foreach ($get_option as $options_array) {
+				$option .= '<option value="'.esc_attr($options_array->name).'">'.esc_html($options_array->name).'</option>';
+			}
+		}
+
+		}
+
+		if($include_type == 'user_type'){ 
+			$get_options = array("administrator"=>"Administrator", "editor"=>"Editor", "author"=>"Author", "contributor"=>"Contributor","subscriber"=>"Subscriber");
+			$get_option = $get_options;
+			$option ='<option value="">'.esc_html__( 'Select User', 'push-notification' ).'</option>';
+			if(!empty($get_option) && is_array($get_option)){   
+			foreach ($get_option as $key => $value) {
+				$option .= '<option value="'.esc_attr($key).'">'.esc_html($value).'</option>';
+			}}
+
+		}
+
+		if($include_type == 'page_template'){ 
+			$get_option = wp_get_theme()->get_page_templates();
+			$option ='<option value="">'.esc_html__( 'Select Page Template', 'push-notification' ).'</option>';
+			if(!empty($get_option) && is_array($get_option)){   
+			foreach ($get_option as $key => $value) {
+				$option .= '<option value="'.esc_attr($value).'">'.esc_html($value).'</option>';
+			}}
+		}
+
+		$data = array('success' => 1,'message'=>esc_html__('Success','push-notification'),'option'=>$option );
+		echo wp_json_encode($data);    exit;
+
+	}
+
+	function pn_get_data_by_type($include_type='post',$search=null){
+		$result = array();
+		$posts_per_page = 50;
+		
+		if($include_type == 'post' || $include_type == 'page'){
+			$args = array(
+				'post_type' => $include_type,
+				'post_status' => 'publish',
+				'posts_per_page' => $posts_per_page,
+			);
+			if(!empty($search)){
+				$args['s']	= $search;
+			}
+	
+			$meta_query = new WP_Query($args);        
+				
+			  if($meta_query->have_posts()) {
+				while($meta_query->have_posts()) {
+					$meta_query->the_post();
+					$result[] = array('id' => get_the_ID(), 'text' => get_the_title());
+				  }
+				wp_reset_postdata();
+			  }
+			
+		}
+		if(in_array($include_type, array('post_type','globally'))) {
+			if($include_type == 'post_type'){
+				$args['public'] = true;
+				if(!empty($search)){
+					$args['name']	= $search;
+				}
+				  $get_option = get_post_types( $args, 'names');
+			}
+			if($include_type == 'globally'){ 
+				$get_option = array('Globally');
+			}
+			if(!empty($get_option) && is_array($get_option)){        
+			foreach ($get_option as $options_array) {
+				$result[] = array('id' => $options_array, 'text' => $options_array);
+			}}
+		}
+	
+		 if($include_type == 'post_category'){
+			$args = array( 
+				'hide_empty' => true,
+				'number'     => $posts_per_page, 
+			);
+	
+			if(!empty($search)){
+				$args['name__like'] = $search;
+			}
+			$get_option = get_terms( 'category', $args);
+			// $get_option = get_categories($args);
+			if(!empty($get_option) && is_array($get_option)){   
+				foreach ($get_option as $options_array) {
+					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+				}
+			}
+		   
+		}
+	
+		if($include_type == 'taxonomy'){
+			$args = array( 
+				'hide_empty' => true,
+				'number'     => $posts_per_page, 
+			);
+	
+			if(!empty($search)){
+				$args['name__like'] = $search;
+			}
+			$get_option = get_terms($args);
+			if(!empty($get_option) && is_array($get_option)){  
+				foreach ($get_option as $options_array) {
+					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+				}
+			}
+		}
+	
+		if($include_type == 'tags'){
+			$args['hide_empty'] = false;
+			$get_option = get_tags($args);
+			if(!empty($get_option) && is_array($get_option)){  
+				foreach ($get_option as $options_array) {
+					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+				}
+			}
+		}
+	
+		if($include_type == 'user_type'){ 
+			$get_options = array("administrator"=>"Administrator", "editor"=>"Editor", "author"=>"Author", "contributor"=>"Contributor","subscriber"=>"Subscriber");
+			$get_option = $get_options;
+			if(!empty($get_option) && is_array($get_option)){   
+				foreach ($get_option as $key => $value) {
+					$result[] = array('id' => $key, 'text' => $value);
+				}
+			}
+	
+		}
+	
+		if($include_type == 'page_template'){ 
+			$get_option = wp_get_theme()->get_page_templates();
+			if(!empty($get_option) && is_array($get_option)){   
+				foreach ($get_option as $key => $value) {
+					$result[] = array('id' => $value, 'text' => $value);
+				}
+			}
+		}
+	
+		return $result;
+	}
+
+	add_action( 'wp_ajax_pn_get_select2_data_by_cat', 'pn_get_select2_data_by_cat');
+	function pn_get_select2_data_by_cat(){
+		if(empty( $_POST['nonce'])){
+			return;	
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
+			return;	
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;	
+		}
+		$search        = isset( $_GET['q'] ) ? sanitize_text_field( $_GET['q'] ) : '';
+		$type          = isset( $_GET['type'] ) ? sanitize_text_field( $_GET['type'] ) : '';
+		$result = pn_get_data_by_type($type,$search);
+		wp_send_json(['results' => $result] );
+		
+		wp_die();
+	}
+
+	function pn_RemoveExtraValue($val) {
+		$val = str_replace("_", " ", $val);
+		$val = str_replace(".php", "", $val);
+		$val = ucwords($val);
+		return $val;
+	}
+	
