@@ -326,16 +326,16 @@ function pushnotification_load_messaging(){
   if(pnScriptSetting.pn_token_exists=='0'){
 	  setTimeout(function(){
 		  messaging.getToken().then(function(currentToken) {
-			  if (currentToken) {                      
+			  if (currentToken) {
 			   push_notification_saveToken(currentToken);
 			   console.log(currentToken);
 				push_notification_setTokenSentToServer(true);
-			  } else {                       
-				console.log('No Instance ID token available. Request permission to generate one.');                       
+			  } else {
+				console.log('No Instance ID token available. Request permission to generate one.');
 				push_notification_setTokenSentToServer(false);
 			  }
 			}).catch(function(err) {
-			  console.log('An error occurred while retrieving token. ', err);                      
+			  console.log('An error occurred while retrieving token. ', err);
 			  push_notification_setTokenSentToServer(false);
 			});
   
@@ -347,8 +347,8 @@ setTimeout(function(){
 	if (document.querySelector('.pn-bell-button')) {
 		const bellButton = document.querySelector('.pn-bell-button');
 		bellButton.addEventListener('click', () => {
-			console.log('Bell button clicked!');
 			document.cookie = 'pn_notification_block' + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+			localStorage.removeItem('pn_notification_block');
 			location.reload();
 		});
 	}

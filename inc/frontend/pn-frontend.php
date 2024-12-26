@@ -1184,10 +1184,23 @@ class Push_Notification_Frontend{
 			if (!empty($settings['include_targeting_data'])) {
 				$expo_include_data = $settings['include_targeting_data'];
 			}
-			
-			$current_page_type = get_post_type();
-			// $current_page_title = get_the_title();
+
+			$current_page_type = '';
+			if(is_singular() && !is_front_page()){
+				$current_page_type = get_post_type();
+			}
+
 			$current_page_title = single_post_title("",false);
+
+			if ( empty($current_page_type) ) {
+				global $wp;
+				$slug = $wp->request;
+				$q = get_page_by_path( $slug, OBJECT, array( 'post', 'page' ) );
+				if ( ! empty($q) && isset($q->post_type) ) {
+					$current_page_type = $q->post_type;
+					$current_page_title = $q->post_title;
+				}
+			}
 	
 			$is_desplay = 0;
 	
@@ -1232,139 +1245,49 @@ class Push_Notification_Frontend{
 					$current_page_type = 'user_type';
 				}
 			}
-				   
 			if(in_array($current_page_type,$expo_include_type)){
-				$find_from = $this->pn_get_data_by_type($current_page_type,'including');
+				$find_from = $this->pn_visibility_data_by_type($current_page_type,'including');
 				if (in_array($current_page_title, $find_from)) {
-					$is_desplay = 1; 
+					$is_desplay = 1;
 				}
 			}
 	
 			if (in_array('post_type',$expo_include_type)) {
-				$find_from = $this->pn_get_data_by_type('post_type','including');
+				$find_from = $this->pn_visibility_data_by_type('post_type','including');
 				if(in_array($current_page_type,$find_from)){
-						$is_desplay = 1;
+					$is_desplay = 1;
 				}
 			}
 	
 			if(in_array('globally',$expo_include_type)){
 				$is_desplay = 1; 
 			}
-			/*Include code end */
 			return $is_desplay;
 		}
 		return 1;
 	}
 
-	function pn_get_data_by_type($include_type='post',$search=null){
-		$result = array();
-		$posts_per_page = 50;
-		
-		if($include_type == 'post' || $include_type == 'page'){
-			$args = array(
-				'post_type' => $include_type,
-				'post_status' => 'publish',
-				'posts_per_page' => $posts_per_page,
-			);
-			if(!empty($search)){
-				$args['s']	= $search;
-			}
+	function pn_visibility_data_by_type($type,$from){
+		$response_array = array();
+		$settings = push_notification_settings();
+		if(isset($settings['include_targeting_data']) && isset($settings['include_targeting_type']) && !empty($settings['include_targeting_type'])){
+			$expo_include_type = array();
+			$expo_include_data = array();
 	
-			$meta_query = new WP_Query($args);        
+			if (!empty($settings['include_targeting_type'])) {
+				$expo_include_type = $settings['include_targeting_type'];
+			}
+			if (!empty($settings['include_targeting_data'])) {
+				$expo_include_data = $settings['include_targeting_data'];
+			}
 				
-			  if($meta_query->have_posts()) {
-				while($meta_query->have_posts()) {
-					$meta_query->the_post();
-					$result[] = array('id' => get_the_ID(), 'text' => get_the_title());
-				  }
-				wp_reset_postdata();
-			  }
-			
-		}
-		if(in_array($include_type, array('post_type','globally'))) {
-			if($include_type == 'post_type'){
-				$args['public'] = true;
-				if(!empty($search)){
-					$args['name']	= $search;
-				}
-				  $get_option = get_post_types( $args, 'names');
-			}
-			if($include_type == 'globally'){ 
-				$get_option = array('Globally');
-			}
-			if(!empty($get_option) && is_array($get_option)){        
-			foreach ($get_option as $options_array) {
-				$result[] = array('id' => $options_array, 'text' => $options_array);
-			}}
-		}
-	
-		 if($include_type == 'post_category'){
-			$args = array( 
-				'hide_empty' => true,
-				'number'     => $posts_per_page, 
-			);
-	
-			if(!empty($search)){
-				$args['name__like'] = $search;
-			}
-			$get_option = get_terms( 'category', $args);
-			// $get_option = get_categories($args);
-			if(!empty($get_option) && is_array($get_option)){   
-				foreach ($get_option as $options_array) {
-					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
-				}
-			}
-		   
-		}
-	
-		if($include_type == 'taxonomy'){
-			$args = array( 
-				'hide_empty' => true,
-				'number'     => $posts_per_page, 
-			);
-	
-			if(!empty($search)){
-				$args['name__like'] = $search;
-			}
-			$get_option = get_terms($args);
-			if(!empty($get_option) && is_array($get_option)){  
-				foreach ($get_option as $options_array) {
-					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
+			foreach ($expo_include_type as $key => $value) {
+				if ($value == $type) {
+					$response_array[$key] = $expo_include_data[$key];
 				}
 			}
 		}
-	
-		if($include_type == 'tags'){
-			$args['hide_empty'] = false;
-			$get_option = get_tags($args);
-			if(!empty($get_option) && is_array($get_option)){  
-				foreach ($get_option as $options_array) {
-					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
-				}
-			}
-		}
-	
-		if($include_type == 'user_type'){ 
-			$get_options = array("administrator"=>"Administrator", "editor"=>"Editor", "author"=>"Author", "contributor"=>"Contributor","subscriber"=>"Subscriber");
-			$get_option = $get_options;
-			if(!empty($get_option) && is_array($get_option)){   
-				foreach ($get_option as $key => $value) {
-					$result[] = array('id' => $key, 'text' => $value);
-				}
-			}
-	
-		}
-	
-		if($include_type == 'page_template'){ 
-			$get_option = wp_get_theme()->get_page_templates();
-			if(!empty($get_option) && is_array($get_option)){   
-				foreach ($get_option as $key => $value) {
-					$result[] = array('id' => $value, 'text' => $value);
-				}
-			}
-		}
-	
-		return $result;
+		return $response_array;
 	}
 }
 
