@@ -189,7 +189,7 @@ class Push_Notification_Admin{
 						echo '<a href="' . esc_url('#pn_dashboard') . '" link="pn_dashboard" class="nav-tab"><span class="dashicons dashicons-dashboard"></span> ' . esc_html__('Dashboard','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_notification_bell') . '" link="pn_notification_bell" class="nav-tab js_notification"><span class="dashicons dashicons-bell"></span> ' . esc_html__('Notification','push-notification') . '</a>';
 						if ( ! is_network_admin()) {
-						if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
+							if( !empty($authData['token_details']) && !empty($authData['token_details']['user_pro_status']) ){
 								if( (isset($authData['token_details']) && $authData['token_details']['user_pro_status']=='active') ){
 									echo '<a href="' . esc_url('#pn_segmentation') . '" link="pn_segmentation" class="nav-tab"><span class="dashicons dashicons-admin-generic"></span> ' . esc_html__('Segmentation','push-notification') . '</a>';
 								}
@@ -305,7 +305,7 @@ class Push_Notification_Admin{
 
 			add_settings_field(
 				'pn_select_custom_roles',								// ID
-				'<label for="pn_select_custom_roles" '.$soc_display.'><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
+				'<label for="pn_select_custom_roles"><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_select_specific_roles_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -1159,7 +1159,9 @@ class Push_Notification_Admin{
 						}
 						echo '<option value="'.esc_attr(strtolower($role['name']) ).'"  '.esc_attr($selected_option).'>'. esc_html( $role['name'] ).'</option>';
 					}
-			echo '</select></div></div>';
+			echo '</select>
+			<p>'.esc_html__('Display popup will be visible for selected user roles or on empty it will display to everyone', 'push-notification').'</p
+			</div></div>';
 	}
 	public function pn_utm_tracking_callback() {
 

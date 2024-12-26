@@ -356,9 +356,9 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_notification_bell").hide();
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
-	        	jQuery("#pn_compatibility").show();
 	        	jQuery("#pn_visibility").hide();
 	        	jQuery("#pn_campaings").hide();
+	        	jQuery("#pn_compatibility").show();
 	        }
 	        if( link == "pn_visibility") {
 	        	jQuery("#pn_dashboard").hide();
@@ -368,8 +368,8 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
 	        	jQuery("#pn_compatibility").hide();
-	        	jQuery("#pn_visibility").show();
 	        	jQuery("#pn_campaings").hide();
+	        	jQuery("#pn_visibility").show();
 	        }
 	        if( link == "pn_help") {
 	        	jQuery("#pn_dashboard").hide();

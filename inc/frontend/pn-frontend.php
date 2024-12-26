@@ -554,7 +554,7 @@ class Push_Notification_Frontend{
 			return false;
 		}else{
 			if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && is_user_logged_in() ) {
-				$roles_val = $settings['roles'];
+				$roles_val = (isset($settings['roles'])) ? $settings['roles'] : [];
 				if ( !empty( $roles_val )) {
 					$selected_roles = !is_array($roles_val) ? explode(',',$roles_val ) : $roles_val;
 					$user = wp_get_current_user();
@@ -562,8 +562,6 @@ class Push_Notification_Frontend{
 					if (empty(array_intersect($current_roles, $selected_roles))) {
 						return false;
 					}
-				}else{
-					return false;
 				}
 			}
 		}
