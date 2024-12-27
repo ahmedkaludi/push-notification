@@ -69,10 +69,15 @@ function pushnotification_load_messaging(reg){
 		if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
 			return false;
 		}
+
+		var popup_show_afternseconds = 1000;
+		if (pnScriptSetting.popup_show_afternseconds) {
+			popup_show_afternseconds = (parseInt(pnScriptSetting.popup_show_afternseconds) * 1000);
+		}
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		setTimeout(function() {
 			if(wrapper){ wrapper[0].style.display="flex"; }
-	   }, pnScriptSetting.notification_popup_show_afternseconds);
+	   }, pnScriptSetting.popup_show_afternseconds);
 	}
 	document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
 		var date = new Date;

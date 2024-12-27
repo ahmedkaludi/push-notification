@@ -59,28 +59,31 @@ function pushnotification_load_messaging(){
   }
 	  
 		if(PWAforwpreadCookie("pn_notification_block")==null){
-		  const pageAccessedByReload = window.history.length;
-		  if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
-			  return false;
-		  }
-		  if(pnScriptSetting.superpwa_apk_only == '1'){
+			const pageAccessedByReload = window.history.length;
+			if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
+				return false;
+		}
+		if(pnScriptSetting.superpwa_apk_only == '1'){
 			let superpwa_apk = sessionStorage.getItem('superpwa_mode');
 			if(superpwa_apk != 'apk'){
 				return false;
 			}
-		  }
+		}
 
-		  if(pnScriptSetting.pwaforwp_apk_only == '1'){
+		if(pnScriptSetting.pwaforwp_apk_only == '1'){
 			let pwaforwp_apk = sessionStorage.getItem('pwaforwp_mode');
 			if(pwaforwp_apk != 'apk'){
 				return false;
 			}
-		  }
-
-		  setTimeout(function() {
+		}
+		var popup_show_afternseconds = 1000;
+		if (pnScriptSetting.popup_show_afternseconds) {
+			popup_show_afternseconds = (parseInt(pnScriptSetting.popup_show_afternseconds) * 1000);
+		}
+		setTimeout(function() {
 			var wrapper = document.getElementsByClassName("pn-wrapper");
 			if(wrapper.length > 0){ wrapper[0].style.display="flex"; }
-	   }, pnScriptSetting.notification_popup_show_afternseconds);	
+	   	}, popup_show_afternseconds);	
 		 
 	  }
 	  
