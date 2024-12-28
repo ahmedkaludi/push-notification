@@ -1601,7 +1601,11 @@ class Push_Notification_Admin{
 	}
 
 	public function send_notification_on_update($new_status, $old_status, $post){
-		$pn_settings = push_notification_settings();		
+		if ( ! isset( $_POST['set_send_push_notification_nonce'] ) )
+			return;
+		if ( !wp_verify_nonce( sanitize_text_field( wp_unslash(  $_POST['set_send_push_notification_nonce'] ) ), 'set_send_push_notification_data' ) )
+			return;
+		$pn_settings = push_notification_settings();
 		if ( 'publish' !== $new_status ){
         	return;
 		}
@@ -1610,16 +1614,16 @@ class Push_Notification_Admin{
 		}
 		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
 			return;
-		}				
+		}
 		$post_notf_on = '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
 		if(isset($_POST['pn_send_notification_on_post'])){
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
 			$post_notf_on = sanitize_text_field( wp_unslash( $_POST['pn_send_notification_on_post']) );
-		}			
+		}
 		if(isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_notf_on) || $post_notf_on !== 1)){
 			if ( $new_status !== $old_status) {
-			 	$this->send_notification($post);
+				$this->send_notification($post);
 			}
 		}
 
