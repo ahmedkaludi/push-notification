@@ -1853,7 +1853,15 @@ class Push_Notification_Admin{
 		$token_ids = array_unique($token_ids);
 
 		$post_title = esc_html__('Order status changed', 'push-notification');
-		$post_content = esc_html__('Order id #', 'push-notification').esc_html($order_id).esc_html__(' changed from ', 'push-notification').esc_html($status_from).esc_html__(' to ', 'push-notification').esc_html($status_to);
+		$post_content = esc_html( 
+			/* translators: %1$s: order_id , %2$s: status_from, %3$s: status_to */
+			sprintf(
+				__( 'Order id #%1$s changed from %2$s to %3$s', 'push-notification' ),
+				$order_id,
+				$status_from,
+				$status_to
+			)
+		);
 		$auth_settings = push_notification_auth_settings();
 
 		//API Data
