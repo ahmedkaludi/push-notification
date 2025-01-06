@@ -1523,13 +1523,13 @@ class Push_Notification_Admin{
 					}
 				}
 
-				if( ! empty($send_type) ){
+				if( ! empty($send_type) && $send_type!='custom-roles'){
 					if($send_type=='custom-page-subscribed'){
 						$authData = push_notification_auth_settings();
 						if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated'] ==1){
 							$push_notify_token =pn_get_tokens_by_url($page_subscribed);
 						}
-					}				
+					}
 					if(empty($push_notify_token)){
 						if($send_type=='custom-select'){
 							wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
@@ -1540,17 +1540,18 @@ class Push_Notification_Admin{
 						}
 					}
 				}
-
 				if($send_type=='custom-roles'){
 					$roles = isset($audience_token_id)?explode(',',$audience_token_id):'';
-					$role_wise_web_token_ids = get_option('pn_website_token_ids',[]);
 					$push_notify_token = [];
 					$audience_token_url = 'campaign_for_individual_tokens';
-					foreach($roles as $role){
-						if(isset($role_wise_web_token_ids[$role]) && !empty($role_wise_web_token_ids[$role])){
-							$push_notify_token = array_merge($push_notify_token,$role_wise_web_token_ids[$role]);
+					$role_wise_web_token_ids = get_option('pn_website_token_ids',[]);
+					$website_ids= [];
+					foreach ($roles as $key=> $value ) {
+						if (isset($role_wise_web_token_ids[$value])) {
+							$website_ids = array_merge($website_ids,$role_wise_web_token_ids[$value]);
 						}
 					}
+					$push_notify_token = $website_ids;
 				}
 
 				$payload =array(
