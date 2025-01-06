@@ -10,7 +10,6 @@ class Push_Notification_Admin{
 	public function __construct(){}
 
 	public function init(){
-		
 		add_action('admin_notices', array($this, 'admin_notices_opt') );
 		if (! is_network_admin()) {
 			add_action( 'admin_menu', array( $this, 'add_menu_links') );
@@ -1542,6 +1541,18 @@ class Push_Notification_Admin{
 					}
 				}
 
+				if($send_type=='custom-roles'){
+					$roles = isset($audience_token_id)?explode(',',$audience_token_id):'';
+					$role_wise_web_token_ids = get_option('pn_website_token_ids',[]);
+					$push_notify_token = [];
+					$audience_token_url = 'campaign_for_individual_tokens';
+					foreach($roles as $role){
+						if(isset($role_wise_web_token_ids[$role]) && !empty($role_wise_web_token_ids[$role])){
+							$push_notify_token = array_merge($push_notify_token,$role_wise_web_token_ids[$role]);
+						}
+					}
+				}
+
 				$payload =array(
 					'user_token'=>$auth_settings['user_token'],
 					'title'=>$title,
@@ -2239,8 +2250,9 @@ function push_notification_pro_notifyform_before(){
 			<label for="notification-send-type">'.esc_html__('Send To','push-notification').'</label>
 			<select id="notification-send-type" class="regular-text js_pn_select">
 				<option value="">'.esc_html__('All Subscribers','push-notification').'</option>
-				<option value="custom-select">'.esc_html__('Select subscribers','push-notification').'</option>
-				<option value="custom-upload">'.esc_html__('Upload subscribers list','push-notification').'</option>';
+				<option value="custom-select">'.esc_html__('Select Subscribers','push-notification').'</option>
+				<option value="custom-upload">'.esc_html__('Upload Subscribers List','push-notification').'</option>
+				<option value="custom-roles">'.esc_html__('Select User Roles','push-notification').'</option>';
 
 	if ( isset( $notification_settings['pn_url_capture']) && ($notification_settings['pn_url_capture'] == 'auto' || $notification_settings['pn_url_capture'] == 'manual' ) ) {
 
@@ -2253,8 +2265,8 @@ function push_notification_pro_notifyform_before(){
 	if ( function_exists( 'pll_current_language' ) && isset($notification_settings['pn_polylang_compatibale']) && $notification_settings['pn_polylang_compatibale']) {
 		$languages = pll_languages_list();
 		echo '<div class="form-group">
-				<label for="notification-send-type">'.esc_html__('Select Language','push-notification').'</label>
-				<select id="notification-send-type" class="regular-text js_pn_select">';
+				<label for="pn-language-type">'.esc_html__('Select Language','push-notification').'</label>
+				<select id="pn-language-type" class="regular-text js_pn_select">';
 					foreach ($languages as $key => $value) {
 						echo '<option value="'.esc_attr($value).'">'.esc_html($value).'</option>';
 					}
@@ -2264,12 +2276,17 @@ function push_notification_pro_notifyform_before(){
 
 	
 		  
-		  $users = get_users( array(
+		$users = get_users( array(
 								// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 								'meta_key'     => 'pnwoo_notification_token',
 							) );
 
 		$today_date = gmdate( 'Y-m-d', strtotime( '+1 day' ) );
+		global $wp_roles;
+		if ( ! isset( $wp_roles ) ) {
+			$wp_roles = new WP_Roles();
+		}
+		$roles = $wp_roles->roles;
 
 		echo '<div class="form-group" style="display:none">
 			<label for="notification-custom-select">'.esc_html__('Select Subscribers','push-notification').'</label>
@@ -2279,6 +2296,15 @@ function push_notification_pro_notifyform_before(){
 					echo '<option value="'.esc_attr($user->ID).'">'.esc_attr($user->user_login).' ('.esc_attr($user->user_email).')</option>';			
 				}
 			}			
+		echo' </select></div>
+		<div class="form-group" style="display:none">
+			<label for="pn-notification-custom-roles">'.esc_html__('Select User Roles','push-notification').'</label>
+			<select id="pn-notification-custom-roles" class="regular-text js_pn_select" placeholder="'.esc_html__('Select User Roles','push-notification').'" multiple>';
+			if(!empty($roles)){
+				foreach ($roles as $role_key => $role) {
+					echo '<option value="'.esc_attr(strtolower($role['name']) ).'"  >'. esc_html( $role['name'] ).'</option>';
+				}
+			}
 		echo' </select>
 		  </div>';
 

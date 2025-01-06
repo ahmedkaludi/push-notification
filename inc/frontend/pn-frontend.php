@@ -364,20 +364,16 @@ class Push_Notification_Frontend{
 				$user_agent = $this->check_browser_type();
 			}
 			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
-			$settings = push_notification_settings();
-			if (isset($settings['pn_display_popup_after_login']) && !empty( $settings['pn_display_popup_after_login'] ) && is_user_logged_in() ) {
-				$roles_val = $settings['roles'];
-				if ( !empty( $roles_val )) {
-					$selected_roles = !is_array($roles_val) ? explode(',',$roles_val ) : $roles_val;
+			if (is_user_logged_in() ) {
+				if ( isset($response['status']) && $response['status'] == 200 ) {
 					$user = wp_get_current_user();
 					$current_roles = (array) $user->roles;
-					if (!empty(array_intersect($current_roles, $selected_roles))) {
-						if ( isset($response['status']) && $response['status'] == 200 ) {
-							$website_ids = get_option('pn_website_token_ids',[]);
-							array_push($website_ids, $response['data']['id']);
-							update_option('pn_website_token_ids', $website_ids);
-						}
+					$role_wise_web_token_ids = [];
+					$role_wise_web_token_ids = get_option('pn_website_token_ids',[]);
+					foreach ($current_roles as $key=> $value ) {
+						$role_wise_web_token_ids[$value][] = $response['data']['id'];
 					}
+					update_option('pn_website_token_ids', $role_wise_web_token_ids);
 				}
 			}
 			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address, $url);
