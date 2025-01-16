@@ -561,7 +561,7 @@ class Push_Notification_Frontend{
 				}
 			}
 		}
-		if ( isset($settings['pn_revoke_subscription_popup']) && $settings['pn_revoke_subscription_popup'] && isset($_COOKIE['pn_notification_block']) && $_COOKIE['pn_notification_block']) {
+		if ( isset($settings['pn_revoke_subscription_popup']) && $settings['pn_revoke_subscription_popup'] && isset($_COOKIE['pn_notification_block']) && $_COOKIE['pn_notification_block'] && !isset($_COOKIE['notification_permission'])) {
 			?>
 			<style>
 				.pn-bell-container {
