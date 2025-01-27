@@ -336,6 +336,20 @@ class Push_Notification_Admin{
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_gravity_compatibale',								// ID
+				'<label for="pn_gravity_compatibale"><b>'.esc_html__('Gravity Plugin', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_gravity_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_buddyboss_compatibale',								// ID
+				'<label for="pn_buddyboss_compatibale"><b>'.esc_html__('BuddyBoss Plugin', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_buddyboss_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
+			);
 
 		add_settings_section('push_notification_user_settings_section',
 					 ' ', 
@@ -1078,6 +1092,28 @@ class Push_Notification_Admin{
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_peepso_compatibale" name="push_notification_settings[pn_peepso_compatibale]"  value="1" '.esc_attr($pn_peepso_compatibale).'/>
 					<p class="help">'.esc_html__('It allows you to send notification based on peepso events. Such as posting in feed, chating and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+	}
+	public function pn_gravity_callback(){		
+		$notification = push_notification_settings();
+		$pn_gravity_compatibale = "";
+		if (isset($notification['pn_gravity_compatibale']) && $notification['pn_gravity_compatibale']) {
+			$pn_gravity_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_gravity_compatibale" name="push_notification_settings[pn_gravity_compatibale]"  value="1" '.esc_attr($pn_gravity_compatibale).'/>
+					<p class="help">'.esc_html__('It allows you to send notification based on gravity form submission.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+	}
+	public function pn_buddyboss_callback(){		
+		$notification = push_notification_settings();
+		$pn_buddyboss_compatibale = "";
+		if (isset($notification['pn_buddyboss_compatibale']) && $notification['pn_buddyboss_compatibale']) {
+			$pn_buddyboss_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_buddyboss_compatibale" name="push_notification_settings[pn_buddyboss_compatibale]"  value="1" '.esc_attr($pn_buddyboss_compatibale).'/>
+					<p class="help">'.esc_html__('It allows you to send notification based on buddyboss events. Such as posting in timeling, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	
