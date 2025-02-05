@@ -296,7 +296,7 @@ class Push_Notification_Admin{
 
 			add_settings_field(
 				'pn_display_popup_after_login',								// ID
-				esc_html__('Display Pop Up After Login', 'push-notification'),// Title
+				esc_html__('Logged in Users', 'push-notification'),// Title
 				array( $this, 'pn_display_popup_after_login_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -338,7 +338,7 @@ class Push_Notification_Admin{
 			);
 			add_settings_field(
 				'pn_gravity_compatibale',								// ID
-				'<label for="pn_gravity_compatibale"><b>'.esc_html__('Gravity Plugin', 'push-notification').'</b></label>',// Title
+				'<label for="pn_gravity_compatibale"><b>'.esc_html__('Gravity Form Plugin', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_gravity_callback'),// Callback
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
@@ -440,7 +440,7 @@ class Push_Notification_Admin{
 
 			add_settings_field(
 				'pn_revoke_subscription_popup',								// ID
-				esc_html__('Display popup bell on deny', 'push-notification'),// Title
+				esc_html__('Display open subscriber popup', 'push-notification'),// Title
 				array( $this, 'pn_revoke_subscription_popup_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
@@ -721,19 +721,16 @@ class Push_Notification_Admin{
                     <td colspan="3">
 
                         <div class="visibility-include-target-item-list">
-                            <?php $rand = time() . rand(000, 999);
-							// echo '<pre>';
-							// print_r($settings);
-
+                            <?php $rand = time() . wp_rand(000, 999);
                             if (!empty($settings['include_targeting_type']) && is_array($settings['include_targeting_type'])) {
                                 $expo_include_type = $settings['include_targeting_type'];
                                 $expo_include_data = (isset($settings['include_targeting_data'])) ? $settings['include_targeting_data'] :[];
                                 for ($i = 0; $i < count($expo_include_type); $i++) {
-                                    $or_string = '';
-                                    if ($i !== 0) {
-                                        $or_string = '<b>OR</b>';
+                                    echo '<span class="pn-visibility-target-icon-' . esc_attr($rand) . '">';
+									if ($i !== 0) {
+                                        echo '<b>OR</b>';
                                     }
-                                    echo '<span class="pn-visibility-target-icon-' . esc_attr($rand) . '">'.$or_string.'<input type="hidden" name="push_notification_settings[include_targeting_type][]" value="' . esc_attr($expo_include_type[$i]) . '">
+									echo '<input type="hidden" name="push_notification_settings[include_targeting_type][]" value="' . esc_attr($expo_include_type[$i]) . '">
 									<input type="hidden" name="push_notification_settings[include_targeting_data][]" value="' . esc_attr($expo_include_data[$i]) . '">';
                                     $expo_include_type_test = pn_RemoveExtraValue($expo_include_type[$i]);
                                     $expo_include_data_test = pn_RemoveExtraValue($expo_include_data[$i]);
@@ -1901,15 +1898,17 @@ class Push_Notification_Admin{
 		$token_ids = array_unique($token_ids);
 
 		$post_title = esc_html__('Order status changed', 'push-notification');
-		$post_content = esc_html( 
-			/* translators: %1$s: order_id , %2$s: status_from, %3$s: status_to */
+		// translators: %1$s: order_id, %2$s: status_from, %3$s: status_to
+		$post_content = esc_html(
 			sprintf(
+				//phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
 				__( 'Order id #%1$s changed from %2$s to %3$s', 'push-notification' ),
 				$order_id,
 				$status_from,
 				$status_to
 			)
 		);
+
 		$auth_settings = push_notification_auth_settings();
 
 		//API Data
@@ -2561,10 +2560,19 @@ function pn_get_all_unique_meta() {
 			return;	
 		}
 
-		$include_targeting_type = sanitize_text_field($_POST['include_targeting_type']);
-		$include_targeting_data = sanitize_text_field($_POST['include_targeting_data']);
+		$include_targeting_data = "";
+		$include_targeting_type = "";
 
-		$rand = time() . rand(000, 999);
+		if ( isset( $_POST['include_targeting_type'] ) ) {
+			$include_targeting_type = sanitize_text_field( wp_unslash( $_POST['include_targeting_type'] ) );
+		}
+
+		if ( isset( $_POST['include_targeting_data'] ) ) {
+			$include_targeting_data = sanitize_text_field( wp_unslash( $_POST['include_targeting_data'] ) );
+		}
+
+
+		$rand = time() . wp_rand(000, 999);
 		$option = "";
 		$option .= '<span class="pn-visibility-target-icon-' . esc_attr($rand) . '">
 		<input type="hidden" name="push_notification_settings[include_targeting_type][]" value="' . esc_attr($include_targeting_type) . '">
@@ -2582,22 +2590,25 @@ function pn_get_all_unique_meta() {
 	add_action("wp_ajax_pn_include_visibility_setting_callback", 'pn_include_visibility_setting_callback');
 	function pn_include_visibility_setting_callback() {
 		if(empty( $_POST['nonce'])){
-			return;	
+			return;
 		}
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
-			return;	
+			return;
 		}
 		if ( ! current_user_can( 'manage_options' ) ) {
-			return;	
+			return;
 		}
-		$include_type = sanitize_text_field($_POST['include_type']);
+		$include_type = "";
+		if ( isset( $_POST['include_type'] ) ) {
+			$include_type = sanitize_text_field( wp_unslash( $_POST['include_type'] ) );
+		}
 
 		if($include_type == 'post' || $include_type == 'page'){
 			$args = array(
 				'post_type' => $include_type,
 				'post_status' => 'publish',
 				'posts_per_page' => 50,
-			);  
+			);
 			$query = new WP_Query($args);
 			$option ='<option value="">Select '.esc_html($include_type).' Type</option>';
 			while ($query->have_posts()) : $query->the_post();
@@ -2727,14 +2738,14 @@ function pn_get_all_unique_meta() {
 		 if($include_type == 'post_category'){
 			$args = array( 
 				'hide_empty' => true,
-				'number'     => $posts_per_page, 
+				'number'     => $posts_per_page,
+				'taxonomy' => 'category',
 			);
 	
 			if(!empty($search)){
 				$args['name__like'] = $search;
 			}
-			$get_option = get_terms( 'category', $args);
-			// $get_option = get_categories($args);
+			$get_option = get_terms($args);
 			if(!empty($get_option) && is_array($get_option)){   
 				foreach ($get_option as $options_array) {
 					$result[] = array('id' => $options_array->name, 'text' => $options_array->name);
@@ -2804,8 +2815,8 @@ function pn_get_all_unique_meta() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;	
 		}
-		$search        = isset( $_GET['q'] ) ? sanitize_text_field( $_GET['q'] ) : '';
-		$type          = isset( $_GET['type'] ) ? sanitize_text_field( $_GET['type'] ) : '';
+		$search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+		$type = isset( $_GET['type'] ) ? sanitize_text_field( wp_unslash( $_GET['type'] ) ) : '';
 		$result = pn_get_data_by_type($type,$search);
 		wp_send_json(['results' => $result] );
 		

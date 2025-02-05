@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.7
-Stable tag: 1.39
+Stable tag: 1.40
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -23,6 +23,8 @@ Send push notifications automatically when a post is published or updated. You c
 * Update a post a draft will not trigger push notifications.
 * Compability with community by PeepSo plugin.
 * Compability with Polylang plugin.
+* Compability with Gravity form plugin.
+* Compability with BuddyBoss Plugin.
 * Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
 
 = Pro Features: =
@@ -57,6 +59,15 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.40 (05 February 2025) =
+* Added: Added integration with BuddyBoss with directly push notifications plugin. #132
+* Added: Added a compatibility with Gravity form #140
+* Fixed: Push Notification Disabled Checkbox Not Working on Publish/Save in Gutenberg Editor #136
+* Fixed: Popup show after 'n' seconds option is not working #102
+* Enhancement: woocommerce_order_status_changed | Option to translate status messages #116
+* Added: Custom development #141
+
 
 = 1.39 (28 November 2024) =
 * Enhancement: Mention self hosted in marketing #27
@@ -113,10 +124,5 @@ Fixed: Issue with plugin activation. #103
 * Fixed: Plugin is not being deactivated on multisite #83 
 * Fixed: Conflict issue with campaigns #73
 * Enhancement: Test with WordPress 6.4 and update readme.txt #77
-
-= 1.31 (30 October 2023) =
-* Added: Added Option to export Users from User's section in push notification #57.
-* Added: Added a filter/ function to send a push notification to specific users. #67.
-* Added: Added an option to schedule push notifications. #64.
 
 Full changelog available [ at changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)

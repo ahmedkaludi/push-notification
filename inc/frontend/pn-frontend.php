@@ -90,8 +90,6 @@ class Push_Notification_Frontend{
 		// Buddyboss
 		add_action( 'pn_tokenid_registration_id', array($this, 'buddyboss_pn_tokenid_registration_id') ,10,5);
 		add_filter( 'bp_activity_comment_action', array( $this,'buddyboss_pn_activity_comment_action'), 10, 2);
-		add_action( 'bp_activity_after_save', array( $this,'buddyboss_pn_activity_create_feed'));
-		// add_filter( 'bp_activity_at_name_do_notifications', array( $this,'buddyboss_pn_message_notifications'));
 		add_action( 'messages_message_sent', array( $this,'buddyboss_pn_message_notifications'));
 		add_action( 'bp_invitations_send_invitation_by_id_before_send', array( $this,'buddyboss_pn_invitation_notifications'));
 		add_filter( 'friends_friendship_requested', array( $this,'buddyboss_pn_friend_request'), 10, 4);
@@ -579,6 +577,7 @@ class Push_Notification_Frontend{
 				}
 			}
 		}
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		if ( isset($settings['pn_revoke_subscription_popup']) && $settings['pn_revoke_subscription_popup'] && isset($_COOKIE['pn_notification_block']) && $_COOKIE['pn_notification_block'] && !isset($_COOKIE['notification_permission'])) {
 			?>
 			<style>
@@ -754,6 +753,7 @@ class Push_Notification_Frontend{
 }
 </style><div class="pn-wrapper">';
 				if(isset($settings['notification_pop_up_icon']) && !empty($settings['notification_pop_up_icon']) && PN_Server_Request::getProStatus()=='active'){
+					// phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
 					echo '<span style=" top: 0; vertical-align: top; "><img src="'.esc_attr($settings['notification_pop_up_icon']).'" style=" max-width: 70px;"></span>';
 				}
 			   echo '<span class="pn-txt-wrap pn-select-box">
@@ -1284,30 +1284,6 @@ class Push_Notification_Frontend{
 			}
 
 		}
-	}
-	public function buddyboss_pn_activity_create_feed($activity){ 
-		$settings = push_notification_settings();
-
-		// if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
-
-		// 	$receiver_id = 	add_filter('bp_activity_comment_user_id', function($userid) {
-		// 						return $userid;
-		// 					});
-
-		// 	$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
-
-		// 	if(! empty( $notification ) ) {
-
-		// 		$sender_info = get_userdata($activity->user_id);
-
-		// 		$title	 	= esc_html__('New activity comment', 'push-notification' );
-
-		// 		$message 	= $action;
-
-		// 		$this->pn_buddyboss_send_notification($notification,$sender_info,$title,$message);
-		// 	}
-
-		// }
 	}
 	public function buddyboss_pn_message_notifications($activity){
 		$settings = push_notification_settings();

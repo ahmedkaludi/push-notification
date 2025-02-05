@@ -1,3 +1,11 @@
+= 1.40 (05 February 2025) =
+* Added: Added integration with BuddyBoss with directly push notifications plugin. #132
+* Added: Added a compatibility with Gravity form #140
+* Fixed: Push Notification Disabled Checkbox Not Working on Publish/Save in Gutenberg Editor #136
+* Fixed: Popup show after 'n' seconds option is not working #102
+* Enhancement: woocommerce_order_status_changed | Option to translate status messages #116
+* Added: Custom development #141
+
 = 1.39 (28 November 2024) =
 * Enhancement: Mention self hosted in marketing #27
 * Enhancement: Reviewed and updated the code #119
