@@ -1580,9 +1580,14 @@ class Push_Notification_Admin{
 					$role_wise_web_token_ids = get_option('pn_website_token_ids',[]);
 					$website_ids= [];
 					foreach ($roles as $key=> $value ) {
+						$value = str_replace(' ', '_', $value);
 						if (isset($role_wise_web_token_ids[$value])) {
 							$website_ids = array_merge($website_ids,$role_wise_web_token_ids[$value]);
 						}
+					}
+					$push_notify_token = $website_ids;
+					if(empty($push_notify_token)){
+						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
 					}
 					$push_notify_token = $website_ids;
 				}
