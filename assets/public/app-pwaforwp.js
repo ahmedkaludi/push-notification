@@ -59,56 +59,77 @@ function pushnotification_load_messaging(){
   }
 	  
 		if(PWAforwpreadCookie("pn_notification_block")==null){
-		  const pageAccessedByReload = window.history.length;
-		  if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
-			  return false;
-		  }
-		 var wrapper = document.getElementsByClassName("pn-wrapper");
+			const pageAccessedByReload = window.history.length;
+			if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
+				return false;
+		}
+		if(pnScriptSetting.superpwa_apk_only == '1'){
+			let superpwa_apk = sessionStorage.getItem('superpwa_mode');
+			if(superpwa_apk != 'apk'){
+				return false;
+			}
+		}
+
+		if(pnScriptSetting.pwaforwp_apk_only == '1'){
+			let pwaforwp_apk = sessionStorage.getItem('pwaforwp_mode');
+			if(pwaforwp_apk != 'apk'){
+				return false;
+			}
+		}
+		var popup_show_afternseconds = 1000;
+		if (pnScriptSetting.popup_show_afternseconds) {
+			popup_show_afternseconds = (parseInt(pnScriptSetting.popup_show_afternseconds) * 1000);
+		}
 		setTimeout(function() {
-			if(wrapper){ wrapper[0].style.display="flex"; }
-	   }, pnScriptSetting.notification_popup_show_afternseconds);	
+			var wrapper = document.getElementsByClassName("pn-wrapper");
+			if(wrapper.length > 0){ wrapper[0].style.display="flex"; }
+	   	}, popup_show_afternseconds);	
 		 
 	  }
 	  
-	  document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
-		  var date = new Date;
-		  date.setDate(date.getDate() + parseInt(pnScriptSetting.notification_popup_show_again));
-		  document.cookie = "pn_notification_block=true;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
-		  localStorage.setItem('pn_notification_block',true);
-		  localStorage.setItem('pn_notification_block_expiry',date.getTime());
-		  var wrapper = document.getElementsByClassName("pn-wrapper");
-		  if(wrapper){ wrapper[0].style.display="none"; }
-	  })
-	  document.getElementById("pn-activate-permission_link").addEventListener("click", function(){
-		  var wrapper = document.getElementsByClassName("pn-wrapper");
-		  if(wrapper){ wrapper[0].style.display="none"; }
-		  messaging.requestPermission().then(function() {
-			  console.log("Notification permission granted.");
+	  if (document.getElementById("pn-activate-permission_link_nothanks")) {
+		  document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
 			  var date = new Date;
 			  date.setDate(date.getDate() + parseInt(pnScriptSetting.notification_popup_show_again));
 			  document.cookie = "pn_notification_block=true;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
-			  document.cookie = "notification_permission=granted;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
 			  localStorage.setItem('pn_notification_block',true);
 			  localStorage.setItem('pn_notification_block_expiry',date.getTime());
-			  localStorage.getItem('notification_permission','granted');
-			  if(push_notification_isTokenSentToServer()){
-				  console.log('Token already saved');
-			  }else{
-				  push_notification_getRegToken();
-			  }                                   
-		  }).catch(function(err) {
-			  if(Notification && Notification.permission=='denied'){
-				  console.log("Notification permission denied.");
+			  var wrapper = document.getElementsByClassName("pn-wrapper");
+			  if(wrapper){ wrapper[0].style.display="none"; }
+		  })
+	  }
+	  if (document.getElementById("pn-activate-permission_link")) {
+		  document.getElementById("pn-activate-permission_link").addEventListener("click", function(){
+			  var wrapper = document.getElementsByClassName("pn-wrapper");
+			  if(wrapper){ wrapper[0].style.display="none"; }
+			  messaging.requestPermission().then(function() {
+				  console.log("Notification permission granted.");
 				  var date = new Date;
-				  date.setDate(date.getDate() + pnScriptSetting.notification_popup_show_again);
-				  document.cookie = "pn_notification_block=true;expires="+date+";path="+pnScriptSetting.cookie_scope;
+				  date.setDate(date.getDate() + parseInt(pnScriptSetting.notification_popup_show_again));
+				  document.cookie = "pn_notification_block=true;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
+				  document.cookie = "notification_permission=granted;expires="+date.toUTCString()+";path="+pnScriptSetting.cookie_scope;
 				  localStorage.setItem('pn_notification_block',true);
 				  localStorage.setItem('pn_notification_block_expiry',date.getTime());
-			  }else{
-				  console.log("Unable to get permission to notify.", err);
-			  }
-		  });
-	  })
+				  localStorage.getItem('notification_permission','granted');
+				  if(push_notification_isTokenSentToServer()){
+					  console.log('Token already saved');
+				  }else{
+					  push_notification_getRegToken();
+				  }                                   
+			  }).catch(function(err) {
+				  if(Notification && Notification.permission=='denied'){
+					  console.log("Notification permission denied.");
+					  var date = new Date;
+					  date.setDate(date.getDate() + pnScriptSetting.notification_popup_show_again);
+					  document.cookie = "pn_notification_block=true;expires="+date+";path="+pnScriptSetting.cookie_scope;
+					  localStorage.setItem('pn_notification_block',true);
+					  localStorage.setItem('pn_notification_block_expiry',date.getTime());
+				  }else{
+					  console.log("Unable to get permission to notify.", err);
+				  }
+			  });
+		  })
+	  }
 	}
 	  messaging.onMessage(function(payload) {
 		  console.log('Message received. ', payload);
@@ -308,16 +329,16 @@ function pushnotification_load_messaging(){
   if(pnScriptSetting.pn_token_exists=='0'){
 	  setTimeout(function(){
 		  messaging.getToken().then(function(currentToken) {
-			  if (currentToken) {                      
+			  if (currentToken) {
 			   push_notification_saveToken(currentToken);
 			   console.log(currentToken);
 				push_notification_setTokenSentToServer(true);
-			  } else {                       
-				console.log('No Instance ID token available. Request permission to generate one.');                       
+			  } else {
+				console.log('No Instance ID token available. Request permission to generate one.');
 				push_notification_setTokenSentToServer(false);
 			  }
 			}).catch(function(err) {
-			  console.log('An error occurred while retrieving token. ', err);                      
+			  console.log('An error occurred while retrieving token. ', err);
 			  push_notification_setTokenSentToServer(false);
 			});
   
@@ -325,3 +346,13 @@ function pushnotification_load_messaging(){
 	  },2000);
 	  
   }
+setTimeout(function(){
+	if (document.querySelector('.pn-bell-button')) {
+		const bellButton = document.querySelector('.pn-bell-button');
+		bellButton.addEventListener('click', () => {
+			document.cookie = 'pn_notification_block' + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+			localStorage.removeItem('pn_notification_block');
+			location.reload();
+		});
+	}
+},2000);

@@ -319,10 +319,10 @@ class PN_Server_Request{
 			$lang_compatibility = 'yes';
 			$language_code = pll_current_language();
         }
-
 		if($payload['audience_token_url']=='campaign_for_individual_tokens'){
 			$verifyUrl = 'campaign/single'; 
 		}
+
 		$data = array("user_token"=>$payload['user_token'], 
 					"website"=>   $weblink, 
 					'title'=>$payload['title'], 
