@@ -1,3 +1,6 @@
+= 1.41 (15 March 2025) =
+* Fixed: Post notification not being sent on publish when using Gutenberg editor #148
+
 = 1.40 (05 February 2025) =
 * Added: Added integration with BuddyBoss with directly push notifications plugin. #132
 * Added: Added a compatibility with Gravity form #140
