@@ -1663,7 +1663,7 @@ class Push_Notification_Admin{
 			return;
 		}
 		$post_notf_on = get_post_meta($post->ID, 'pn_send_notification_on_post', true);
-		if( isset( $pn_settings['on_publish'] ) && $pn_settings['on_publish'] == '1' && ( empty( $post_notf_on ) || $post_notf_on != '1' ) ){
+		if( ! empty ( $pn_settings['on_publish'] ) && empty( $post_notf_on ) ){
 			if ( $new_status !== $old_status) {
 				$this->send_notification($post);
 			}
@@ -2857,7 +2857,7 @@ add_action( 'wp_ajax_update_pn_meta' , 'pn_update_meta_ajax_callback' );
         return;
     }
 	$pn_settings = push_notification_settings();
-	if( isset( $pn_settings['on_publish']) && $pn_settings['on_publish'] == '1' ){
+	if( ! empty ( $pn_settings['on_publish'] ) ){
 		wp_enqueue_script( 'pn-admin-ajax', PUSH_NOTIFICATION_PLUGIN_URL.'assets/pn-admin-meta.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION , true );
 		wp_localize_script( 'pn-admin-ajax', 'pnAjax', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' )
