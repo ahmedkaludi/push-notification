@@ -1651,34 +1651,25 @@ class Push_Notification_Admin{
 	}
 
 	public function send_notification_on_update($new_status, $old_status, $post){
-		if ( ! isset( $_POST['set_send_push_notification_nonce'] ) )
-			return;
-		if ( !wp_verify_nonce( sanitize_text_field( wp_unslash(  $_POST['set_send_push_notification_nonce'] ) ), 'set_send_push_notification_data' ) )
-			return;
+	
 		$pn_settings = push_notification_settings();
 		if ( 'publish' !== $new_status ){
         	return;
 		}
-		if(!isset($pn_settings['posttypes'])){
+		if( !isset( $pn_settings['posttypes'] ) ){
 			$pn_settings['posttypes'] = array("post");
 		}
-		if( !in_array( get_post_type($post), $pn_settings['posttypes']) ){
+		if( !in_array( get_post_type( $post ), $pn_settings['posttypes'] ) ){
 			return;
 		}
-		$post_notf_on = '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
-		if(isset($_POST['pn_send_notification_on_post'])){
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Reasone: already nonce verified
-			$post_notf_on = sanitize_text_field( wp_unslash( $_POST['pn_send_notification_on_post']) );
-		}
-		if(isset($pn_settings['on_publish']) && $pn_settings['on_publish']==1 && (empty($post_notf_on) || $post_notf_on !== 1)){
+		$post_notf_on = get_post_meta($post->ID, 'pn_send_notification_on_post', true);
+		if( isset( $pn_settings['on_publish'] ) && $pn_settings['on_publish'] == 1 && ( empty( $post_notf_on ) || $post_notf_on != 1 ) ){
 			if ( $new_status !== $old_status) {
 				$this->send_notification($post);
 			}
 		}
 
 	}
-
 	public function pn_get_compaigns(){		
 		if(empty( $_POST['nonce'])){
 			return;	
@@ -2069,7 +2060,6 @@ if ( is_admin() || wp_doing_ajax() ) {
 //Send push on publish and update 
 // Put it here because in Gutenberg is_admin gives us false
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
-
 function push_notification_settings(){
 	$push_notification_settings = get_option( 'push_notification_settings', array() );
 	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/bell-icon.png';
@@ -2835,3 +2825,43 @@ function pn_get_all_unique_meta() {
 		return $val;
 	}
 	
+// AJAX callback to update the meta value.
+function pn_update_meta_ajax_callback()
+{
+	check_ajax_referer( 'set_send_push_notification_data', 'set_send_push_notification_nonce' );
+
+	$post_id = isset ($_POST['post_id'] ) ? intval(wp_unslash( $_POST['post_id']) ) : 0;
+	if ( !$post_id ) {
+		wp_send_json_error( esc_html__('Invalid post ID.', 'push-notification') );
+	}
+
+	if ( !current_user_can( 'edit_post', $post_id ) ) {
+		wp_send_json_error( esc_html__('You do not have permission to edit this post.', 'push-notification') );
+	}
+
+	$meta_key = isset( $_POST['meta_key'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_key'] ) ) : '';
+	$meta_value = isset( $_POST['meta_value'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_value'] ) ) : '';
+
+	if ( !$post_id || empty( $meta_key ) ) {
+		wp_send_json_error( esc_html__('Missing parameters.', 'push-notification') );
+	}
+	if ( update_post_meta( $post_id, $meta_key, $meta_value ) ) {
+		wp_send_json_success( esc_html__( 'Meta updated.', 'push-notification') );
+	} else {
+		wp_send_json_error( esc_html__( 'Failed to update meta.', 'push-notification') );
+	}
+}
+add_action( 'wp_ajax_update_pn_meta' , 'pn_update_meta_ajax_callback' );
+	function pn_enqueue_admin_meta_script( $hook ) {
+    if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
+        return;
+    }
+	$pn_settings = push_notification_settings();
+	if( isset( $pn_settings['on_publish']) && $pn_settings['on_publish'] == '1' ){
+		wp_enqueue_script( 'pn-admin-ajax', PUSH_NOTIFICATION_PLUGIN_URL.'assets/pn-admin-meta.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION , true );
+		wp_localize_script( 'pn-admin-ajax', 'pnAjax', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' )
+		) );
+	}
+}
+add_action( 'admin_enqueue_scripts', 'pn_enqueue_admin_meta_script' );
