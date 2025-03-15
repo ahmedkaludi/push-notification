@@ -1663,7 +1663,7 @@ class Push_Notification_Admin{
 			return;
 		}
 		$post_notf_on = get_post_meta($post->ID, 'pn_send_notification_on_post', true);
-		if( isset( $pn_settings['on_publish'] ) && $pn_settings['on_publish'] == 1 && ( empty( $post_notf_on ) || $post_notf_on != 1 ) ){
+		if( isset( $pn_settings['on_publish'] ) && $pn_settings['on_publish'] == '1' && ( empty( $post_notf_on ) || $post_notf_on != '1' ) ){
 			if ( $new_status !== $old_status) {
 				$this->send_notification($post);
 			}
