@@ -250,10 +250,10 @@ add_action('upgrader_process_complete', 'pn_plugin_upgrade_function', 10, 2);
 
 function pn_plugin_upgrade_function($upgrader_object, $options) {
     // Check if it's a plugin update
-    if ($options['type'] === 'plugin' && isset($options['action']) && $options['action'] === 'update') {
+    if ( $options['type'] === 'plugin' && isset( $options['action'] ) && $options['action'] === 'update' ) {
         // Check if the updated plugin is your plugin
         $plugin_slug = 'push-notification/push-notification.php';
-        if (in_array($plugin_slug, $options['plugins'])) {
+        if ( is_array( $options['plugins'] ) && in_array( $plugin_slug, $options['plugins'] ) ) {
 			push_notification_on_install();
         }
     }
