@@ -2828,39 +2828,40 @@ function pn_get_all_unique_meta() {
 // AJAX callback to update the meta value.
 function pn_update_meta_ajax_callback()
 {
-	check_ajax_referer('set_send_push_notification_data', 'set_send_push_notification_nonce');
+	check_ajax_referer( 'set_send_push_notification_data', 'set_send_push_notification_nonce' );
 
-	$post_id = isset($_POST['post_id']) ? intval(wp_unslash($_POST['post_id'])) : 0;
-	if (!$post_id) {
-		wp_send_json_error('Invalid post ID.');
+	$post_id = isset ($_POST['post_id'] ) ? intval(wp_unslash( $_POST['post_id']) ) : 0;
+	if ( !$post_id ) {
+		wp_send_json_error( esc_html__('Invalid post ID.', 'push-notification') );
 	}
 
-	if (!current_user_can('edit_post', $post_id)) {
-		wp_send_json_error('You do not have permission to edit this post.');
+	if ( !current_user_can( 'edit_post', $post_id ) ) {
+		wp_send_json_error( esc_html__('You do not have permission to edit this post.', 'push-notification') );
 	}
 
-	$meta_key = isset($_POST['meta_key']) ? sanitize_text_field(wp_unslash($_POST['meta_key'])) : '';
-	$meta_value = isset($_POST['meta_value']) ? sanitize_text_field(wp_unslash($_POST['meta_value'])) : '';
+	$meta_key = isset( $_POST['meta_key'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_key'] ) ) : '';
+	$meta_value = isset( $_POST['meta_value'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_value'] ) ) : '';
 
-	if (!$post_id || empty($meta_key)) {
-		wp_send_json_error('Missing parameters.');
+	if ( !$post_id || empty( $meta_key ) ) {
+		wp_send_json_error( esc_html__('Missing parameters.', 'push-notification') );
 	}
-
-	if (update_post_meta($post_id, $meta_key, $meta_value)) {
-		wp_send_json_success('Meta updated.');
+	if ( update_post_meta( $post_id, $meta_key, $meta_value ) ) {
+		wp_send_json_success( esc_html__( 'Meta updated.', 'push-notification') );
 	} else {
-		wp_send_json_error('Failed to update meta.');
+		wp_send_json_error( esc_html__( 'Failed to update meta.', 'push-notification') );
 	}
 }
-add_action('wp_ajax_update_pn_meta', 'pn_update_meta_ajax_callback');
-
+add_action( 'wp_ajax_update_pn_meta' , 'pn_update_meta_ajax_callback' );
 	function pn_enqueue_admin_meta_script( $hook ) {
     if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
         return;
     }
-    wp_enqueue_script( 'pn-admin-ajax', PUSH_NOTIFICATION_PLUGIN_URL.'assets/pn-admin-meta.js', array( 'jquery' ), '1.0', true );
-    wp_localize_script( 'pn-admin-ajax', 'pnAjax', array(
-        'ajax_url' => admin_url( 'admin-ajax.php' )
-    ) );
+	$pn_settings = push_notification_settings();
+	if( isset( $pn_settings['on_publish']) && $pn_settings['on_publish'] == '1' ){
+		wp_enqueue_script( 'pn-admin-ajax', PUSH_NOTIFICATION_PLUGIN_URL.'assets/pn-admin-meta.js', array( 'jquery' ), '1.0', true );
+		wp_localize_script( 'pn-admin-ajax', 'pnAjax', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' )
+		) );
+	}
 }
 add_action( 'admin_enqueue_scripts', 'pn_enqueue_admin_meta_script' );
