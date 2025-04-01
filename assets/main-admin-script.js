@@ -684,6 +684,26 @@ jQuery(document).ready(function($){
 		}
 	}
 	var interval = setInterval(initializeSelect2, 1500);
+	function pn_push_on_publish_select() {
+		if (jQuery('#pn_push_on_publish_select').length > 0) {
+			jQuery('#pn_push_on_publish_select').select2();
+			clearInterval(interval2);
+		}
+		if(jQuery("#pn_push_on_publish").prop("checked")==true){
+			jQuery("#pn_push_on_publish_select").parents('tr').show();
+		}else{
+			jQuery("#pn_push_on_publish_select").parents('tr').hide();
+		}
+	}
+	var interval2 = setInterval(pn_push_on_publish_select, 1000);
+
+	jQuery('#pn_push_on_publish').click(function(){
+		if(jQuery(this).prop("checked")==true){
+			jQuery("#pn_push_on_publish_select").parents('tr').show();
+		}else{
+			jQuery("#pn_push_on_publish_select").parents('tr').hide();
+		}
+	});
 
 	
 });

@@ -367,14 +367,14 @@ class Push_Notification_Admin{
 			
 			add_settings_field(
 				'pn_key_sendpush_publish',								// ID
-				'<label for="pn_push_on_publish"><b>'.esc_html__('Send Notification on Publish', 'push-notification').'</b></label>',
+				'<label for="pn_push_on_publish"><b>'.esc_html__('Send notification on post type', 'push-notification').'</b></label>',
 				array( $this, 'user_settings_onpublish_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_posttype_select',								// ID
-				esc_html__('Send Notification On', 'push-notification'),// Title
+				'<label style="margin-left:10px;"><b>'.esc_html__('Send notification on', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_posttype_select_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
@@ -1055,7 +1055,7 @@ class Push_Notification_Admin{
 		if(is_array($data) && !empty($data)){
 			$data = array_merge(array('none'=>'None'), $data);
 		}
-		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish', '');
+		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish_select', '');
 	}
 	public function pn_key_segment_select_callback(){		
 		$notification = push_notification_settings();
