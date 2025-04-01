@@ -367,21 +367,21 @@ class Push_Notification_Admin{
 			
 			add_settings_field(
 				'pn_key_sendpush_publish',								// ID
-				'<label for="pn_push_on_publish"><b>'.esc_html__('Send notification on post type', 'push-notification').'</b></label>',
+				'<label for="pn_push_on_publish"><b>'.esc_html__('Send Notification on Publish', 'push-notification').'</b></label>',
 				array( $this, 'user_settings_onpublish_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
 				'pn_key_posttype_select',								// ID
-				'<label style="margin-left:10px;"><b>'.esc_html__('Send notification on', 'push-notification').'</b></label>',// Title
+				'<label style="margin-left:5px;"><b>'.esc_html__('Select Post Types', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_posttype_select_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
 
 		add_settings_section('push_notification_utm_tracking_settings_section',
-					 esc_html__('UTM tracking','push-notification'), 
+					 esc_html__('UTM Tracking','push-notification'), 
 					 '__return_false', 
 					 'push_notification_user_settings_section');
 			add_settings_field(
