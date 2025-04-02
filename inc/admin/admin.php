@@ -1994,7 +1994,7 @@ class Push_Notification_Admin{
 		$order = wc_get_order( $order_id );
 		$user_id = $order->get_user_id();
 		$token_ids = get_user_meta($user_id, 'pnwoo_notification_token',true);
-		if(!is_array($token_ids)){
+		if(!empty( $token_ids ) && !is_array( $token_ids ) ){
 			$token_ids[] = $token_ids;
 		}
 
@@ -2008,7 +2008,7 @@ class Push_Notification_Admin{
 			if(count($users)>0){
 				foreach ($users as $key => $user) {
 					$tokens = get_user_meta($user->ID, 'pnwoo_notification_token',true);
-					if(is_array($tokens) && !empty($tokens)){
+					if(is_array($tokens) && !empty($tokens) && !empty($token_ids) ){
 						$token_ids = array_merge($token_ids, $tokens);
 					}
 				}
