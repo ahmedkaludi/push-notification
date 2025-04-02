@@ -982,6 +982,7 @@ class Push_Notification_Admin{
 							<tr>
 								<th width="100px">'.esc_html__('User Agent', 'push-notification').'</th>
 								<th>'.esc_html__('Os', 'push-notification').'</th>
+								<th>'.esc_html__('IP Address', 'push-notification').'</th>
 								<th>'.esc_html__('Subscribed at', 'push-notification').'</th>
 								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
 								<th width="160px">'.esc_html__('Actions', 'push-notification').'</th>
@@ -1005,6 +1006,7 @@ class Push_Notification_Admin{
 								echo '<tr>
 									<td>'.esc_html( $campaign['user_agent'] ).'</td>
 									<td>'.esc_html( $campaign['os'] ).'</td>
+									<td>'.esc_html( $campaign['ip_address'] ).'</td>
 									<td>'.esc_html( $local_datetime->format( 'Y-m-d H:i:s' )  ).'</td>
 									<td>';
 									if ( $campaign['status'] === 'Active' ) {
