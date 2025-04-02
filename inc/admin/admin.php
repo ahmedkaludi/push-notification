@@ -196,7 +196,7 @@ class Push_Notification_Admin{
 							}
 						}
 						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
-						echo '<a href="' . esc_url('#pn_subscribers') . '" link="pn_subscribers" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Subscribers','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_subscribers') . '" link="pn_subscribers" class="nav-tab"><span class="dashicons dashicons-groups"></span> ' . esc_html__('Subscribers','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_compatibility') . '" link="pn_compatibility" class="nav-tab"><span class="dashicons dashicons-image-filter"></span> ' . esc_html__('Compatibality','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_visibility') . '" link="pn_visibility" class="nav-tab"><span class="dashicons dashicons-visibility"></span> ' . esc_html__('Visibility','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
