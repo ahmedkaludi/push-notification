@@ -1994,6 +1994,9 @@ class Push_Notification_Admin{
 		$order = wc_get_order( $order_id );
 		$user_id = $order->get_user_id();
 		$token_ids = get_user_meta($user_id, 'pnwoo_notification_token',true);
+		if(!is_array($token_ids)){
+			$token_ids[] = $token_ids;
+		}
 
 		//Send notificarion to admin
 		if(isset($push_notification_settings['notification_on_order_change_to_admin']) && $push_notification_settings['notification_on_order_change_to_admin']==1){ 
@@ -2014,10 +2017,6 @@ class Push_Notification_Admin{
 
 		if (empty($token_ids)) {
 			return;
-		}else{
-			if(!is_array($token_ids)){
-				$token_ids[] = $token_ids;
-			}
 		}
 
 		$token_ids = array_filter($token_ids);
