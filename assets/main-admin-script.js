@@ -300,6 +300,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").show();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").hide();
 				jQuery("#pn_compatibility").hide();
 				jQuery("#pn_visibility").hide();
 	        }
@@ -311,6 +312,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").hide();
 				jQuery("#pn_compatibility").hide();
 				jQuery("#pn_visibility").hide();
 	        } 
@@ -322,6 +324,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_segmentation").show();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").hide();
 				jQuery("#pn_compatibility").hide();
 				jQuery("#pn_visibility").hide();
 	        	
@@ -334,6 +337,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").hide();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").hide();
 				jQuery("#pn_compatibility").hide();
 				jQuery("#pn_visibility").hide();
 	        }
@@ -347,6 +351,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_compatibility").hide();
 	        	jQuery("#pn_visibility").hide();
 	        	jQuery("#pn_campaings").show();
+				jQuery("#pn_subscribers").hide();
 	        }
 	        if( link == "pn_compatibility") {
 	        	jQuery("#pn_dashboard").hide();
@@ -357,6 +362,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").hide();
 	        	jQuery("#pn_visibility").hide();
 	        	jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").hide();
 	        	jQuery("#pn_compatibility").show();
 	        }
 	        if( link == "pn_visibility") {
@@ -368,6 +374,7 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_connect").hide();
 	        	jQuery("#pn_compatibility").hide();
 	        	jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").hide();
 	        	jQuery("#pn_visibility").show();
 	        }
 	        if( link == "pn_help") {
@@ -378,6 +385,19 @@ jQuery(document).ready(function($){
 	        	jQuery("#pn_help").show();
 	        	jQuery("#pn_connect").hide();
 				jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").hide();
+				jQuery("#pn_compatibility").hide();
+				jQuery("#pn_visibility").hide();
+	        }
+	        if( link == "pn_subscribers") {
+	        	jQuery("#pn_dashboard").hide();
+	        	jQuery("#pn_wc_settings_section").hide();
+	        	jQuery("#pn_segmentation").hide();
+	        	jQuery("#pn_notification_bell").hide();
+	        	jQuery("#pn_help").hide();
+	        	jQuery("#pn_connect").hide();
+				jQuery("#pn_campaings").hide();
+				jQuery("#pn_subscribers").show();
 				jQuery("#pn_compatibility").hide();
 				jQuery("#pn_visibility").hide();
 	        }
@@ -969,6 +989,50 @@ function pn_delete_campaign(self){
 			action: 'pn_delete_campaign',
 			nonce: pn_setings.remote_nonce,
 			campaign_ids: selectedCampaigns 
+		},
+		success: function(response) {
+			if(response){
+			if (response.status == 200) {
+				self.innerHTML=response.message;
+					jQuery(self).parent().parent().remove();
+			} else {
+				self.innerHTML = response.message;
+			}
+		}
+		},
+		error: function(response) {
+			var messagediv = self.parents('fieldset').find(".resp_message");
+			messagediv.html(response.responseJSON.message);
+			messagediv.css({ "color": "red" });
+			self.innerHTML='Delete';
+		}
+	});
+
+}
+
+function pn_delete_subscribers(self){
+
+	var selectedSubscriber = [];
+
+	selectedSubscriber.push(self.getAttribute('data-id'));
+	
+
+	// Show confirmation alert before proceeding
+    var confirmation = confirm('Are you sure you want to delete the subscriber?');
+    
+    if (!confirmation) {
+        return; 
+    }
+
+	self.innerHTML='Deleting...';
+	jQuery.ajax({
+		url: ajaxurl,
+		method: "post",
+		dataType: 'json',
+		data: { 
+			action: 'pn_delete_subscribers',
+			nonce: pn_setings.remote_nonce,
+			subscriber_ids: selectedSubscriber 
 		},
 		success: function(response) {
 			if(response){

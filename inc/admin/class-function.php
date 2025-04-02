@@ -195,6 +195,18 @@ class PN_Server_Request{
 		$response = self::sendRequest($verifyUrl, $data, 'post');
 		return $response;
 	}
+	public static function deleteSubscribers($user_token, $subscribers_ids){
+		$verifyUrl = 'subscribers/delete';
+		if ( is_multisite() ) {
+			$weblink = get_site_url();              
+		}
+		else {
+			$weblink = home_url();
+		}    
+		$data = array("user_token"=>$user_token, "website"=> $weblink, "subscribers_ids" => $subscribers_ids);
+		$response = self::sendRequest($verifyUrl, $data, 'post');
+		return $response;
+	}
 
 
 	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url, $category){

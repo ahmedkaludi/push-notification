@@ -24,6 +24,7 @@ class Push_Notification_Admin{
 		add_action('wp_ajax_pn_send_query_message', 'pn_send_query_message');
 		add_action('wp_ajax_pn_get_compaigns', array( $this, 'pn_get_compaigns' ));
 		add_action( 'wp_ajax_pn_delete_campaign', array( $this, 'pn_delete_campaigns' ) ); 
+		add_action( 'wp_ajax_pn_delete_subscribers', array( $this, 'pn_delete_subscribers' ) ); 
 		add_action('wp_ajax_pn_subscribe_newsletter',array( $this, 'pn_subscribe_newsletter' ) );
 		//on oreder status change
 		add_action('woocommerce_order_status_changed', array( $this, 'pn_order_send_notification'), 10, 4);
@@ -195,6 +196,7 @@ class Push_Notification_Admin{
 							}
 						}
 						echo '<a href="' . esc_url('#pn_campaings') . '" link="pn_campaings" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Campaigns','push-notification') . '</a>';
+						echo '<a href="' . esc_url('#pn_subscribers') . '" link="pn_subscribers" class="nav-tab"><span class="dashicons dashicons-megaphone"></span> ' . esc_html__('Subscribers','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_compatibility') . '" link="pn_compatibility" class="nav-tab"><span class="dashicons dashicons-image-filter"></span> ' . esc_html__('Compatibality','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_visibility') . '" link="pn_visibility" class="nav-tab"><span class="dashicons dashicons-visibility"></span> ' . esc_html__('Visibility','push-notification') . '</a>';
 						echo '<a href="' . esc_url('#pn_help') . '" link="pn_help" class="nav-tab"><span class="dashicons dashicons-editor-help"></span> ' . esc_html__('Help','push-notification') . '</a>';
@@ -607,12 +609,14 @@ class Push_Notification_Admin{
 		$detail_settings = push_notification_details_settings();
 		$notification_settings = push_notification_settings();
 		$campaigns = [];
+		$subscribers = [];
 		if( !$detail_settings && isset( $auth_settings['user_token'] ) ){
 			 PN_Server_Request::getsubscribersData( $auth_settings['user_token'] );
 			 $detail_settings = push_notification_details_settings();
 		}
 		if(isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
 			$campaigns = PN_Server_Request::getCompaignsData( $auth_settings['user_token'] );
+			$subscribers = $campaigns;
 		}
 
 		$updated_at = '';
@@ -828,9 +832,9 @@ class Push_Notification_Admin{
 					</div>
 				</div>
 				<div id="pn_campaings" style="display:none;" class="pn-tabs">
-				<div id="pn_cam_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
-				  <img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
-				</div>
+					<div id="pn_cam_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
+					<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
+					</div>
 
 					<div class="row">
 						<div class="action-wrapper" style="float:right; padding-bottom: -10px;">
@@ -956,6 +960,106 @@ class Push_Notification_Admin{
 										<span id="table-paging" class="paging-input">
 											<span class="tablenav-paging-text">'.esc_html($campaigns['campaigns']['current_page']).' '.esc_html__('of', 'push-notification').'
 												<span class="total-pages">'.esc_html($campaigns['campaigns']['last_page']).'</span>
+											</span>
+										</span>'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped  */ $next_html_escaped.'
+									</span>
+								</div>
+								<br class="clear">
+							</div>';
+					}                
+		        echo '</div></div>
+
+				<div id="pn_subscribers" style="display:none;" class="pn-tabs">
+					<div id="pn_subscriber_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
+					<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
+					</div>
+					<div class="row" id="pn_subscriber_custom_div">
+					<h3>'.esc_html__('Subscribers', 'push-notification').'</h3>
+					<div class="table-responsive">
+					<br/><br/>
+					<table class="wp-list-table widefat fixed striped table-view-list">
+						<thead>
+							<tr>
+								<th width="100px">'.esc_html__('User Agent', 'push-notification').'</th>
+								<th>'.esc_html__('Os', 'push-notification').'</th>
+								<th>'.esc_html__('Subscribed at', 'push-notification').'</th>
+								<th width="80px">'.esc_html__('Status', 'push-notification').'</th>
+								<th width="160px">'.esc_html__('Actions', 'push-notification').'</th>
+							</tr>
+						</thead>
+						<tbody>';
+						$current_count_start = 0;
+						$timezone_string = get_option('timezone_string');
+						$timezone = 'UTC';
+						$clickCount = 0;
+						if (!$timezone_string) {
+							$gmt_offset = get_option('gmt_offset');
+							$timezone_string = sprintf('%+d:00', $gmt_offset);
+						}
+						
+						
+						if (!empty($subscribers['subscribers']['data'])) {
+	                        foreach ($subscribers['subscribers']['data'] as $key => $campaign){
+								$local_datetime = new DateTime($campaign['created_at'], new DateTimeZone($timezone) );
+								$local_datetime->setTimezone(new DateTimeZone($timezone_string));
+								echo '<tr>
+									<td>'.esc_html( $campaign['user_agent'] ).'</td>
+									<td>'.esc_html( $campaign['os'] ).'</td>
+									<td>'.esc_html( $local_datetime->format( 'Y-m-d H:i:s' )  ).'</td>
+									<td>';
+									if ( $campaign['status'] === 'Active' ) {
+										echo '<span class="badge badge-pill badge-success" style="color:green">'.esc_html($campaign['status']).'</span>';
+									}else{
+										echo '<span class="badge badge-pill badge-danger" style="color:red">'.esc_html($campaign['status']).'</span>';
+									}
+								echo'</td>';
+									echo'<td><a class="button pn_delete_button" onclick="pn_delete_subscribers(this)" data-id="'.esc_attr($campaign['id']).'">'.esc_html__('Delete', 'push-notification').'</a></td>';
+								
+								echo'</tr>';
+							}
+						}else{
+							echo'<tr><td colspan="5" align="center">'.esc_html__('No data found', 'push-notification').'</td></tr>';
+						}
+						echo'</tbody></table></div>';
+						if (isset($subscribers['subscribers']['data']) && !empty($subscribers['subscribers']['data']) && !empty($subscribers['subscribers']['next_page_url'])) {
+						if (empty($subscribers['subscribers']['prev_page_url'])) {
+							$pre_html_escaped = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
+										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>';
+						}else{
+							$pre_html_escaped = '<a class="first-page button js_custom_pagination" page="1" href="'.esc_attr($subscribers['subscribers']['first_page_url']).'">
+											<span class="screen-reader-text">'.esc_html__('First page', 'push-notification').'</span>
+											<span aria-hidden="true">«</span>
+										</a>
+										<a class="prev-page button js_custom_pagination" page="'.esc_attr(($subscribers['subscribers']['current_page']-1)).'" href="'.esc_attr($subscribers['subscribers']['prev_page_url']).'">
+											<span class="screen-reader-text">'.esc_html__('Previous page', 'push-notification').'</span>
+											<span aria-hidden="true">‹</span>
+										</a>';
+						}
+						if (empty($subscribers['subscribers']['next_page_url'])) {
+							$next_html_escaped = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
+										<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>';
+						}else{
+							$next_html_escaped = '<a class="next-page button js_custom_pagination"  page="'.esc_attr(($subscribers['subscribers']['current_page']+1)).'" href="'.esc_attr($subscribers['subscribers']['next_page_url']).'">
+											<span class="screen-reader-text">'.esc_html__('Next page', 'push-notification').'</span>
+											<span aria-hidden="true">›</span>
+										</a>
+										<a class="last-page button js_custom_pagination"  page="'.esc_attr(($subscribers['subscribers']['current_page']+1)).'" href="'.esc_attr($subscribers['subscribers']['last_page_url']).'">
+											<span class="screen-reader-text">'.esc_html__('Last page', 'push-notification').'</span>
+											<span aria-hidden="true">»</span>
+										</a>';
+						}
+						// already used esc_html for $pre_html_escaped and $next_html_escaped variable
+						echo '<div class="tablenav bottom">
+								<div class="alignleft actions bulkactions">
+								</div>
+								<div class="alignleft actions">
+								</div>
+								<div class="tablenav-pages">
+									<span class="displaying-num">'.esc_html($subscribers['subscribers']['total']).' '.esc_html__('items', 'push-notification').'</span>
+									<span class="pagination-links">'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped  */ $pre_html_escaped.'<span class="screen-reader-text">'.esc_html__('Current Page', 'push-notification').'</span>
+										<span id="table-paging" class="paging-input">
+											<span class="tablenav-paging-text">'.esc_html($subscribers['subscribers']['current_page']).' '.esc_html__('of', 'push-notification').'
+												<span class="total-pages">'.esc_html($subscribers['subscribers']['last_page']).'</span>
 											</span>
 										</span>'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped  */ $next_html_escaped.'
 									</span>
@@ -1462,6 +1566,32 @@ class Push_Notification_Admin{
 			}
 			if( isset( $auth_settings['user_token'] ) ){
 				$response = PN_Server_Request::deleteCampaigns( $auth_settings['user_token'], $campaign_ids );
+				wp_send_json($response);
+			}else{
+				wp_send_json(array("status"=> 503, 'message'=> esc_html__('User token not found', 'push-notification')));
+			}
+		}
+	}
+	public function pn_delete_subscribers(){
+		if(empty( $_POST['nonce'])){
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+		}
+		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
+			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+		}else{
+			
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			}
+			
+			$auth_settings = push_notification_auth_settings();
+			$subscriber_ids = (isset($_POST['subscriber_ids']) && is_array($_POST['subscriber_ids'])) ? array_map('sanitize_text_field', wp_unslash( $_POST['subscriber_ids'] ) ):sanitize_text_field( wp_unslash( $_POST['subscriber_ids'] ) );
+			if($subscriber_ids != 'all'){
+				$subscriber_ids = implode(',', $subscriber_ids);
+			}
+			
+			if( isset( $auth_settings['user_token'] ) ){
+				$response = PN_Server_Request::deleteSubscribers( $auth_settings['user_token'], $subscriber_ids );
 				wp_send_json($response);
 			}else{
 				wp_send_json(array("status"=> 503, 'message'=> esc_html__('User token not found', 'push-notification')));
