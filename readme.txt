@@ -1,8 +1,8 @@
 === Push Notifications for WP - Self Hosted Web Push Notifications ===
 Contributors: magazine3
 Requires at least: 3.0
-Tested up to: 6.7
-Stable tag: 1.41
+Tested up to: 6.8
+Stable tag: 1.42
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -60,6 +60,14 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
+= 1.42 (24 April 2025) =
+* Enhancement: Tested with WordPress 6.8 #155
+* Fixed: Fatal error when change the status of a woocommerce order #153
+* Enhancement: Improvements to Send Notification on selection #146
+* Added: Added a new feature so users can delete the subscribers #143
+* Added: Added feature to tracking country or ip of subscriber #107
+
+
 = 1.41 (15 March 2025) =
 * Fixed: Post notification not being sent on publish when using Gutenberg editor #148
 
@@ -111,12 +119,5 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 1.33.1 (09 May 2024)
 Fixed: Issue with plugin activation. #103
-
-= 1.33 (16 March 2024) =
-* Added: Notification types preview with selection #86 #79
-* Added: Copy token on click #89
-* Added: Select2 for category segmentation #84
-* Added: Active site limitation on pro token #81
-* Enhancement : Code improvement #82
 
 Full changelog available [ at changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)
