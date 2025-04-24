@@ -1,3 +1,11 @@
+
+= 1.42 (24 April 2025) =
+* Enhancement: Tested with WordPress 6.8 #155
+* Fixed: Fatal error when change the status of a woocommerce order #153
+* Enhancement: Improvements to Send Notification on selection #146
+* Added: Added a new feature so users can delete the subscribers #143
+* Added: Added feature to tracking country or ip of subscriber #107
+
 = 1.41 (15 March 2025) =
 * Fixed: Post notification not being sent on publish when using Gutenberg editor #148
 
