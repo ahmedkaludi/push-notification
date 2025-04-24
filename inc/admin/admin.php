@@ -246,15 +246,6 @@ class Push_Notification_Admin{
 					esc_html__('Notification Segment','push-notification'),
 					'__return_false',
 					'push_notification_segment_settings_section');
-
-					echo'<style>table {
-						border-collapse: collapse;
-						}
-						td, th {
-						padding: 0;
-						margin: 0;
-						border: none;
-						}</style>';
 			}
 			add_settings_section('push_notification_compatibility_settings_section',
 			esc_html__('Compatibility','push-notification'), 
@@ -1231,14 +1222,6 @@ class Push_Notification_Admin{
 	
 
 	public function pn_key_segment_on_categories_callback() {
-		echo'<style>table {
-			border-collapse: collapse;
-			}
-			td, th {
-			padding: 0;
-			margin: 0;
-			border: none;
-			}</style>';
 
 		$segment_on_category_checked = "";
 		$notification = push_notification_settings();		
