@@ -246,6 +246,15 @@ class Push_Notification_Admin{
 					esc_html__('Notification Segment','push-notification'),
 					'__return_false',
 					'push_notification_segment_settings_section');
+
+					echo'<style>table {
+						border-collapse: collapse;
+						}
+						td, th {
+						padding: 0;
+						margin: 0;
+						border: none;
+						}</style>';
 			}
 			add_settings_section('push_notification_compatibility_settings_section',
 			esc_html__('Compatibility','push-notification'), 
@@ -272,9 +281,9 @@ class Push_Notification_Admin{
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
 			$notification = push_notification_settings();
-			$s_display="style='display:none;'";
+			$s_display="style='display:none;margin-left:10px;'";
 			if(isset($notification['on_category']) && $notification['on_category']){
-				$s_display="style='display:block;'";
+				$s_display="style='display:block;margin-left:10px;'";
 			}
 			add_settings_field(
 				'pn_key_segment_on_categories',								// ID
@@ -284,9 +293,9 @@ class Push_Notification_Admin{
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
 
-			$soc_display="style='display:none;'";
+			$soc_display="style='display:none;margin-left:10px;'";
 			if(isset($notification['on_category']) && $notification['on_category']){
-				$soc_display="style='display:block;'";
+				$soc_display="style='display:block;margin-left:10px;'";
 			}
 			add_settings_field(
 				'pn_select_custom_categories',								// ID
@@ -306,7 +315,7 @@ class Push_Notification_Admin{
 
 			add_settings_field(
 				'pn_select_custom_roles',								// ID
-				'<label for="pn_select_custom_roles"><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
+				'<label for="pn_select_custom_roles" style="margin-left:10px;"><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_select_specific_roles_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
@@ -1222,6 +1231,14 @@ class Push_Notification_Admin{
 	
 
 	public function pn_key_segment_on_categories_callback() {
+		echo'<style>table {
+			border-collapse: collapse;
+			}
+			td, th {
+			padding: 0;
+			margin: 0;
+			border: none;
+			}</style>';
 
 		$segment_on_category_checked = "";
 		$notification = push_notification_settings();		

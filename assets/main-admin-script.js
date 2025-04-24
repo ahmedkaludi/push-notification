@@ -255,18 +255,27 @@ jQuery(document).ready(function($){
 		}else{jQuery("#utm_tracking_wrapper").hide();}
 	});
 
+	jQuery(".js_category_selector_wrapper").parents('tr').hide();
+	jQuery(".js_custom_category_selector_wrapper").parents('tr').hide();
+
 	jQuery('#pn_push_on_category_checkbox').click(function(){
 		if(jQuery(this).prop("checked")==true){
 			jQuery("#category_selector_wrapper").show();
 			jQuery(".js_category_selector_wrapper").show();
 			jQuery(".js_custom_category_selector_wrapper").show();
 			jQuery("#segment_category_selector_wrapper").show();
+
+			jQuery(".js_category_selector_wrapper").parents('tr').show();
+			jQuery(".js_custom_category_selector_wrapper").parents('tr').show();
 			
 		}else{
 			jQuery("#category_selector_wrapper").hide();
 			jQuery(".js_category_selector_wrapper").hide();
 			jQuery(".js_custom_category_selector_wrapper").hide();
 			jQuery("#segment_category_selector_wrapper").hide();
+
+			jQuery(".js_category_selector_wrapper").parents('tr').hide();
+			jQuery(".js_custom_category_selector_wrapper").parents('tr').hide();
 		}
 	});
 
