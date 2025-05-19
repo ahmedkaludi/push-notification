@@ -356,7 +356,7 @@ class Push_Notification_Admin{
 			);
 			add_settings_field(
 				'pn_buddyboss_compatibale',								// ID
-				'<label for="pn_buddyboss_compatibale"><b>'.esc_html__('BuddyBoss Plugin', 'push-notification').'</b></label>',// Title
+				'<label for="pn_buddyboss_compatibale"><b>'.esc_html__('BuddyPress / BuddyBoss', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_buddyboss_callback'),// Callback
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
@@ -1225,7 +1225,7 @@ class Push_Notification_Admin{
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_buddyboss_compatibale" name="push_notification_settings[pn_buddyboss_compatibale]"  value="1" '.esc_attr($pn_buddyboss_compatibale).'/>
-					<p class="help">'.esc_html__('It allows you to send notification based on buddyboss events. Such as posting in timeling, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on buddypress/buddyboss events. Such as posting in timeling, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	
@@ -1975,6 +1975,12 @@ class Push_Notification_Admin{
 		} 
 		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
+		$max_length = 100; // character count, not words
+		if (mb_strlen($post_content, 'UTF-8') > $max_length) {
+			$message = mb_substr($post_content, 0, $max_length - 3, 'UTF-8') . '...';
+		} else {
+			$message = $post_content;
+		}
 		$link_url = esc_url_raw(get_permalink( $post_id ));
 		if(isset($push_notification_settings['utm_tracking_checkbox']) && $push_notification_settings['utm_tracking_checkbox']){
 			$utm_details = array(

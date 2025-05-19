@@ -89,11 +89,12 @@ class Push_Notification_Frontend{
 
 		// Buddyboss
 		add_action( 'pn_tokenid_registration_id', array($this, 'buddyboss_pn_tokenid_registration_id') ,10,5);
-		add_filter( 'bp_activity_comment_action', array( $this,'buddyboss_pn_activity_comment_action'), 10, 2);
-		add_action( 'messages_message_sent', array( $this,'buddyboss_pn_message_notifications'));
+		add_action( 'bp_activity_comment_posted', array( $this,'buddyboss_pn_activity_comment_action'), 10, 2);
+		add_action( 'messages_message_sent', array( $this,'buddyboss_pn_message_notifications'), 10 ,1);
 		add_action( 'bp_invitations_send_invitation_by_id_before_send', array( $this,'buddyboss_pn_invitation_notifications'));
 		add_filter( 'friends_friendship_requested', array( $this,'buddyboss_pn_friend_request'), 10, 4);
 		add_filter( 'friends_friendship_accepted', array( $this,'buddyboss_pn_friend_request_accepted'), 10, 4);
+		add_action('bp_activity_after_save', array($this, 'buddyboss_pn_group_activity_notification'), 10, 1);
 
 		// Buddyboss end
 
@@ -999,7 +1000,7 @@ class Push_Notification_Frontend{
 		$this->pn_handle_error_log( $remoteResponse , 'peepso_friends_requests_after_add');
 	}
 
-	public function pn_buddyboss_send_notification($notification,$sender_info,$title,$message){
+	public function pn_buddyboss_send_notification($notification,$sender_info,$title,$message,$weblink = null){
 		$auth_settings = push_notification_auth_settings();
 		$user_token = '';
 		if( isset( $auth_settings['user_token'] ) && ! empty( $auth_settings['user_token'] ) ){
@@ -1007,11 +1008,13 @@ class Push_Notification_Frontend{
 		}
 		$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
 
-		if ( is_multisite() ) {
-			$weblink = get_site_url();
-		} else {
-			$weblink = home_url();
-		}
+		if( !$weblink ){
+			if ( is_multisite() ) {
+				$weblink = get_site_url();
+			} else {
+				$weblink = home_url();
+			}
+		}	
 		$user_email = $sender_info->user_email;
 
 	    $avatar_url = get_avatar_url($user_email, ['size' => 96]);
@@ -1038,6 +1041,8 @@ class Push_Notification_Frontend{
 		$postdata = array('body'=> $data);
 
 		$remoteResponse = wp_remote_post($verifyUrl, $postdata);
+
+		error_log('Buddyboss Notification: '.print_r($remoteResponse, true));
 
 		// $this->pn_handle_error_log( $remoteResponse , 'peepso_friends_requests_after_add');
 	}
@@ -1235,7 +1240,7 @@ class Push_Notification_Frontend{
 	public function buddyboss_pn_tokenid_registration_id($token_id, $response, $user_agent, $os, $ip_address){
 		$settings = push_notification_settings();
 
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
 
 			$userData = wp_get_current_user();
 			if(isset($userData->ID)){
@@ -1261,50 +1266,69 @@ class Push_Notification_Frontend{
 		}
 	}
 
-	public function buddyboss_pn_activity_comment_action($action, $activity){
+	public function buddyboss_pn_activity_comment_action($comment_id, $params){
 		$settings = push_notification_settings();
-
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
-
-			$receiver_id = 	add_filter('bp_activity_comment_user_id', function($userid) {
-								return $userid;
-							});
-
-			$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
-
-			if(! empty( $notification ) ) {
-
-				$sender_info = get_userdata($activity->user_id);
-
-				$title	 	= esc_html__('New activity comment', 'push-notification' );
-
-				$message 	= $action;
-
-				$this->pn_buddyboss_send_notification($notification,$sender_info,$title,$message);
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
+			$activity = new BP_Activity_Activity($comment_id);
+			if (!empty($activity->item_id)) {
+				$parent_activity = new BP_Activity_Activity($activity->item_id);
+				$receiver_id = $parent_activity->user_id;
+				if (!empty($receiver_id) && $receiver_id != $activity->user_id) {
+					$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
+					if (!empty($notification)) {
+						$sender_info = get_userdata($activity->user_id);
+	
+						$title   =  $sender_info->display_name . esc_html__(' commented on your post', 'push-notification');
+						$message = wp_trim_words($activity->content, 20, '...');
+						$user_domain = bp_core_get_user_domain($receiver_id);
+						$activity_link = trailingslashit($user_domain . bp_get_activity_slug()) . $activity->item_id . '/#acomment-' . $activity->id;
+	
+	
+						$this->pn_buddyboss_send_notification($notification, $sender_info, $title, $message, $activity_link);
+					}
+				}
 			}
 
 		}
 	}
-	public function buddyboss_pn_message_notifications($activity){
+	public function buddyboss_pn_message_notifications($message){
 		$settings = push_notification_settings();
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
-			$recipients = $activity->recipients;
-			foreach ($recipients as $key => $recipient) {
-				$receiver_id = 	$recipient->user_id;
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
+
+			if (empty($message->thread_id) || empty($message->sender_id) || empty($message->message)) {
+				return;
+			}
+	
+			$recipients = $message->recipients;
+			if (empty($recipients)) {
+				return;
+			}
+			$sender_id = intval($message->sender_id);
+	
+			foreach ($recipients as $receiver_id => $recipient_obj) {
+				if ($receiver_id === $sender_id) {
+					continue; // Skip notifying the sender
+				}
+	
 				$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
 	
-				if(! empty( $notification ) ) {
+				if (!empty($notification)) {
+					$sender_info = get_userdata($sender_id);
 	
-					$sender_info = get_userdata($activity->user_id);
+					$title = sprintf(
+						esc_html__('%s sent you a message', 'push-notification'),
+						esc_html($sender_info->display_name)
+					);
 	
-					$title	 	= $sender_info->display_name .esc_html__(' sent you message', 'push-notification' );
-	
-					$message 	= $activity->message;
-	
-					$this->pn_buddyboss_send_notification($notification,$sender_info,$title,$message);
-				}
-			}
-		}
+					$body = wp_strip_all_tags($message->message);
+
+					$link = bp_core_get_user_domain($receiver_id) . 'messages/view/' . $message->thread_id . '/';
+					$body = wp_trim_words($body, 20, '...');
+
+                    $this->pn_buddyboss_send_notification($notification, $sender_info, $title, $body, $link);
+                }
+            }
+        }
 	}
 	public function buddyboss_pn_invitation_notifications($activity){
 		$settings = push_notification_settings();
@@ -1360,7 +1384,61 @@ class Push_Notification_Frontend{
 			}
 		}
 	}
-
+	
+	public function buddyboss_pn_group_activity_notification($activity) {
+		if (
+			!isset($activity->component) ||
+			$activity->component !== 'groups' ||
+			$activity->type !== 'activity_update'
+		) {
+			return;
+		}
+	
+		$settings = push_notification_settings();
+	
+		if (
+			isset($settings['pn_buddyboss_compatibale']) &&
+			$settings['pn_buddyboss_compatibale'] &&
+			(is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php'))
+		) {
+			$group_id = $activity->item_id;
+			$group = groups_get_group(array('group_id' => $group_id));
+	
+			if (!$group || empty($group->id)) {
+				return;
+			}
+	
+			$members = groups_get_group_members(array(
+				'group_id' => $group_id,
+				'exclude' => array($activity->user_id),
+			));
+	
+			if (!empty($members['members'])) {
+				foreach ($members['members'] as $member) {
+					$receiver_id = $member->ID;
+					$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
+	
+					if (!empty($notification)) {
+						$sender_info = get_userdata($activity->user_id);
+	
+						$title = sprintf(
+							esc_html__('%s posted in %s', 'push-notification'),
+							esc_html($sender_info->display_name),
+							esc_html($group->name)
+						);
+	
+						$message = wp_strip_all_tags($activity->content);
+						$message = wp_trim_words($message, 20, '...');
+						$activity_link = $this->get_activity_link($activity);
+	
+						$this->pn_buddyboss_send_notification($notification, $sender_info, $title, $message, $activity_link);
+					}
+				}
+			}
+		}
+	}
+	
+	
 	public function peepso_pn_tokenid_registration_id($token_id, $response, $user_agent, $os, $ip_address){
 		$settings = push_notification_settings();
 
@@ -1566,8 +1644,57 @@ class Push_Notification_Frontend{
 		}
 		return $response_array;
 	}
-}
 
+	public function get_activity_link($activity) {
+		$link = home_url(); // fallback
+		$anchor = '#activity-' . $activity->id;
+	
+		// Get user domain
+		$user_domain = bp_core_get_user_domain($activity->user_id);
+	
+		switch ($activity->component) {
+			case 'groups':
+				$group = groups_get_group(['group_id' => $activity->item_id]);
+	
+				if (!empty($group->slug)) {
+					$base = trailingslashit(bp_get_groups_directory_permalink() . $group->slug);
+					$link = $base . (strpos($base, $anchor) === false ? $anchor : '');
+				}
+				break;
+	
+			case 'activity':
+				$base = trailingslashit($user_domain . bp_get_activity_slug());
+				$link = $base . (strpos($base, $anchor) === false ? $anchor : '');
+				break;
+	
+			case 'friends':
+				$link = $user_domain;
+				break;
+	
+			case 'blogs':
+			case 'forums':
+				if (!empty($activity->primary_link)) {
+					$link = $activity->primary_link;
+					if (strpos($link, '#') === false) {
+						$link .= $anchor; // append only if no hash
+					}
+				}
+				break;
+	
+			default:
+				if (!empty($activity->primary_link)) {
+					$link = $activity->primary_link;
+					if (strpos($link, '#') === false) {
+						$link .= $anchor;
+					}
+				}
+				break;
+		}
+	
+		return esc_url($link);
+	}
+	
+}
 function push_notification_frontend_class(){
 	if(!is_admin() || wp_doing_ajax()){
 		$notificationFrontEnd = new Push_Notification_Frontend(); 
