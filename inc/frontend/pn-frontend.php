@@ -157,7 +157,6 @@ class Push_Notification_Frontend{
 				max-width: 800px;
 				overflow-x: auto;
 				margin: 1.5em 0;
-				font-family: 'Segoe UI', sans-serif;
 			}
 
 			.pn-table {
@@ -181,10 +180,10 @@ class Push_Notification_Frontend{
 			}
 
 			.pn-badge {
-				padding: 4px 8px;
+				padding: 2px 4px 2px;
 				border-radius: 4px;
 				color: #fff;
-				font-size: 0.85em;
+				font-size: 0.75em;
 			}
 
 			.pn-done {
@@ -204,18 +203,31 @@ class Push_Notification_Frontend{
 				align-items: center;
 			}
 
-			.pn-pagination-buttons a {
+			.pagination-links a {
 				margin: 0 5px;
 				text-decoration: none;
 				background: #007bff;
 				color: white;
-				padding: 6px 12px;
+				padding: 0px 10px;
+				border-radius: 4px;
+				transition: background 0.3s;
+			}
+			.pagination-links .disabled {
+				margin: 0 5px;
+				text-decoration: none;
+				background:rgb(154, 155, 156);
+				color: white;
+				padding: 0px 10px;
 				border-radius: 4px;
 				transition: background 0.3s;
 			}
 
-			.pn-pagination-buttons a:hover {
+			.pagination-links a:hover {
 				background: #0056b3;
+			}
+			.tablenav-pages {
+				margin-top:10px;
+				float:right;
 			}
 		</style>
 		
@@ -423,8 +435,8 @@ class Push_Notification_Frontend{
 				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">«</span>';
 				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">‹</span>';
 			} else {
-				echo '<a class="first-page button pn_js_custom_pagination" page="1" href="' . esc_url($campaigns['campaigns']['first_page_url']) . '"><span class="screen-reader-text">' . esc_html__('First page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">«</span></a>';
-				echo '<a class="prev-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] - 1) . '" href="' . esc_url($campaigns['campaigns']['prev_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Previous page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">‹</span></a>';
+				echo '<a class="first-page button pn_js_custom_pagination" page="1" href="' . esc_url($campaigns['campaigns']['first_page_url']) . '"><span class="screen-reader-text">' . esc_html__('First page', 'push-notification') . '</span><span aria-hidden="true" >«</span></a>';
+				echo '<a class="prev-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] - 1) . '" href="' . esc_url($campaigns['campaigns']['prev_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Previous page', 'push-notification') . '</span><span aria-hidden="true" >‹</span></a>';
 			}
 
 			echo '<span class="screen-reader-text">' . esc_html__('Current Page', 'push-notification') . '</span>';
@@ -436,8 +448,8 @@ class Push_Notification_Frontend{
 				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">›</span>';
 				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">»</span>';
 			} else {
-				echo '<a class="next-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] + 1) . '" href="' . esc_url($campaigns['campaigns']['next_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Next page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">›</span></a>';
-				echo '<a class="last-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['last_page']) . '" href="' . esc_url($campaigns['campaigns']['last_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Last page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">»</span></a>';
+				echo '<a class="next-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] + 1) . '" href="' . esc_url($campaigns['campaigns']['next_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Next page', 'push-notification') . '</span><span aria-hidden="true" >›</span></a>';
+				echo '<a class="last-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['last_page']) . '" href="' . esc_url($campaigns['campaigns']['last_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Last page', 'push-notification') . '</span><span aria-hidden="true" >»</span></a>';
 			}
 
 			echo '</span></div>';
