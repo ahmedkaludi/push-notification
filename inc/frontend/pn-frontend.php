@@ -123,7 +123,332 @@ class Push_Notification_Frontend{
 		add_action('wp_login', array($this, 'after_login_transient'), 10, 2); 
 		 // force token update if login is detected
 		add_filter('pn_token_exists', array($this, 'pn_token_exists'), 10, 1);
+		add_action('wp_enqueue_scripts', array($this,'pn_enqueue_scripts'));
+		add_action('wp_footer', array($this,'pn_enqueue_ajax_pagination_script'));
+		add_shortcode('pn_campaigns', array($this,'pn_campaigns_shortcode'));
+		add_action('wp_ajax_pn_get_compaigns_front', array( $this, 'pn_get_compaigns_front' ));
 	}
+
+	function pn_campaigns_shortcode($atts) {
+		$atts = shortcode_atts(array(
+			'title' => true,
+			'message' => true,
+			'date' => true,
+			'status' => true,
+			'campaign_name' => 'Campaign',
+		), $atts, 'pn_campaigns');
+
+		$auth_settings = push_notification_auth_settings();
+		$detail_settings = push_notification_details_settings();
+		$campaigns = [];
+
+		if (!$detail_settings && isset($auth_settings['user_token'])) {
+			PN_Server_Request::getsubscribersData($auth_settings['user_token']);
+			$detail_settings = push_notification_details_settings();
+		}
+		if (!empty($auth_settings['user_token'])) {
+			$campaigns = PN_Server_Request::getCompaignsData($auth_settings['user_token']);
+		}
+
+		ob_start();
+		?>
+		<style>
+			.pn-table-wrapper {
+				max-width: 800px;
+				overflow-x: auto;
+				margin: 1.5em 0;
+				font-family: 'Segoe UI', sans-serif;
+			}
+
+			.pn-table {
+				width: 100%;
+				border-collapse: collapse;
+				background: #fff;
+				box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+				border: 1px solid #ccc;
+			}
+
+			.pn-table th,
+			.pn-table td {
+				padding: 8px 8px;
+				text-align: left;
+				border: 1px solid #ccc;
+			}
+
+			.pn-table th {
+				background: #f5f5f5;
+				font-weight: 400;
+			}
+
+			.pn-badge {
+				padding: 4px 8px;
+				border-radius: 4px;
+				color: #fff;
+				font-size: 0.85em;
+			}
+
+			.pn-done {
+				background-color: #28a745;
+			}
+			.pn-failed {
+				background-color: #dc3545;
+			}
+			.pn-pending {
+				background-color: #007bff;
+			}
+
+			.pn-pagination {
+				margin-top: 15px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.pn-pagination-buttons a {
+				margin: 0 5px;
+				text-decoration: none;
+				background: #007bff;
+				color: white;
+				padding: 6px 12px;
+				border-radius: 4px;
+				transition: background 0.3s;
+			}
+
+			.pn-pagination-buttons a:hover {
+				background: #0056b3;
+			}
+		</style>
+		
+		<div class="pn-table-wrapper">
+			<h3><?php echo esc_html($atts['campaign_name']); ?></h3>
+			<div id="pn_campaings_custom_div" attr="<?php echo esc_attr(json_encode($atts)) ?>">
+			<table class="pn-table">
+				<thead>
+					<tr>
+						<?php if ($atts['title']) : ?><th><?php esc_html_e('Title', 'push-notification'); ?></th><?php endif; ?>
+						<?php if ($atts['message']) : ?><th><?php esc_html_e('Message', 'push-notification'); ?></th><?php endif; ?>
+						<?php if ($atts['date']) : ?><th><?php esc_html_e('Sent on', 'push-notification'); ?></th><?php endif; ?>
+						<?php if ($atts['status']) : ?><th><?php esc_html_e('Status', 'push-notification'); ?></th><?php endif; ?>
+					</tr>
+				</thead>
+				<tbody>
+					<?php
+					if (!empty($campaigns['campaigns']['data'])) :
+						$timezone_string = get_option('timezone_string') ?: 'UTC';
+						foreach ($campaigns['campaigns']['data'] as $campaign) :
+							$message = wp_strip_all_tags($campaign['message']);
+							if (strlen($message) > 100) {
+								$message = substr($message, 0, strrpos(substr($message, 0, 100), ' ')) . '...';
+							}
+							$date = new DateTime($campaign['created_at'], new DateTimeZone('UTC'));
+							$date->setTimezone(new DateTimeZone($timezone_string));
+							?>
+							<tr>
+								<?php if ($atts['title']) : ?><td><?php echo esc_html($campaign['title']); ?></td><?php endif; ?>
+								<?php if ($atts['message']) : ?><td><?php echo esc_html($message); ?></td><?php endif; ?>
+								<?php if ($atts['date']) : ?><td><?php echo esc_html($date->format('Y-m-d H:i:s')); ?></td><?php endif; ?>
+								<?php if ($atts['status']) : ?>
+									<td>
+										<span class="pn-badge pn-<?php echo strtolower($campaign['status']); ?>">
+											<?php echo esc_html($campaign['status']); ?>
+										</span>
+									</td>
+								<?php endif; ?>
+							</tr>
+						<?php
+						endforeach;
+					else :
+						?>
+						<tr><td colspan="4" style="text-align:center;"><?php esc_html_e('No data found', 'push-notification'); ?></td></tr>
+					<?php endif; ?>
+				</tbody>
+			</table>
+			<div class="tablenav-pages">
+				<span class="displaying-num"><?php echo esc_html($campaigns['campaigns']['total']) . ' ' . esc_html__('items', 'push-notification'); ?></span>
+				<span class="pagination-links">
+					<?php if (empty($campaigns['campaigns']['prev_page_url'])) : ?>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>
+					<?php else : ?>
+						<a class="first-page button pn_js_custom_pagination" page="1" href="<?php echo esc_attr($campaigns['campaigns']['first_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('First page', 'push-notification'); ?></span>
+							<span aria-hidden="true">«</span>
+						</a>
+						<a class="prev-page button pn_js_custom_pagination" page="<?php echo esc_attr($campaigns['campaigns']['current_page'] - 1); ?>" href="<?php echo esc_attr($campaigns['campaigns']['prev_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('Previous page', 'push-notification'); ?></span>
+							<span aria-hidden="true">‹</span>
+						</a>
+					<?php endif; ?>
+
+					<span class="screen-reader-text"><?php esc_html_e('Current Page', 'push-notification'); ?></span>
+					<span id="table-paging" class="paging-input" style="margin: 0 8px;">
+						<span class="tablenav-paging-text">
+							<?php echo esc_html($campaigns['campaigns']['current_page']) . ' ' . esc_html__('of', 'push-notification'); ?>
+							<span class="total-pages"><?php echo esc_html($campaigns['campaigns']['last_page']); ?></span>
+						</span>
+					</span>
+
+					<?php if (empty($campaigns['campaigns']['next_page_url'])) : ?>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>
+					<?php else : ?>
+						<a class="next-page button pn_js_custom_pagination" page="<?php echo esc_attr($campaigns['campaigns']['current_page'] + 1); ?>" href="<?php echo esc_attr($campaigns['campaigns']['next_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('Next page', 'push-notification'); ?></span>
+							<span aria-hidden="true">›</span>
+						</a>
+						<a class="last-page button pn_js_custom_pagination" page="<?php echo esc_attr($campaigns['campaigns']['last_page']); ?>" href="<?php echo esc_attr($campaigns['campaigns']['last_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('Last page', 'push-notification'); ?></span>
+							<span aria-hidden="true">»</span>
+						</a>
+					<?php endif; ?>
+				</span>
+			</div>
+		</div>
+    
+		<?php
+		return ob_get_clean();
+	}
+
+	
+	function pn_enqueue_scripts() {
+		wp_enqueue_script('jquery');
+		wp_register_script('pn-custom-ajax', false);
+		wp_enqueue_script('pn-custom-ajax');
+		wp_localize_script('pn-custom-ajax', 'pn_setings', array(
+			'ajaxurl' => admin_url('admin-ajax.php'),
+			'remote_nonce' => wp_create_nonce('pn_remote_nonce')
+		));
+	}
+
+
+	
+	
+	function pn_enqueue_ajax_pagination_script() {
+		?>
+		<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				$("body").on("click", ".pn_js_custom_pagination", function(e) {
+					e.preventDefault();
+					var page = $(this).attr('page');
+					var atts = $('#pn_campaings_custom_div').attr('attr');
+					var shortcode_attr = JSON.parse(atts);
+					$.ajax({
+						url: pn_setings.ajaxurl,
+						type: "post",
+						dataType: 'html',
+						data: {
+							action: 'pn_get_compaigns_front',
+							page: page,
+							nonce: pn_setings.remote_nonce,
+							attr: shortcode_attr
+						},
+						success: function(response) {
+							$("#pn_campaings_custom_div").html(response);
+						},
+						error: function() {
+							alert("Something went wrong.");
+						}
+					});
+				});
+			});
+		</script>
+		<?php
+	}
+
+	public function pn_get_compaigns_front(){
+		if(empty( $_POST['nonce'])){
+			return;	
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_remote_nonce') ){
+			return;	
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;	
+		}
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		$page =  sanitize_text_field( wp_unslash( $_POST['page'] ) );
+		$authData = push_notification_auth_settings();
+		if ($authData['token_details']['validated']!=1 ){
+			return;  
+		}
+		
+		$campaigns = [];
+		$attr = [];
+		if(isset( $authData['user_token'] ) && !empty($authData['user_token']) ){
+			$campaigns = PN_Server_Request::getCompaignsData( $authData['user_token'],$page);
+		}
+
+		if (isset($_POST['attr'])) {
+			$attr = $_POST['attr'];
+		}
+		if (!empty($attr) && isset($attr['campaign_name'])) {
+			$timezone_string = get_option('timezone_string') ?: 'UTC';
+			echo '<table class="pn-table"><thead><tr>';
+			if (!empty($attr['title'])) echo '<th>' . esc_html__('Title', 'push-notification') . '</th>';
+			if (!empty($attr['message'])) echo '<th>' . esc_html__('Message', 'push-notification') . '</th>';
+			if (!empty($attr['date'])) echo '<th>' . esc_html__('Sent on', 'push-notification') . '</th>';
+			if (!empty($attr['status'])) echo '<th>' . esc_html__('Status', 'push-notification') . '</th>';
+			echo '</tr></thead><tbody>';
+
+			if (!empty($campaigns['campaigns']['data'])) {
+				foreach ($campaigns['campaigns']['data'] as $campaign) {
+					$message = wp_strip_all_tags($campaign['message']);
+					if (strlen($message) > 100) {
+						$message = substr($message, 0, strrpos(substr($message, 0, 100), ' ')) . '...';
+					}
+					$date = new DateTime($campaign['created_at'], new DateTimeZone('UTC'));
+					$date->setTimezone(new DateTimeZone($timezone_string));
+
+					echo '<tr>';
+					if (!empty($attr['title'])) echo '<td>' . esc_html($campaign['title']) . '</td>';
+					if (!empty($attr['message'])) echo '<td>' . esc_html($message) . '</td>';
+					if (!empty($attr['date'])) echo '<td>' . esc_html($date->format('Y-m-d H:i:s')) . '</td>';
+					if (!empty($attr['status'])) {
+						echo '<td><span class="pn-badge pn-' . esc_attr(strtolower($campaign['status'])) . '">' . esc_html($campaign['status']) . '</span></td>';
+					}
+					echo '</tr>';
+				}
+			} else {
+				echo '<tr><td colspan="4" style="text-align:center;">' . esc_html__('No data found', 'push-notification') . '</td></tr>';
+			}
+
+			echo '</tbody></table>';
+
+			// Pagination
+			echo '<div class="tablenav-pages">';
+			echo '<span class="displaying-num">' . esc_html($campaigns['campaigns']['total']) . ' ' . esc_html__('items', 'push-notification') . '</span>';
+			echo '<span class="pagination-links">';
+
+			if (empty($campaigns['campaigns']['prev_page_url'])) {
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">«</span>';
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">‹</span>';
+			} else {
+				echo '<a class="first-page button pn_js_custom_pagination" page="1" href="' . esc_url($campaigns['campaigns']['first_page_url']) . '"><span class="screen-reader-text">' . esc_html__('First page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">«</span></a>';
+				echo '<a class="prev-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] - 1) . '" href="' . esc_url($campaigns['campaigns']['prev_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Previous page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">‹</span></a>';
+			}
+
+			echo '<span class="screen-reader-text">' . esc_html__('Current Page', 'push-notification') . '</span>';
+			echo '<span id="table-paging" class="paging-input" style="margin: 0 8px;">';
+			echo '<span class="tablenav-paging-text">' . esc_html($campaigns['campaigns']['current_page']) . ' ' . esc_html__('of', 'push-notification') . ' <span class="total-pages">' . esc_html($campaigns['campaigns']['last_page']) . '</span></span>';
+			echo '</span>';
+
+			if (empty($campaigns['campaigns']['next_page_url'])) {
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">›</span>';
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">»</span>';
+			} else {
+				echo '<a class="next-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] + 1) . '" href="' . esc_url($campaigns['campaigns']['next_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Next page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">›</span></a>';
+				echo '<a class="last-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['last_page']) . '" href="' . esc_url($campaigns['campaigns']['last_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Last page', 'push-notification') . '</span><span aria-hidden="true" style="margin: 0 8px;">»</span></a>';
+			}
+
+			echo '</span></div>';
+			wp_die();
+		}         
+	}
+
+
+
+
+
 	public static function update_autoptimize_exclude( $values, $option ){
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js')){
 			$values .= ", ".PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js';
