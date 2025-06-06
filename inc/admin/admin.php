@@ -560,6 +560,13 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_key_popup_display_setings_custom_css',								// ID
+				esc_html__('Custom CSS For Popup', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_setings_custom_css_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);
 		}
 			
 			if( class_exists( 'WooCommerce', false )){
@@ -1418,6 +1425,10 @@ class Push_Notification_Admin{
 	public function pn_key_popup_display_setings_border_radius_callback(){        
         PN_Field_Generator::get_input_number('popup_display_setings_border_radius', 'popup_display_setings_border_radius_id');
 		echo "<p class='description'>".esc_html__('Set Border radius of Popup (in px)',"push-notification")."</p>";
+    }
+	public function pn_key_popup_display_setings_custom_css_callback(){        
+        PN_Field_Generator::get_input_textarea('popup_display_setings_custom_css', 'popup_display_setings_custom_css_id',esc_html__('Add your own CSS code here.',"push-notification"),60,5);
+		echo "<p class='description'>".esc_html__('You can use any valid CSS syntax. This will be applied on the frontend popup.',"push-notification")."</p>";
     }
 	public function pn_key_banner_accept_btn_callback(){		
 		PN_Field_Generator::get_input('popup_banner_accept_btn', 'popup_banner_accept_btn_id');

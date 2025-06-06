@@ -1014,82 +1014,88 @@ class Push_Notification_Frontend{
 		$activate_btn_color = (isset($settings['popup_display_setings_ok_color'])&& $is_pro)?$settings['popup_display_setings_ok_color']:'#8ab4f8';
 		$decline_btn_color = (isset($settings['popup_display_setings_no_thanks_color'])&& $is_pro)?$settings['popup_display_setings_no_thanks_color']:'#5f6368';
 		$border_radius =  (isset($settings['popup_display_setings_border_radius'])&& $is_pro)?$settings['popup_display_setings_border_radius']:'4';
-		echo '<style>.pn-wrapper{
-			box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
-		    font-size: 14px;
-		    align-items: center;
-		    background-color: '.esc_attr($custom_bg_color).';
-		    border: none;
-		    border-radius: '.esc_attr($border_radius).'px;
-		    box-sizing: border-box;
-		    color: #fff;
-		    display: none;
-		    flex-wrap: wrap;
-		    font-weight: 400;
-		    padding: 16px 22px;
-		    z-index:99999;
-		    text-align: left;
-		    position: fixed;
-		    '. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static values  */ $css_position_escaped.'
+		$popup_display_setings_custom_css =  (isset($settings['popup_display_setings_custom_css'])&& $is_pro)?$settings['popup_display_setings_custom_css']:null;
+		if ( !empty($popup_display_setings_custom_css) ) {
+			echo '<style>'.$popup_display_setings_custom_css.'</style>';
+		}else{
+			echo '<style>.pn-wrapper{
+				box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
+				font-size: 14px;
+				align-items: center;
+				background-color: '.esc_attr($custom_bg_color).';
+				border: none;
+				border-radius: '.esc_attr($border_radius).'px;
+				box-sizing: border-box;
+				color: #fff;
+				display: none;
+				flex-wrap: wrap;
+				font-weight: 400;
+				padding: 16px 22px;
+				z-index:99999;
+				text-align: left;
+				position: fixed;
+				'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static values  */ $css_position_escaped.'
+				}
+				.pn-wrapper .pn-txt-wrap {
+					display: flex;
+					flex-wrap: wrap;
+					position: relative;
+					height: auto;
+					line-height: 1.5;
+					color:'.esc_attr($custom_txt_color).';
+					max-width:400px;
+				}
+				.pn-wrapper .btn.act{color: '.esc_attr($activate_btn_color).';}
+				.pn-wrapper .btn{
+					align-items: center;
+					border: none;
+					display: inline-flex;
+					outline: none;
+					position: relative;
+					font-size: 14px;
+					background: none;
+					border-radius: 4px;
+					box-sizing: border-box;
+					color: '.esc_attr($decline_btn_color).';
+					cursor: pointer;
+					font-weight: 500;
+					outline: none;
+					margin-left: 8px;
+					min-width: auto;
+					padding: 0 8px;
+					text-decoration: none;
+				}
+				.pn-txt-wrap.pn-select-box {
+					display: block;
+					padding: 5px 15px;
+				}
+				.pn-categories-multiselect {
+					font-size: 13px;
+					margin: 10px 0;
+				}
+				#pn-activate-permission-categories {
+					background-color: #fff;
+					padding: 8px 15px;
+					color: #000;
+				}
+				#pn-categories-checkboxes label{
+					padding-right: 12px;
+					text-transform: capitalize;
+					cursor:pointer;
+				}
+				#pn-categories-checkboxes input{
+					margin-right: 3px;
+					cursor:pointer;
+				}
+				#pn-activate-permission-categories-text {
+					padding: 12px 0;
+					margin-top: 5px;
+					font-size: 12px;
+					font-weight: 600;
+				}
+				</style>';
 		}
-.pn-wrapper .pn-txt-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    position: relative;
-    height: auto;
-    line-height: 1.5;
-	color:'.esc_attr($custom_txt_color).';
-	max-width:400px;
-}
-.pn-wrapper .btn.act{color: '.esc_attr($activate_btn_color).';}
-.pn-wrapper .btn{
-	align-items: center;
-    border: none;
-    display: inline-flex;
-    outline: none;
-    position: relative;
-    font-size: 14px;
-    background: none;
-    border-radius: 4px;
-    box-sizing: border-box;
-    color: '.esc_attr($decline_btn_color).';
-    cursor: pointer;
-    font-weight: 500;
-    outline: none;
-    margin-left: 8px;
-    min-width: auto;
-    padding: 0 8px;
-    text-decoration: none;
-}
-.pn-txt-wrap.pn-select-box {
-	display: block;
-	padding: 5px 15px;
-}
-.pn-categories-multiselect {
-	font-size: 13px;
-    margin: 10px 0;
-}
-#pn-activate-permission-categories {
-    background-color: #fff;
-    padding: 8px 15px;
-    color: #000;
-}
-#pn-categories-checkboxes label{
-    padding-right: 12px;
-    text-transform: capitalize;
-	cursor:pointer;
-}
-#pn-categories-checkboxes input{
-	margin-right: 3px;
-	cursor:pointer;
-}
-#pn-activate-permission-categories-text {
-    padding: 12px 0;
-    margin-top: 5px;
-    font-size: 12px;
-    font-weight: 600;
-}
-</style><div class="pn-wrapper">';
+			echo'<div class="pn-wrapper">';
 				if(isset($settings['notification_pop_up_icon']) && !empty($settings['notification_pop_up_icon']) && PN_Server_Request::getProStatus()=='active'){
 					// phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
 					echo '<span style=" top: 0; vertical-align: top; "><img src="'.esc_attr($settings['notification_pop_up_icon']).'" style=" max-width: 70px;"></span>';
