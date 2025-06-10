@@ -249,6 +249,14 @@ jQuery(document).ready(function($){
 		}
 		target.val(value);
 	})
+	jQuery('.checkbox_operator_multi').click(function(e){
+		var value = 0;
+		var target = jQuery(this).next('.checkbox_target_multi');
+		if(jQuery(this).prop("checked")==true){
+			var value = 1;
+		}
+		target.val(value);
+	})
 	jQuery('#utm_tracking_checkbox').click(function(){
 		if(jQuery(this).prop("checked")==true){
 			jQuery("#utm_tracking_wrapper").show();

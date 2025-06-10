@@ -305,6 +305,14 @@ class Push_Notification_Admin{
 			);
 
 			add_settings_field(
+				'pn_device_target',								// ID
+				esc_html__('Device Target', 'push-notification'),// Title
+				array( $this, 'pn_device_target_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
+			add_settings_field(
 				'pn_select_custom_roles',								// ID
 				'<label for="pn_select_custom_roles" style="margin-left:10px;"><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_select_specific_roles_callback'),// Callback
@@ -1386,6 +1394,30 @@ Keep empty or 0 to disable the limit (no restriction on hourly sends)',"push-not
 		$value = 1;$class = $id = 'pn_display_popup_after_login';
 
 		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
+	}
+	public function pn_device_target_callback(){
+		$name = 'pn_device_target';
+		$desktop_value = 0;
+		$mobile_value = 0;
+		$class = $id = 'pn_device_target';
+
+		$settings = push_notification_settings();
+		if(isset($settings[$name]['desktop']) && $settings[$name]['desktop'] == 1){
+			$desktop_value = 1;
+		}
+		if(isset($settings[$name]['mobile']) && $settings[$name]['mobile'] == 1){
+			$mobile_value = 1;
+		}
+		?>
+		<div class="checkbox_wrapper">
+			<input type="checkbox" class="regular-text checkbox_operator_multi" id="pn_device_target_desktop" <?php if ( $desktop_value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($desktop_value); ?>"/>
+			<input type="hidden" name="push_notification_settings[pn_device_target][desktop]" class="regular-text checkbox_target_multi" id="pn_device_target_desktop" value="<?php echo esc_attr($desktop_value); ?>" data-truevalue="<?php echo esc_attr($desktop_value); ?>"/>
+			<label style="display:inline-block" for="pn_device_target_desktop"><?php echo esc_html__('Desktop', 'push-notification'); ?></label>&nbsp;&nbsp;
+			<input type="checkbox" class="regular-text checkbox_operator_multi" id="<?php echo esc_attr($id); ?>" <?php if ( $mobile_value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($mobile_value); ?>"/>
+			<input type="hidden" name="push_notification_settings[pn_device_target][mobile]" class="regular-text checkbox_target_multi" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($mobile_value); ?>" data-truevalue="<?php echo esc_attr($mobile_value); ?>"/>
+			<label style="display:inline-block" for="<?php echo esc_attr($id); ?>"><?php echo esc_html__('Mobile', 'push-notification'); ?></label>
+		</div>
+		<?php
 	}
 
 	public function pn_key_showon_apk_only_callback(){		

@@ -893,8 +893,30 @@ class Push_Notification_Frontend{
 		<?php
 	}
 
+	function pn_detect_user_agent_new() {
+		$device = 'desktop';
+		if ( wp_is_mobile() ) {
+			$device = 'mobile';
+		}
+		return $device;
+	}
+
 	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
+		$user_device = $this->pn_detect_user_agent_new();
+		$allow_desktop = true;
+		$allow_mobile = true;
+
+		if(isset($settings['pn_device_target']['desktop']) && $settings['pn_device_target']['desktop'] == 0){
+			$allow_desktop = false;
+		}
+		if(isset($settings['pn_device_target']['mobile']) && $settings['pn_device_target']['mobile'] == 0){
+			$allow_mobile = false;
+		}
+		if ( ($user_device == 'desktop' && !$allow_desktop) ||
+			($user_device == 'mobile' && !$allow_mobile) ) {
+			return; 
+		}
 
 		if (! $this->pn_display_status($settings)) {
 			return;
