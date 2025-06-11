@@ -102,6 +102,14 @@ class Push_Notification_Frontend{
 		add_action( 'pn_tokenid_registration_id', array($this, 'gravity_pn_tokenid_registration_id') ,10,5);
 		add_action( 'gform_after_save_form', array($this, 'send_pn_on_gravity_form_saved'), 10, 2 );
 		//  Gravity Form End
+		
+		
+		// Fluent Community Start
+		add_action( 'pn_tokenid_registration_id', array($this, 'fluent_community_pn_tokenid_registration_id') ,10,5);
+		add_action( 'fluent_community/feed/created', array($this, 'pn_notify_on_fc_feed_created'), 10, 1 );
+		add_action('fluent_community/comment_added', array($this, 'pn_notify_on_fc_new_comment'), 10, 2);
+		add_action('fluent_community/feed/react_added', array($this, 'pn_notify_on_fc_react_added'), 10, 2);
+		//  Fluent Community End
 
 		//click event
 		add_action( 'wp_ajax_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) );
@@ -1364,6 +1372,48 @@ class Push_Notification_Frontend{
 
 		$this->pn_handle_error_log( $remoteResponse , 'peepso_friends_requests_after_add');
 	}
+	public function pn_fluent_community_send_notification($notification,$sender_info,$title,$message){
+		$auth_settings = push_notification_auth_settings();
+		$user_token = '';
+		if( isset( $auth_settings['user_token'] ) && ! empty( $auth_settings['user_token'] ) ){
+			$user_token = $auth_settings['user_token'];
+		}
+		$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
+
+		if ( is_multisite() ) {
+			$weblink = get_site_url();
+		} else {
+			$weblink = home_url();
+		}
+		$user_email = $sender_info->user_email;
+
+	    $avatar_url = get_avatar_url($user_email, ['size' => 96]);
+
+		$data = array(
+					"user_token" =>	$user_token,
+
+					"audience_token_id"	=>	$notification,
+
+					"title"	 	=>		 $title,
+
+					"message" 	=>	 $message,
+
+					"link_url" 	=>	 $weblink,
+
+					"icon_url" 	=>	 $avatar_url,
+
+					"image_url" =>	 null,
+
+					"website" 	=>	 $weblink,
+
+				);
+
+		$postdata = array('body'=> $data);
+
+		$remoteResponse = wp_remote_post($verifyUrl, $postdata);
+
+		$this->pn_handle_error_log( $remoteResponse , 'pn_fluent_community_send_notification');
+	}
 
 	public function pn_buddyboss_send_notification($notification,$sender_info,$title,$message,$weblink = null){
 		$auth_settings = push_notification_auth_settings();
@@ -1406,8 +1456,6 @@ class Push_Notification_Frontend{
 		$postdata = array('body'=> $data);
 
 		$remoteResponse = wp_remote_post($verifyUrl, $postdata);
-
-		error_log('Buddyboss Notification: '.print_r($remoteResponse, true));
 
 		// $this->pn_handle_error_log( $remoteResponse , 'peepso_friends_requests_after_add');
 	}
@@ -1861,6 +1909,34 @@ class Push_Notification_Frontend{
 
 		}
 	}
+	public function fluent_community_pn_tokenid_registration_id($token_id, $response, $user_agent, $os, $ip_address){
+		$settings = push_notification_settings();
+
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$userid = $userData->ID;
+
+				$device_tokens = get_user_meta($userid, 'fluent_community_pn_notification_token_id', true);
+
+				if ( isset($response['data']['id']) && !empty( $response['data']['id'] )) {
+					if (!is_array($device_tokens)) {
+					    $device_tokens = [];
+					}
+
+					$new_token = $response['data']['id'];
+
+					if (!in_array($new_token, $device_tokens)) {
+					    $device_tokens[] = $new_token;
+					}
+					$device_tokens = array_slice(array_unique($device_tokens), -5);
+					update_user_meta($userid, 'fluent_community_pn_notification_token_id', $device_tokens);
+				}
+			}
+
+		}
+	}
 	public function send_pn_on_gravity_form_saved($form, $is_new){
 		$settings = push_notification_settings();
 		if (isset($settings['pn_gravity_compatibale']) && $settings['pn_gravity_compatibale'] && is_plugin_active('gravityforms/gravityforms.php') ) {
@@ -1879,6 +1955,64 @@ class Push_Notification_Frontend{
 					$message	 	= esc_html__('Gravity form saved', 'push-notification' );
 
 					$this->pn_gravity_send_notification($notification,$sender_info,$title,$message);
+				}
+			}
+		}
+	}
+	public function pn_notify_on_fc_feed_created($feed){
+		$settings = push_notification_settings();
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$userid = $userData->ID;
+
+				$receiver_id = 	$feed->user_id;
+				$notification = get_user_meta($receiver_id, 'fluent_community_pn_notification_token_id', true);
+
+				if(! empty( $notification ) ) {
+
+					$sender_info = get_userdata($receiver_id);
+
+					$title	 	= esc_html__('New Feed Created', 'push-notification' );
+					$message	 	= esc_html__('New Feed Created', 'push-notification' );
+
+					$this->pn_fluent_community_send_notification($notification,$sender_info,$title,$message);
+				}
+			}
+		}
+	}
+	public function pn_notify_on_fc_new_comment($comment, $feed){
+		$settings = push_notification_settings();
+		
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$receiver_id = $feed->user_id;
+
+				$notification = get_user_meta($receiver_id, 'fluent_community_pn_notification_token_id', true);
+				if(! empty( $notification ) ) {
+					$sender_info = get_userdata($comment->user_id);
+					$title	 	= $sender_info->display_name.' '.esc_html__('commented on feed', 'push-notification' );
+					$message 	= esc_html( $comment->message );
+					$this->pn_fluent_community_send_notification($notification,$sender_info,$title,$message);
+				}
+			}
+		}
+	}
+	public function pn_notify_on_fc_react_added($react, $feed){
+		$settings = push_notification_settings();
+		
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$receiver_id = $feed->user_id;
+
+				$notification = get_user_meta($receiver_id, 'fluent_community_pn_notification_token_id', true);
+				if(! empty( $notification ) ) {
+					$sender_info = get_userdata($comment->user_id);
+					$title	 	= $sender_info->display_name.' '.esc_html__('reacted on feed', 'push-notification' );
+					$message 	= esc_html__('reacted on feed', 'push-notification' );
+					$this->pn_fluent_community_send_notification($notification,$sender_info,$title,$message);
 				}
 			}
 		}
