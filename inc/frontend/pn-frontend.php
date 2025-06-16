@@ -709,6 +709,8 @@ class Push_Notification_Frontend{
 			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$category = sanitize_text_field($_POST['category']);
 			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$author = (isset($_POST['author'])) ? sanitize_text_field($_POST['author']) : "";
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$os = sanitize_text_field($_POST['os']);
 			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$url = isset($_POST['url'])?sanitize_url($_POST['url']):'';
@@ -725,7 +727,7 @@ class Push_Notification_Frontend{
 			if ($user_agent == 'undefined') {
 				$user_agent = $this->check_browser_type();
 			}
-			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
+			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category,$author);
 			if (is_user_logged_in() ) {
 				if ( isset($response['status']) && $response['status'] == 200 ) {
 					$user = wp_get_current_user();
@@ -997,6 +999,11 @@ class Push_Notification_Frontend{
 		$setting_category = !empty($settings['category'])? $settings['category'] : [];
 		$selected_category =  !is_array($setting_category) ? explode(',',$setting_category) : $setting_category;
 		$catArray = !is_array($selected_category) ? explode(',',$selected_category) : $selected_category;
+
+		$setting_author = !empty($settings['author'])? $settings['author'] : [];
+		$selected_author =  !is_array($setting_author) ? explode(',',$setting_author) : $setting_author;
+		$authorArray = !is_array($selected_author) ? explode(',',$selected_author) : $selected_author;
+
 		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
 		
 		switch ($position) {
@@ -1145,15 +1152,16 @@ class Push_Notification_Frontend{
 				   		}
 			   		echo '</div>';
 						if(!empty($settings['on_category']) && $settings['on_category'] == 1){
-							 echo '<div id="pn-activate-permission-categories-text">
-								 '.esc_html__('On which category would you like to receive?', 'push-notification').'
-							 </div>
-							 <div class="pn-categories-multiselect">
-								 <div id="pn-categories-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
-							  if($all_category){
-									  echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
-							  }
-							  if(!empty($catArray)){
+							if($all_category || !empty($catArray)){
+								echo '<div id="pn-activate-permission-categories-text">
+									'.esc_html__('On which category would you like to receive?', 'push-notification').'
+								</div>
+								<div class="pn-categories-multiselect">
+								<div id="pn-categories-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
+								if($all_category){
+										echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
+								}
+							  	if(!empty($catArray)){
 								  foreach ($catArray as $key=>$value) {
 									  if (is_string($value)) {
 										  $catslugdata ='';
@@ -1163,9 +1171,32 @@ class Push_Notification_Frontend{
 										  echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr($catslugdata).'" />'.esc_html(get_cat_name($value)).'</label>';
 									  }
 								  }
+							  	}
+							  	echo '</div></div>';
+							}
+							  if(!empty($authorArray)){
+									echo '<div id="pn-activate-permission-categories-text">
+									'.esc_html__('On which author would you like to receive?', 'push-notification').'
+								</div>
+								<div class="pn-author-multiselect">
+									<div id="pn-author-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
+							  
+								$all_authors = get_users([
+									'role' => 'author',
+									'orderby' => 'display_name',
+									'order' => 'ASC',
+								]);
+								$author_key_val = [];
+								foreach ( $all_authors as $author_d ) {
+									$author_key_val[$author_d->ID] = $author_d->display_name;
+								}
+								foreach ($authorArray as $key=>$value) {
+									
+										echo '<label for="pn_author_checkbox'.esc_attr($value).'"><input type="checkbox" name="author[]" id="pn_author_checkbox'.esc_attr($value).'" value="'.esc_attr($value).'" />'.esc_html($author_key_val[$value]).'</label>';
+								}
+									  echo '</div>
+								  </div>';
 							  }
-								 echo '</div>
-							 </div>';
 						}
 
 					   if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom' && PN_Server_Request::getProStatus()=='active'){

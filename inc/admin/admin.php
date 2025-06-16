@@ -296,6 +296,18 @@ class Push_Notification_Admin{
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
 
+			$soc_display="style='display:none;margin-left:10px;'";
+			if(isset($notification['on_category']) && $notification['on_category']){
+				$soc_display="style='display:block;margin-left:10px;'";
+			}
+			add_settings_field(
+				'pn_select_custom_author',								// ID
+				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_author" '.$soc_display.'><b>'.esc_html__('On Selected Author', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_select_specific_author_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
 			add_settings_field(
 				'pn_display_popup_after_login',								// ID
 				esc_html__('Logged in Users', 'push-notification'),// Title
@@ -1335,6 +1347,40 @@ Keep empty or 0 to disable the limit (no restriction on hourly sends)',"push-not
 						}
 						
 						echo '<option value="'.esc_attr($value['id']).'"  '.esc_attr($selected_option).'>'. esc_html($value['text']).'</option>';
+					}
+			echo '</select></div></div>';
+	}
+
+	public function pn_select_specific_author_callback() {
+
+			$notification = push_notification_settings();		
+
+			if ( isset( $notification['on_category'] ) && $notification['on_category'] ) {
+				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:block;">';
+			}else{
+				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:none;">';
+			}
+		
+			echo '<div class="pn-field_wrap">';
+				
+			$settings = push_notification_settings();
+			
+			$author_val = isset($settings['author'])?$settings['author']:array();
+			$selected_author = !is_array($author_val) ? explode(',',$author_val ) : $author_val;
+			$authors = get_users([
+							'role' => 'author',
+							'orderby' => 'display_name',
+							'order' => 'ASC',
+						]);
+			echo "<div id='segment_category_selector_wrapper'>";
+				echo '<select name="push_notification_settings[author][]" class="regular-text pn_author_select2">';
+					foreach ($authors as $key => $author) {
+						$selected_option ='';
+						if (in_array($author->ID,$selected_author) ||  in_array(get_cat_name($author->ID),$selected_author)) {
+							$selected_option ='selected=selected';
+						}
+						
+						echo '<option value="'.esc_attr($author->ID).'"  '.esc_attr($selected_option).'>'. esc_html($author->display_name).'</option>';
 					}
 			echo '</select></div></div>';
 	}
@@ -2759,6 +2805,50 @@ function pn_select2_category_data(){
 	wp_die();
 
 }
+
+add_action( 'wp_ajax_pn_select2_author_data', 'pn_select2_author_data' );
+function pn_select2_author_data() {
+
+	if ( ! isset( $_GET['nonce'] ) ) {
+		return;
+	}
+
+	if ( isset( $_GET['nonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'pn_notification' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+
+	$args = [
+		'role'           => 'author',
+		'orderby'        => 'display_name',
+		'order'          => 'ASC',
+		'number'         => 20,
+	];
+
+	if ( $search ) {
+		$args['search'] = '*' . esc_attr( $search ) . '*';
+		$args['search_columns'] = ['display_name', 'user_login', 'user_nicename'];
+	}
+
+	$authors = get_users( $args );
+
+	$result = [];
+	foreach ( $authors as $author ) {
+		$result[] = [
+			'id'   => $author->ID,
+			'text' => $author->display_name,
+		];
+	}
+
+	wp_send_json( [ 'results' => $result ] );
+	wp_die();
+}
+
 
 add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data' );
 
