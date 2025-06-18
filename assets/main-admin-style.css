@@ -294,8 +294,9 @@ content:'';
 #popup_display_setings_border_radius_id{
 	width:100px;
 }
-#pn_key_notification_limit_number_id{
-	width:100px;
+#pn_key_notification_limit_id{
+	width: 141px;
+    margin-top: -3px;
 }
 
 /* pn visibility css */

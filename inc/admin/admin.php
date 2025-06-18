@@ -826,11 +826,15 @@ class Push_Notification_Admin{
 			<div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
 					<div id="dashboard_right_now" class="postbox" >
 						<h2 class="pn_select_design" style="margin-top:6px;">'.esc_html__('Select push notification design', 'push-notification').'</h2>
-						<div class="pn-image-container">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m.png" alt="Image 1" class="pn-clickable-image pn-clickable-image-selected" notification_type="message">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i.png" alt="Image 2" class="pn-clickable-image" notification_type="message-with-icon">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_b.png" alt="Image 3" class="pn-clickable-image" notification_type="message-with-banner">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i_b.png" alt="Image 1" class="pn-clickable-image" notification_type="message-with-icon-and-banner">
+						<div class="pn-image-container">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m.png" alt="Image 1" class="pn-clickable-image pn-clickable-image-selected" notification_type="message">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i.png" alt="Image 2" class="pn-clickable-image" notification_type="message-with-icon">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_b.png" alt="Image 3" class="pn-clickable-image" notification_type="message-with-banner">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i_b.png" alt="Image 1" class="pn-clickable-image" notification_type="message-with-icon-and-banner">
 						</div>
 						<div class="inside device-container-test">
 						<div class="pn-form-part">
@@ -874,8 +878,9 @@ class Push_Notification_Admin{
 					</div>
 				</div>
 				<div id="pn_campaings" style="display:none;" class="pn-tabs">
-					<div id="pn_cam_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
-					<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
+					<div id="pn_cam_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">';
+					//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+					echo'<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
 					</div>
 
 					<div class="row">
@@ -1012,8 +1017,9 @@ class Push_Notification_Admin{
 		        echo '</div></div>
 
 				<div id="pn_subscribers" style="display:none;" class="pn-tabs">
-					<div id="pn_subscriber_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
-					<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
+					<div id="pn_subscriber_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">';
+					//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+					echo'<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
 					</div>
 					<div class="row" id="pn_subscriber_custom_div">
 					<h3>'.esc_html__('Subscribers', 'push-notification').'</h3>
@@ -1198,14 +1204,14 @@ class Push_Notification_Admin{
 		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
 	}
 	public function user_settings_notification_limit_callback(){
+		PN_Field_Generator::get_input_number('pn_key_notification_limit_number', 'pn_key_notification_limit_number_id');
 		$data = array(
-			''=> esc_html__('Select Notification Limit', 'push-notification'),
-			'per_hour'=> esc_html__('Per Hour', 'push-notification'),
 			'per_day'=> esc_html__('Per Day', 'push-notification'),
+			'per_hour'=> esc_html__('Per Hour', 'push-notification'),
 			'per_month'=> esc_html__('Per Month', 'push-notification'),
 		);
 		PN_Field_Generator::get_input_select('pn_key_notification_limit', '', $data, 'pn_key_notification_limit_id', '');		
-		PN_Field_Generator::get_input_number('pn_key_notification_limit_number', 'pn_key_notification_limit_number_id');
+		
 		echo "<p class='description'>".esc_html__('Set the maximum number of push notifications that can be sent within selected limit.
 Keep empty or 0 to disable the limit (no restriction on hourly sends)',"push-notification")."</p>";
 	}
@@ -1543,7 +1549,7 @@ Keep empty or 0 to disable the limit (no restriction on hourly sends)',"push-not
 		echo "<p class='description'>".esc_html__('Set Border radius of Popup (in px)',"push-notification")."</p>";
     }
 	public function pn_key_popup_display_setings_custom_css_callback(){        
-        PN_Field_Generator::get_input_textarea('popup_display_setings_custom_css', 'popup_display_setings_custom_css_id',esc_html__('Add your own CSS code here.',"push-notification"),60,5);
+        PN_Field_Generator::get_input_textarea('popup_display_setings_custom_css', 'popup_display_setings_custom_css_id',esc_html__('Add your own CSS code here.',"push-notification"),70,5);
 		echo "<p class='description'>".esc_html__('You can use any valid CSS syntax. This will be applied on the frontend popup.',"push-notification")."</p>";
     }
 	public function pn_key_banner_accept_btn_callback(){		
@@ -1755,13 +1761,13 @@ Keep empty or 0 to disable the limit (no restriction on hourly sends)',"push-not
 
 		switch ($type) {
 			case 'per_hour':
-				$date_key = 'pn_sent_hour_' . date('YmdH', $now);
+				$date_key = 'pn_sent_hour_' . gmdate('YmdH', $now);
 				break;
 			case 'per_day':
-				$date_key = 'pn_sent_day_' . date('Ymd', $now);
+				$date_key = 'pn_sent_day_' . gmdate('Ymd', $now);
 				break;
 			case 'per_month':
-				$date_key = 'pn_sent_month_' . date('Ym', $now);
+				$date_key = 'pn_sent_month_' . gmdate('Ym', $now);
 				break;
 		}
 
@@ -1790,13 +1796,13 @@ Keep empty or 0 to disable the limit (no restriction on hourly sends)',"push-not
 
 		switch ($type) {
 			case 'per_hour':
-				$date_key = 'pn_sent_hour_' . date('YmdH', $now);
+				$date_key = 'pn_sent_hour_' . gmdate('YmdH', $now);
 				break;
 			case 'per_day':
-				$date_key = 'pn_sent_day_' . date('Ymd', $now);
+				$date_key = 'pn_sent_day_' . gmdate('Ymd', $now);
 				break;
 			case 'per_month':
-				$date_key = 'pn_sent_month_' . date('Ym', $now);
+				$date_key = 'pn_sent_month_' . gmdate('Ym', $now);
 				break;
 		}
 
@@ -2441,7 +2447,8 @@ function push_notification_settings(){
 		'popup_display_setings_text_color'=>'#fff',
 		'popup_display_setings_bg_color'=>'#222',
 		'popup_display_setings_border_radius'=>'4',
-		'notification_botton_position'=>'top'
+		'notification_botton_position'=>'top',
+		'pn_key_notification_limit_number'=>0
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);

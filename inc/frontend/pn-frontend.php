@@ -269,7 +269,7 @@ class Push_Notification_Frontend{
 								<?php if ($atts['date']) : ?><td><?php echo esc_html($date->format('Y-m-d H:i:s')); ?></td><?php endif; ?>
 								<?php if ($atts['status']) : ?>
 									<td>
-										<span class="pn-badge pn-<?php echo strtolower($campaign['status']); ?>">
+										<span class="pn-badge pn-<?php echo esc_attr( strtolower($campaign['status'] ) ); ?>">
 											<?php echo esc_html($campaign['status']); ?>
 										</span>
 									</td>
@@ -332,7 +332,7 @@ class Push_Notification_Frontend{
 	
 	function pn_enqueue_scripts() {
 		wp_enqueue_script('jquery');
-		wp_register_script('pn-custom-ajax', false);
+		wp_register_script('pn-custom-ajax', false, array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 		wp_enqueue_script('pn-custom-ajax');
 		wp_localize_script('pn-custom-ajax', 'pn_setings', array(
 			'ajaxurl' => admin_url('admin-ajax.php'),
@@ -399,7 +399,7 @@ class Push_Notification_Frontend{
 		}
 
 		if (isset($_POST['attr'])) {
-			$attr = $_POST['attr'];
+			$attr =  array_map('sanitize_text_field',wp_unslash( $_POST['attr'] ) );
 		}
 		if (!empty($attr) && isset($attr['campaign_name'])) {
 			$timezone_string = get_option('timezone_string') ?: 'UTC';
@@ -1053,7 +1053,7 @@ class Push_Notification_Frontend{
 		$border_radius =  (isset($settings['popup_display_setings_border_radius'])&& $is_pro)?$settings['popup_display_setings_border_radius']:'4';
 		$popup_display_setings_custom_css =  (isset($settings['popup_display_setings_custom_css'])&& $is_pro)?$settings['popup_display_setings_custom_css']:null;
 		if ( !empty($popup_display_setings_custom_css) ) {
-			echo '<style>'.$popup_display_setings_custom_css.'</style>';
+			echo '<style>'.esc_html( $popup_display_setings_custom_css ).'</style>';
 		}else{
 			echo '<style>.pn-wrapper{
 				box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
@@ -1758,8 +1758,9 @@ class Push_Notification_Frontend{
 	
 				if (!empty($notification)) {
 					$sender_info = get_userdata($sender_id);
-	
+					// translators: %s is the sender's display name
 					$title = sprintf(
+						//phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
 						esc_html__('%s sent you a message', 'push-notification'),
 						esc_html($sender_info->display_name)
 					);
@@ -1854,6 +1855,7 @@ class Push_Notification_Frontend{
 	
 			$members = groups_get_group_members(array(
 				'group_id' => $group_id,
+				//phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 				'exclude' => array($activity->user_id),
 			));
 	
@@ -1864,9 +1866,10 @@ class Push_Notification_Frontend{
 	
 					if (!empty($notification)) {
 						$sender_info = get_userdata($activity->user_id);
-	
+						// translators: %1$s is the sender's display name, %2$s is the group name
 						$title = sprintf(
-							esc_html__('%s posted in %s', 'push-notification'),
+							//phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
+							esc_html__('%1$s posted in %2$s', 'push-notification'),
 							esc_html($sender_info->display_name),
 							esc_html($group->name)
 						);

@@ -175,7 +175,7 @@ $icon_url => icon link url optional
 
 
 function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $message = "", $link_url = "", $icon_url = "", $image_url = "" ) {
-	$response = array('status' => false,'message' => esc_html('Invalid Request','push-notification'));
+	$response = array('status' => false,'message' => esc_html__('Invalid Request','push-notification'));
 	if ( ! empty( $user_id) && !empty($title) && !empty($message) && !empty($link_url)) {
 
 		$verifyUrl = 'campaign/pn_send_push_filter';
