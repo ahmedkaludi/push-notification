@@ -1,3 +1,13 @@
+= 1.43 (18 June 2025) =
+* Added: Added compatibility with Fluent community #154
+* Fixed: PHP Warning & Notice in push-notification.php: $audience_token_id Returns Nothing, $response Undefined #152
+* Fixed: Buddyboss / Buddypress notification not working #158
+* Added: Options to control how many notifications can be sent per hour. #145
+* Added: Dedicated option for finer CSS controls . #144
+* Added: Feature to show the campaign field with the help of shortcode. #160
+* Added: Option "Device Targeting" #95
+* Added: Feature that enables users to choose categories and authors according to their preferences. #161
+* Enhancement: After saving api token, Browser asks to save as password which should not be happend. #105
 
 = 1.42 (24 April 2025) =
 * Enhancement: Tested with WordPress 6.8 #155

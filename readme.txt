@@ -2,7 +2,7 @@
 Contributors: magazine3
 Requires at least: 3.0
 Tested up to: 6.8
-Stable tag: 1.42
+Stable tag: 1.43
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: Push Notifications, Mobile, amp, Web Push Notifications
@@ -26,6 +26,7 @@ Send push notifications automatically when a post is published or updated. You c
 * Compability with Gravity form plugin.
 * Compability with BuddyBoss Plugin.
 * Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
+* Display campaign list on frontend using the [pn_campaigns] shortcode 
 
 = Pro Features: =
 * Send Notification as per Segmentation
@@ -59,6 +60,17 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 
 == Changelog ==
+
+= 1.43 (18 June 2025) =
+* Added: Added compatibility with Fluent community #154
+* Fixed: PHP Warning & Notice in push-notification.php: $audience_token_id Returns Nothing, $response Undefined #152
+* Fixed: Buddyboss / Buddypress notification not working #158
+* Added: Options to control how many notifications can be sent per hour. #145
+* Added: Dedicated option for finer CSS controls . #144
+* Added: Feature to show the campaign field with the help of shortcode. #160
+* Added: Option "Device Targeting" #95
+* Added: Feature that enables users to choose categories and authors according to their preferences. #161
+* Enhancement: After saving api token, Browser asks to save as password which should not be happend. #105
 
 = 1.42 (24 April 2025) =
 * Enhancement: Tested with WordPress 6.8 #155
@@ -108,14 +120,6 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 = 1.35 (06 June 2024) =
 * Fixed: On the install banner, the yes or no option is not showing.  #112
 * Fixed: Php error's on user end. #111
-
-= 1.34 (31 May 2024) =
-* Added: Ability to change default Notification icon URL #90
-* Added: Option to customise the push notification banner. #76
-* Enhancement: Add loader on campaigns pagination #92
-* Enhancement : Make checkboxes selection on its label clicked #91
-* Fixed: Notice: Trying to get property 'slug' of non-object #97
-* Fixed: Conflict issue with ultimate membership notification. #109
 
 1.33.1 (09 May 2024)
 Fixed: Issue with plugin activation. #103
