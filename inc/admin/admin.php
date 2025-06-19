@@ -1213,7 +1213,7 @@ class Push_Notification_Admin{
 		PN_Field_Generator::get_input_select('pn_key_notification_limit', '', $data, 'pn_key_notification_limit_id', '');		
 		
 		echo "<p class='description'>".esc_html__('Set the maximum number of push notifications that can be sent within selected limit.
-Keep empty or 0 to disable the limit (no restriction on hourly sends)',"push-notification")."</p>";
+Keep empty or 0 to disable the limit',"push-notification")."</p>";
 	}
 
 	public function pn_key_posttype_select_callback(){		

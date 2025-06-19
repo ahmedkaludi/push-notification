@@ -61,7 +61,7 @@ Yes, Absolutely! We would suggest you send your feature request by creating an i
 
 == Changelog ==
 
-= 1.43 (18 June 2025) =
+= 1.43 (19 June 2025) =
 * Added: Added compatibility with Fluent community #154
 * Fixed: PHP Warning & Notice in push-notification.php: $audience_token_id Returns Nothing, $response Undefined #152
 * Fixed: Buddyboss / Buddypress notification not working #158
