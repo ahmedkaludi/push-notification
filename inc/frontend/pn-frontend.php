@@ -89,11 +89,12 @@ class Push_Notification_Frontend{
 
 		// Buddyboss
 		add_action( 'pn_tokenid_registration_id', array($this, 'buddyboss_pn_tokenid_registration_id') ,10,5);
-		add_filter( 'bp_activity_comment_action', array( $this,'buddyboss_pn_activity_comment_action'), 10, 2);
-		add_action( 'messages_message_sent', array( $this,'buddyboss_pn_message_notifications'));
+		add_action( 'bp_activity_comment_posted', array( $this,'buddyboss_pn_activity_comment_action'), 10, 2);
+		add_action( 'messages_message_sent', array( $this,'buddyboss_pn_message_notifications'), 10 ,1);
 		add_action( 'bp_invitations_send_invitation_by_id_before_send', array( $this,'buddyboss_pn_invitation_notifications'));
 		add_filter( 'friends_friendship_requested', array( $this,'buddyboss_pn_friend_request'), 10, 4);
 		add_filter( 'friends_friendship_accepted', array( $this,'buddyboss_pn_friend_request_accepted'), 10, 4);
+		add_action('bp_activity_after_save', array($this, 'buddyboss_pn_group_activity_notification'), 10, 1);
 
 		// Buddyboss end
 
@@ -101,6 +102,14 @@ class Push_Notification_Frontend{
 		add_action( 'pn_tokenid_registration_id', array($this, 'gravity_pn_tokenid_registration_id') ,10,5);
 		add_action( 'gform_after_save_form', array($this, 'send_pn_on_gravity_form_saved'), 10, 2 );
 		//  Gravity Form End
+		
+		
+		// Fluent Community Start
+		add_action( 'pn_tokenid_registration_id', array($this, 'fluent_community_pn_tokenid_registration_id') ,10,5);
+		add_action( 'fluent_community/feed/created', array($this, 'pn_notify_on_fc_feed_created'), 10, 1 );
+		add_action('fluent_community/comment_added', array($this, 'pn_notify_on_fc_new_comment'), 10, 2);
+		add_action('fluent_community/feed/react_added', array($this, 'pn_notify_on_fc_react_added'), 10, 2);
+		//  Fluent Community End
 
 		//click event
 		add_action( 'wp_ajax_pn_noteclick_subscribers', array( $this, 'pn_noteclick_subscribers' ) );
@@ -122,7 +131,344 @@ class Push_Notification_Frontend{
 		add_action('wp_login', array($this, 'after_login_transient'), 10, 2); 
 		 // force token update if login is detected
 		add_filter('pn_token_exists', array($this, 'pn_token_exists'), 10, 1);
+		add_action('wp_enqueue_scripts', array($this,'pn_enqueue_scripts'));
+		add_action('wp_footer', array($this,'pn_enqueue_ajax_pagination_script'));
+		add_shortcode('pn_campaigns', array($this,'pn_campaigns_shortcode'));
+		add_action('wp_ajax_pn_get_compaigns_front', array( $this, 'pn_get_compaigns_front' ));
 	}
+
+	function pn_campaigns_shortcode($atts) {
+		$atts = shortcode_atts(array(
+			'title' => true,
+			'message' => true,
+			'date' => true,
+			'status' => true,
+			'campaign_name' => 'Campaign',
+		), $atts, 'pn_campaigns');
+
+		$auth_settings = push_notification_auth_settings();
+		$detail_settings = push_notification_details_settings();
+		$campaigns = [];
+
+		if (!$detail_settings && isset($auth_settings['user_token'])) {
+			PN_Server_Request::getsubscribersData($auth_settings['user_token']);
+			$detail_settings = push_notification_details_settings();
+		}
+		if (!empty($auth_settings['user_token'])) {
+			$campaigns = PN_Server_Request::getCompaignsData($auth_settings['user_token']);
+		}
+
+		ob_start();
+		?>
+		<style>
+			.pn-table-wrapper {
+				max-width: 800px;
+				overflow-x: auto;
+				margin: 1.5em 0;
+			}
+
+			.pn-table {
+				width: 100%;
+				border-collapse: collapse;
+				background: #fff;
+				box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+				border: 1px solid #ccc;
+			}
+
+			.pn-table th,
+			.pn-table td {
+				padding: 8px 8px;
+				text-align: left;
+				border: 1px solid #ccc;
+			}
+
+			.pn-table th {
+				background: #f5f5f5;
+				font-weight: 400;
+			}
+
+			.pn-badge {
+				padding: 2px 4px 2px;
+				border-radius: 4px;
+				color: #fff;
+				font-size: 0.75em;
+			}
+
+			.pn-done {
+				background-color: #28a745;
+			}
+			.pn-failed {
+				background-color: #dc3545;
+			}
+			.pn-pending {
+				background-color: #007bff;
+			}
+
+			.pn-pagination {
+				margin-top: 15px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.pagination-links a {
+				margin: 0 5px;
+				text-decoration: none;
+				background: #007bff;
+				color: white;
+				padding: 0px 10px;
+				border-radius: 4px;
+				transition: background 0.3s;
+			}
+			.pagination-links .disabled {
+				margin: 0 5px;
+				text-decoration: none;
+				background:rgb(154, 155, 156);
+				color: white;
+				padding: 0px 10px;
+				border-radius: 4px;
+				transition: background 0.3s;
+			}
+
+			.pagination-links a:hover {
+				background: #0056b3;
+			}
+			.tablenav-pages {
+				margin-top:10px;
+				float:right;
+			}
+		</style>
+		
+		<div class="pn-table-wrapper">
+			<h3><?php echo esc_html($atts['campaign_name']); ?></h3>
+			<div id="pn_campaings_custom_div" attr="<?php echo esc_attr(json_encode($atts)) ?>">
+			<table class="pn-table">
+				<thead>
+					<tr>
+						<?php if ($atts['title']) : ?><th><?php esc_html_e('Title', 'push-notification'); ?></th><?php endif; ?>
+						<?php if ($atts['message']) : ?><th><?php esc_html_e('Message', 'push-notification'); ?></th><?php endif; ?>
+						<?php if ($atts['date']) : ?><th><?php esc_html_e('Sent on', 'push-notification'); ?></th><?php endif; ?>
+						<?php if ($atts['status']) : ?><th><?php esc_html_e('Status', 'push-notification'); ?></th><?php endif; ?>
+					</tr>
+				</thead>
+				<tbody>
+					<?php
+					if (!empty($campaigns['campaigns']['data'])) :
+						$timezone_string = get_option('timezone_string') ?: 'UTC';
+						foreach ($campaigns['campaigns']['data'] as $campaign) :
+							$message = wp_strip_all_tags($campaign['message']);
+							if (strlen($message) > 100) {
+								$message = substr($message, 0, strrpos(substr($message, 0, 100), ' ')) . '...';
+							}
+							$date = new DateTime($campaign['created_at'], new DateTimeZone('UTC'));
+							$date->setTimezone(new DateTimeZone($timezone_string));
+							?>
+							<tr>
+								<?php if ($atts['title']) : ?><td><?php echo esc_html($campaign['title']); ?></td><?php endif; ?>
+								<?php if ($atts['message']) : ?><td><?php echo esc_html($message); ?></td><?php endif; ?>
+								<?php if ($atts['date']) : ?><td><?php echo esc_html($date->format('Y-m-d H:i:s')); ?></td><?php endif; ?>
+								<?php if ($atts['status']) : ?>
+									<td>
+										<span class="pn-badge pn-<?php echo esc_attr( strtolower($campaign['status'] ) ); ?>">
+											<?php echo esc_html($campaign['status']); ?>
+										</span>
+									</td>
+								<?php endif; ?>
+							</tr>
+						<?php
+						endforeach;
+					else :
+						?>
+						<tr><td colspan="4" style="text-align:center;"><?php esc_html_e('No data found', 'push-notification'); ?></td></tr>
+					<?php endif; ?>
+				</tbody>
+			</table>
+			<div class="tablenav-pages">
+				<span class="displaying-num"><?php echo esc_html($campaigns['campaigns']['total']) . ' ' . esc_html__('items', 'push-notification'); ?></span>
+				<span class="pagination-links">
+					<?php if (empty($campaigns['campaigns']['prev_page_url'])) : ?>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>
+					<?php else : ?>
+						<a class="first-page button pn_js_custom_pagination" page="1" href="<?php echo esc_attr($campaigns['campaigns']['first_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('First page', 'push-notification'); ?></span>
+							<span aria-hidden="true">«</span>
+						</a>
+						<a class="prev-page button pn_js_custom_pagination" page="<?php echo esc_attr($campaigns['campaigns']['current_page'] - 1); ?>" href="<?php echo esc_attr($campaigns['campaigns']['prev_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('Previous page', 'push-notification'); ?></span>
+							<span aria-hidden="true">‹</span>
+						</a>
+					<?php endif; ?>
+
+					<span class="screen-reader-text"><?php esc_html_e('Current Page', 'push-notification'); ?></span>
+					<span id="table-paging" class="paging-input" style="margin: 0 8px;">
+						<span class="tablenav-paging-text">
+							<?php echo esc_html($campaigns['campaigns']['current_page']) . ' ' . esc_html__('of', 'push-notification'); ?>
+							<span class="total-pages"><?php echo esc_html($campaigns['campaigns']['last_page']); ?></span>
+						</span>
+					</span>
+
+					<?php if (empty($campaigns['campaigns']['next_page_url'])) : ?>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">›</span>
+						<span class="tablenav-pages-navspan button disabled" aria-hidden="true">»</span>
+					<?php else : ?>
+						<a class="next-page button pn_js_custom_pagination" page="<?php echo esc_attr($campaigns['campaigns']['current_page'] + 1); ?>" href="<?php echo esc_attr($campaigns['campaigns']['next_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('Next page', 'push-notification'); ?></span>
+							<span aria-hidden="true">›</span>
+						</a>
+						<a class="last-page button pn_js_custom_pagination" page="<?php echo esc_attr($campaigns['campaigns']['last_page']); ?>" href="<?php echo esc_attr($campaigns['campaigns']['last_page_url']); ?>">
+							<span class="screen-reader-text"><?php esc_html_e('Last page', 'push-notification'); ?></span>
+							<span aria-hidden="true">»</span>
+						</a>
+					<?php endif; ?>
+				</span>
+			</div>
+		</div>
+    
+		<?php
+		return ob_get_clean();
+	}
+
+	
+	function pn_enqueue_scripts() {
+		wp_enqueue_script('jquery');
+		wp_register_script('pn-custom-ajax', false, array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+		wp_enqueue_script('pn-custom-ajax');
+		wp_localize_script('pn-custom-ajax', 'pn_setings', array(
+			'ajaxurl' => admin_url('admin-ajax.php'),
+			'remote_nonce' => wp_create_nonce('pn_remote_nonce')
+		));
+	}
+
+
+	
+	
+	function pn_enqueue_ajax_pagination_script() {
+		?>
+		<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				$("body").on("click", ".pn_js_custom_pagination", function(e) {
+					e.preventDefault();
+					var page = $(this).attr('page');
+					var atts = $('#pn_campaings_custom_div').attr('attr');
+					var shortcode_attr = JSON.parse(atts);
+					$.ajax({
+						url: pn_setings.ajaxurl,
+						type: "post",
+						dataType: 'html',
+						data: {
+							action: 'pn_get_compaigns_front',
+							page: page,
+							nonce: pn_setings.remote_nonce,
+							attr: shortcode_attr
+						},
+						success: function(response) {
+							$("#pn_campaings_custom_div").html(response);
+						},
+						error: function() {
+							alert("Something went wrong.");
+						}
+					});
+				});
+			});
+		</script>
+		<?php
+	}
+
+	public function pn_get_compaigns_front(){
+		if(empty( $_POST['nonce'])){
+			return;	
+		}
+		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_remote_nonce') ){
+			return;	
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;	
+		}
+		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		$page =  sanitize_text_field( wp_unslash( $_POST['page'] ) );
+		$authData = push_notification_auth_settings();
+		if ($authData['token_details']['validated']!=1 ){
+			return;  
+		}
+		
+		$campaigns = [];
+		$attr = [];
+		if(isset( $authData['user_token'] ) && !empty($authData['user_token']) ){
+			$campaigns = PN_Server_Request::getCompaignsData( $authData['user_token'],$page);
+		}
+
+		if (isset($_POST['attr'])) {
+			$attr =  array_map('sanitize_text_field',wp_unslash( $_POST['attr'] ) );
+		}
+		if (!empty($attr) && isset($attr['campaign_name'])) {
+			$timezone_string = get_option('timezone_string') ?: 'UTC';
+			echo '<table class="pn-table"><thead><tr>';
+			if (!empty($attr['title'])) echo '<th>' . esc_html__('Title', 'push-notification') . '</th>';
+			if (!empty($attr['message'])) echo '<th>' . esc_html__('Message', 'push-notification') . '</th>';
+			if (!empty($attr['date'])) echo '<th>' . esc_html__('Sent on', 'push-notification') . '</th>';
+			if (!empty($attr['status'])) echo '<th>' . esc_html__('Status', 'push-notification') . '</th>';
+			echo '</tr></thead><tbody>';
+
+			if (!empty($campaigns['campaigns']['data'])) {
+				foreach ($campaigns['campaigns']['data'] as $campaign) {
+					$message = wp_strip_all_tags($campaign['message']);
+					if (strlen($message) > 100) {
+						$message = substr($message, 0, strrpos(substr($message, 0, 100), ' ')) . '...';
+					}
+					$date = new DateTime($campaign['created_at'], new DateTimeZone('UTC'));
+					$date->setTimezone(new DateTimeZone($timezone_string));
+
+					echo '<tr>';
+					if (!empty($attr['title'])) echo '<td>' . esc_html($campaign['title']) . '</td>';
+					if (!empty($attr['message'])) echo '<td>' . esc_html($message) . '</td>';
+					if (!empty($attr['date'])) echo '<td>' . esc_html($date->format('Y-m-d H:i:s')) . '</td>';
+					if (!empty($attr['status'])) {
+						echo '<td><span class="pn-badge pn-' . esc_attr(strtolower($campaign['status'])) . '">' . esc_html($campaign['status']) . '</span></td>';
+					}
+					echo '</tr>';
+				}
+			} else {
+				echo '<tr><td colspan="4" style="text-align:center;">' . esc_html__('No data found', 'push-notification') . '</td></tr>';
+			}
+
+			echo '</tbody></table>';
+
+			// Pagination
+			echo '<div class="tablenav-pages">';
+			echo '<span class="displaying-num">' . esc_html($campaigns['campaigns']['total']) . ' ' . esc_html__('items', 'push-notification') . '</span>';
+			echo '<span class="pagination-links">';
+
+			if (empty($campaigns['campaigns']['prev_page_url'])) {
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">«</span>';
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">‹</span>';
+			} else {
+				echo '<a class="first-page button pn_js_custom_pagination" page="1" href="' . esc_url($campaigns['campaigns']['first_page_url']) . '"><span class="screen-reader-text">' . esc_html__('First page', 'push-notification') . '</span><span aria-hidden="true" >«</span></a>';
+				echo '<a class="prev-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] - 1) . '" href="' . esc_url($campaigns['campaigns']['prev_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Previous page', 'push-notification') . '</span><span aria-hidden="true" >‹</span></a>';
+			}
+
+			echo '<span class="screen-reader-text">' . esc_html__('Current Page', 'push-notification') . '</span>';
+			echo '<span id="table-paging" class="paging-input" style="margin: 0 8px;">';
+			echo '<span class="tablenav-paging-text">' . esc_html($campaigns['campaigns']['current_page']) . ' ' . esc_html__('of', 'push-notification') . ' <span class="total-pages">' . esc_html($campaigns['campaigns']['last_page']) . '</span></span>';
+			echo '</span>';
+
+			if (empty($campaigns['campaigns']['next_page_url'])) {
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">›</span>';
+				echo '<span class="tablenav-pages-navspan button disabled" aria-hidden="true" style="margin: 0 8px;">»</span>';
+			} else {
+				echo '<a class="next-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['current_page'] + 1) . '" href="' . esc_url($campaigns['campaigns']['next_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Next page', 'push-notification') . '</span><span aria-hidden="true" >›</span></a>';
+				echo '<a class="last-page button pn_js_custom_pagination" page="' . esc_attr($campaigns['campaigns']['last_page']) . '" href="' . esc_url($campaigns['campaigns']['last_page_url']) . '"><span class="screen-reader-text">' . esc_html__('Last page', 'push-notification') . '</span><span aria-hidden="true" >»</span></a>';
+			}
+
+			echo '</span></div>';
+			wp_die();
+		}         
+	}
+
+
+
+
+
 	public static function update_autoptimize_exclude( $values, $option ){
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js')){
 			$values .= ", ".PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js';
@@ -363,6 +709,8 @@ class Push_Notification_Frontend{
 			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$category = sanitize_text_field($_POST['category']);
 			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$author = (isset($_POST['author'])) ? sanitize_text_field($_POST['author']) : "";
+			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$os = sanitize_text_field($_POST['os']);
 			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$url = isset($_POST['url'])?sanitize_url($_POST['url']):'';
@@ -379,7 +727,7 @@ class Push_Notification_Frontend{
 			if ($user_agent == 'undefined') {
 				$user_agent = $this->check_browser_type();
 			}
-			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category);
+			$response = PN_Server_Request::registerSubscribers($token_id, $user_agent, $os, $ip_address, $category,$author);
 			if (is_user_logged_in() ) {
 				if ( isset($response['status']) && $response['status'] == 200 ) {
 					$user = wp_get_current_user();
@@ -555,8 +903,30 @@ class Push_Notification_Frontend{
 		<?php
 	}
 
+	function pn_detect_user_agent_new() {
+		$device = 'desktop';
+		if ( wp_is_mobile() ) {
+			$device = 'mobile';
+		}
+		return $device;
+	}
+
 	function pn_notification_confirm_banner(){
 		$settings = push_notification_settings();
+		$user_device = $this->pn_detect_user_agent_new();
+		$allow_desktop = true;
+		$allow_mobile = true;
+
+		if(isset($settings['pn_device_target']['desktop']) && $settings['pn_device_target']['desktop'] == 0){
+			$allow_desktop = false;
+		}
+		if(isset($settings['pn_device_target']['mobile']) && $settings['pn_device_target']['mobile'] == 0){
+			$allow_mobile = false;
+		}
+		if ( ($user_device == 'desktop' && !$allow_desktop) ||
+			($user_device == 'mobile' && !$allow_mobile) ) {
+			return; 
+		}
 
 		if (! $this->pn_display_status($settings)) {
 			return;
@@ -629,6 +999,11 @@ class Push_Notification_Frontend{
 		$setting_category = !empty($settings['category'])? $settings['category'] : [];
 		$selected_category =  !is_array($setting_category) ? explode(',',$setting_category) : $setting_category;
 		$catArray = !is_array($selected_category) ? explode(',',$selected_category) : $selected_category;
+
+		$setting_author = !empty($settings['author'])? $settings['author'] : [];
+		$selected_author =  !is_array($setting_author) ? explode(',',$setting_author) : $setting_author;
+		$authorArray = !is_array($selected_author) ? explode(',',$selected_author) : $selected_author;
+
 		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
 		
 		switch ($position) {
@@ -676,82 +1051,88 @@ class Push_Notification_Frontend{
 		$activate_btn_color = (isset($settings['popup_display_setings_ok_color'])&& $is_pro)?$settings['popup_display_setings_ok_color']:'#8ab4f8';
 		$decline_btn_color = (isset($settings['popup_display_setings_no_thanks_color'])&& $is_pro)?$settings['popup_display_setings_no_thanks_color']:'#5f6368';
 		$border_radius =  (isset($settings['popup_display_setings_border_radius'])&& $is_pro)?$settings['popup_display_setings_border_radius']:'4';
-		echo '<style>.pn-wrapper{
-			box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
-		    font-size: 14px;
-		    align-items: center;
-		    background-color: '.esc_attr($custom_bg_color).';
-		    border: none;
-		    border-radius: '.esc_attr($border_radius).'px;
-		    box-sizing: border-box;
-		    color: #fff;
-		    display: none;
-		    flex-wrap: wrap;
-		    font-weight: 400;
-		    padding: 16px 22px;
-		    z-index:99999;
-		    text-align: left;
-		    position: fixed;
-		    '. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static values  */ $css_position_escaped.'
+		$popup_display_setings_custom_css =  (isset($settings['popup_display_setings_custom_css'])&& $is_pro)?$settings['popup_display_setings_custom_css']:null;
+		if ( !empty($popup_display_setings_custom_css) ) {
+			echo '<style>'.esc_html( $popup_display_setings_custom_css ).'</style>';
+		}else{
+			echo '<style>.pn-wrapper{
+				box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
+				font-size: 14px;
+				align-items: center;
+				background-color: '.esc_attr($custom_bg_color).';
+				border: none;
+				border-radius: '.esc_attr($border_radius).'px;
+				box-sizing: border-box;
+				color: #fff;
+				display: none;
+				flex-wrap: wrap;
+				font-weight: 400;
+				padding: 16px 22px;
+				z-index:99999;
+				text-align: left;
+				position: fixed;
+				'. /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static values  */ $css_position_escaped.'
+				}
+				.pn-wrapper .pn-txt-wrap {
+					display: flex;
+					flex-wrap: wrap;
+					position: relative;
+					height: auto;
+					line-height: 1.5;
+					color:'.esc_attr($custom_txt_color).';
+					max-width:400px;
+				}
+				.pn-wrapper .btn.act{color: '.esc_attr($activate_btn_color).';}
+				.pn-wrapper .btn{
+					align-items: center;
+					border: none;
+					display: inline-flex;
+					outline: none;
+					position: relative;
+					font-size: 14px;
+					background: none;
+					border-radius: 4px;
+					box-sizing: border-box;
+					color: '.esc_attr($decline_btn_color).';
+					cursor: pointer;
+					font-weight: 500;
+					outline: none;
+					margin-left: 8px;
+					min-width: auto;
+					padding: 0 8px;
+					text-decoration: none;
+				}
+				.pn-txt-wrap.pn-select-box {
+					display: block;
+					padding: 5px 15px;
+				}
+				.pn-categories-multiselect {
+					font-size: 13px;
+					margin: 10px 0;
+				}
+				#pn-activate-permission-categories {
+					background-color: #fff;
+					padding: 8px 15px;
+					color: #000;
+				}
+				#pn-categories-checkboxes label{
+					padding-right: 12px;
+					text-transform: capitalize;
+					cursor:pointer;
+				}
+				#pn-categories-checkboxes input{
+					margin-right: 3px;
+					cursor:pointer;
+				}
+				#pn-activate-permission-categories-text {
+					padding: 12px 0;
+					margin-top: 5px;
+					font-size: 12px;
+					font-weight: 600;
+				}
+				</style>';
 		}
-.pn-wrapper .pn-txt-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    position: relative;
-    height: auto;
-    line-height: 1.5;
-	color:'.esc_attr($custom_txt_color).';
-	max-width:400px;
-}
-.pn-wrapper .btn.act{color: '.esc_attr($activate_btn_color).';}
-.pn-wrapper .btn{
-	align-items: center;
-    border: none;
-    display: inline-flex;
-    outline: none;
-    position: relative;
-    font-size: 14px;
-    background: none;
-    border-radius: 4px;
-    box-sizing: border-box;
-    color: '.esc_attr($decline_btn_color).';
-    cursor: pointer;
-    font-weight: 500;
-    outline: none;
-    margin-left: 8px;
-    min-width: auto;
-    padding: 0 8px;
-    text-decoration: none;
-}
-.pn-txt-wrap.pn-select-box {
-	display: block;
-	padding: 5px 15px;
-}
-.pn-categories-multiselect {
-	font-size: 13px;
-    margin: 10px 0;
-}
-#pn-activate-permission-categories {
-    background-color: #fff;
-    padding: 8px 15px;
-    color: #000;
-}
-#pn-categories-checkboxes label{
-    padding-right: 12px;
-    text-transform: capitalize;
-	cursor:pointer;
-}
-#pn-categories-checkboxes input{
-	margin-right: 3px;
-	cursor:pointer;
-}
-#pn-activate-permission-categories-text {
-    padding: 12px 0;
-    margin-top: 5px;
-    font-size: 12px;
-    font-weight: 600;
-}
-</style><div class="pn-wrapper">';
+			echo'<div class="pn-wrapper">';
 				if(isset($settings['notification_pop_up_icon']) && !empty($settings['notification_pop_up_icon']) && PN_Server_Request::getProStatus()=='active'){
 					// phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
 					echo '<span style=" top: 0; vertical-align: top; "><img src="'.esc_attr($settings['notification_pop_up_icon']).'" style=" max-width: 70px;"></span>';
@@ -771,15 +1152,16 @@ class Push_Notification_Frontend{
 				   		}
 			   		echo '</div>';
 						if(!empty($settings['on_category']) && $settings['on_category'] == 1){
-							 echo '<div id="pn-activate-permission-categories-text">
-								 '.esc_html__('On which category would you like to receive?', 'push-notification').'
-							 </div>
-							 <div class="pn-categories-multiselect">
-								 <div id="pn-categories-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
-							  if($all_category){
-									  echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
-							  }
-							  if(!empty($catArray)){
+							if($all_category || !empty($catArray)){
+								echo '<div id="pn-activate-permission-categories-text">
+									'.esc_html__('On which category would you like to receive?', 'push-notification').'
+								</div>
+								<div class="pn-categories-multiselect">
+								<div id="pn-categories-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
+								if($all_category){
+										echo '<label for="pn-all-categories"><input type="checkbox" name="category[]" id="pn-all-categories" value="all" />'.esc_html__('All Categories', 'push-notification').'</label>';
+								}
+							  	if(!empty($catArray)){
 								  foreach ($catArray as $key=>$value) {
 									  if (is_string($value)) {
 										  $catslugdata ='';
@@ -789,9 +1171,32 @@ class Push_Notification_Frontend{
 										  echo '<label for="pn_category_checkbox'.esc_attr($value).'"><input type="checkbox" name="category[]" id="pn_category_checkbox'.esc_attr($value).'" value="'.esc_attr($catslugdata).'" />'.esc_html(get_cat_name($value)).'</label>';
 									  }
 								  }
+							  	}
+							  	echo '</div></div>';
+							}
+							  if(!empty($authorArray)){
+									echo '<div id="pn-activate-permission-categories-text">
+									'.esc_html__('On which author would you like to receive?', 'push-notification').'
+								</div>
+								<div class="pn-author-multiselect">
+									<div id="pn-author-checkboxes" style="color:'.esc_attr($settings['popup_display_setings_text_color']).'">';
+							  
+								$all_authors = get_users([
+									'role' => 'author',
+									'orderby' => 'display_name',
+									'order' => 'ASC',
+								]);
+								$author_key_val = [];
+								foreach ( $all_authors as $author_d ) {
+									$author_key_val[$author_d->ID] = $author_d->display_name;
+								}
+								foreach ($authorArray as $key=>$value) {
+									
+										echo '<label for="pn_author_checkbox'.esc_attr($value).'"><input type="checkbox" name="author[]" id="pn_author_checkbox'.esc_attr($value).'" value="'.esc_attr($value).'" />'.esc_html($author_key_val[$value]).'</label>';
+								}
+									  echo '</div>
+								  </div>';
 							  }
-								 echo '</div>
-							 </div>';
 						}
 
 					   if(isset($settings['notification_botton_position']) && $settings['notification_botton_position'] == 'bottom' && PN_Server_Request::getProStatus()=='active'){
@@ -998,8 +1403,7 @@ class Push_Notification_Frontend{
 
 		$this->pn_handle_error_log( $remoteResponse , 'peepso_friends_requests_after_add');
 	}
-
-	public function pn_buddyboss_send_notification($notification,$sender_info,$title,$message){
+	public function pn_fluent_community_send_notification($notification,$sender_info,$title,$message){
 		$auth_settings = push_notification_auth_settings();
 		$user_token = '';
 		if( isset( $auth_settings['user_token'] ) && ! empty( $auth_settings['user_token'] ) ){
@@ -1012,6 +1416,51 @@ class Push_Notification_Frontend{
 		} else {
 			$weblink = home_url();
 		}
+		$user_email = $sender_info->user_email;
+
+	    $avatar_url = get_avatar_url($user_email, ['size' => 96]);
+
+		$data = array(
+					"user_token" =>	$user_token,
+
+					"audience_token_id"	=>	$notification,
+
+					"title"	 	=>		 $title,
+
+					"message" 	=>	 $message,
+
+					"link_url" 	=>	 $weblink,
+
+					"icon_url" 	=>	 $avatar_url,
+
+					"image_url" =>	 null,
+
+					"website" 	=>	 $weblink,
+
+				);
+
+		$postdata = array('body'=> $data);
+
+		$remoteResponse = wp_remote_post($verifyUrl, $postdata);
+
+		$this->pn_handle_error_log( $remoteResponse , 'pn_fluent_community_send_notification');
+	}
+
+	public function pn_buddyboss_send_notification($notification,$sender_info,$title,$message,$weblink = null){
+		$auth_settings = push_notification_auth_settings();
+		$user_token = '';
+		if( isset( $auth_settings['user_token'] ) && ! empty( $auth_settings['user_token'] ) ){
+			$user_token = $auth_settings['user_token'];
+		}
+		$verifyUrl = PN_Server_Request::$notificationServerUrl.'campaign/single';
+
+		if( !$weblink ){
+			if ( is_multisite() ) {
+				$weblink = get_site_url();
+			} else {
+				$weblink = home_url();
+			}
+		}	
 		$user_email = $sender_info->user_email;
 
 	    $avatar_url = get_avatar_url($user_email, ['size' => 96]);
@@ -1235,7 +1684,7 @@ class Push_Notification_Frontend{
 	public function buddyboss_pn_tokenid_registration_id($token_id, $response, $user_agent, $os, $ip_address){
 		$settings = push_notification_settings();
 
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
 
 			$userData = wp_get_current_user();
 			if(isset($userData->ID)){
@@ -1261,50 +1710,70 @@ class Push_Notification_Frontend{
 		}
 	}
 
-	public function buddyboss_pn_activity_comment_action($action, $activity){
+	public function buddyboss_pn_activity_comment_action($comment_id, $params){
 		$settings = push_notification_settings();
-
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
-
-			$receiver_id = 	add_filter('bp_activity_comment_user_id', function($userid) {
-								return $userid;
-							});
-
-			$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
-
-			if(! empty( $notification ) ) {
-
-				$sender_info = get_userdata($activity->user_id);
-
-				$title	 	= esc_html__('New activity comment', 'push-notification' );
-
-				$message 	= $action;
-
-				$this->pn_buddyboss_send_notification($notification,$sender_info,$title,$message);
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
+			$activity = new BP_Activity_Activity($comment_id);
+			if (!empty($activity->item_id)) {
+				$parent_activity = new BP_Activity_Activity($activity->item_id);
+				$receiver_id = $parent_activity->user_id;
+				if (!empty($receiver_id) && $receiver_id != $activity->user_id) {
+					$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
+					if (!empty($notification)) {
+						$sender_info = get_userdata($activity->user_id);
+	
+						$title   =  $sender_info->display_name . esc_html__(' commented on your post', 'push-notification');
+						$message = wp_trim_words($activity->content, 20, '...');
+						$user_domain = bp_core_get_user_domain($receiver_id);
+						$activity_link = trailingslashit($user_domain . bp_get_activity_slug()) . $activity->item_id . '/#acomment-' . $activity->id;
+	
+	
+						$this->pn_buddyboss_send_notification($notification, $sender_info, $title, $message, $activity_link);
+					}
+				}
 			}
 
 		}
 	}
-	public function buddyboss_pn_message_notifications($activity){
+	public function buddyboss_pn_message_notifications($message){
 		$settings = push_notification_settings();
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
-			$recipients = $activity->recipients;
-			foreach ($recipients as $key => $recipient) {
-				$receiver_id = 	$recipient->user_id;
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
+
+			if (empty($message->thread_id) || empty($message->sender_id) || empty($message->message)) {
+				return;
+			}
+	
+			$recipients = $message->recipients;
+			if (empty($recipients)) {
+				return;
+			}
+			$sender_id = intval($message->sender_id);
+	
+			foreach ($recipients as $receiver_id => $recipient_obj) {
+				if ($receiver_id === $sender_id) {
+					continue; // Skip notifying the sender
+				}
+	
 				$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
 	
-				if(! empty( $notification ) ) {
+				if (!empty($notification)) {
+					$sender_info = get_userdata($sender_id);
+					// translators: %s is the sender's display name
+					$title = sprintf(
+						//phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
+						esc_html__('%s sent you a message', 'push-notification'),
+						esc_html($sender_info->display_name)
+					);
 	
-					$sender_info = get_userdata($activity->user_id);
-	
-					$title	 	= $sender_info->display_name .esc_html__(' sent you message', 'push-notification' );
-	
-					$message 	= $activity->message;
-	
-					$this->pn_buddyboss_send_notification($notification,$sender_info,$title,$message);
-				}
-			}
-		}
+					$body = wp_strip_all_tags($message->message);
+
+					$link = bp_core_get_user_domain($receiver_id) . 'messages/view/' . $message->thread_id . '/';
+					$body = wp_trim_words($body, 20, '...');
+
+                    $this->pn_buddyboss_send_notification($notification, $sender_info, $title, $body, $link);
+                }
+            }
+        }
 	}
 	public function buddyboss_pn_invitation_notifications($activity){
 		$settings = push_notification_settings();
@@ -1360,7 +1829,63 @@ class Push_Notification_Frontend{
 			}
 		}
 	}
-
+	
+	public function buddyboss_pn_group_activity_notification($activity) {
+		if (
+			!isset($activity->component) ||
+			$activity->component !== 'groups' ||
+			$activity->type !== 'activity_update'
+		) {
+			return;
+		}
+	
+		$settings = push_notification_settings();
+	
+		if (
+			isset($settings['pn_buddyboss_compatibale']) &&
+			$settings['pn_buddyboss_compatibale'] &&
+			(is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php'))
+		) {
+			$group_id = $activity->item_id;
+			$group = groups_get_group(array('group_id' => $group_id));
+	
+			if (!$group || empty($group->id)) {
+				return;
+			}
+	
+			$members = groups_get_group_members(array(
+				'group_id' => $group_id,
+				//phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+				'exclude' => array($activity->user_id),
+			));
+	
+			if (!empty($members['members'])) {
+				foreach ($members['members'] as $member) {
+					$receiver_id = $member->ID;
+					$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
+	
+					if (!empty($notification)) {
+						$sender_info = get_userdata($activity->user_id);
+						// translators: %1$s is the sender's display name, %2$s is the group name
+						$title = sprintf(
+							//phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment
+							esc_html__('%1$s posted in %2$s', 'push-notification'),
+							esc_html($sender_info->display_name),
+							esc_html($group->name)
+						);
+	
+						$message = wp_strip_all_tags($activity->content);
+						$message = wp_trim_words($message, 20, '...');
+						$activity_link = $this->get_activity_link($activity);
+	
+						$this->pn_buddyboss_send_notification($notification, $sender_info, $title, $message, $activity_link);
+					}
+				}
+			}
+		}
+	}
+	
+	
 	public function peepso_pn_tokenid_registration_id($token_id, $response, $user_agent, $os, $ip_address){
 		$settings = push_notification_settings();
 
@@ -1418,6 +1943,34 @@ class Push_Notification_Frontend{
 
 		}
 	}
+	public function fluent_community_pn_tokenid_registration_id($token_id, $response, $user_agent, $os, $ip_address){
+		$settings = push_notification_settings();
+
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$userid = $userData->ID;
+
+				$device_tokens = get_user_meta($userid, 'fluent_community_pn_notification_token_id', true);
+
+				if ( isset($response['data']['id']) && !empty( $response['data']['id'] )) {
+					if (!is_array($device_tokens)) {
+					    $device_tokens = [];
+					}
+
+					$new_token = $response['data']['id'];
+
+					if (!in_array($new_token, $device_tokens)) {
+					    $device_tokens[] = $new_token;
+					}
+					$device_tokens = array_slice(array_unique($device_tokens), -5);
+					update_user_meta($userid, 'fluent_community_pn_notification_token_id', $device_tokens);
+				}
+			}
+
+		}
+	}
 	public function send_pn_on_gravity_form_saved($form, $is_new){
 		$settings = push_notification_settings();
 		if (isset($settings['pn_gravity_compatibale']) && $settings['pn_gravity_compatibale'] && is_plugin_active('gravityforms/gravityforms.php') ) {
@@ -1436,6 +1989,64 @@ class Push_Notification_Frontend{
 					$message	 	= esc_html__('Gravity form saved', 'push-notification' );
 
 					$this->pn_gravity_send_notification($notification,$sender_info,$title,$message);
+				}
+			}
+		}
+	}
+	public function pn_notify_on_fc_feed_created($feed){
+		$settings = push_notification_settings();
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$userid = $userData->ID;
+
+				$receiver_id = 	$feed->user_id;
+				$notification = get_user_meta($receiver_id, 'fluent_community_pn_notification_token_id', true);
+
+				if(! empty( $notification ) ) {
+
+					$sender_info = get_userdata($receiver_id);
+
+					$title	 	= esc_html__('New Feed Created', 'push-notification' );
+					$message	 	= esc_html__('New Feed Created', 'push-notification' );
+
+					$this->pn_fluent_community_send_notification($notification,$sender_info,$title,$message);
+				}
+			}
+		}
+	}
+	public function pn_notify_on_fc_new_comment($comment, $feed){
+		$settings = push_notification_settings();
+		
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$receiver_id = $feed->user_id;
+
+				$notification = get_user_meta($receiver_id, 'fluent_community_pn_notification_token_id', true);
+				if(! empty( $notification ) ) {
+					$sender_info = get_userdata($comment->user_id);
+					$title	 	= $sender_info->display_name.' '.esc_html__('commented on feed', 'push-notification' );
+					$message 	= esc_html( $comment->message );
+					$this->pn_fluent_community_send_notification($notification,$sender_info,$title,$message);
+				}
+			}
+		}
+	}
+	public function pn_notify_on_fc_react_added($react, $feed){
+		$settings = push_notification_settings();
+		
+		if (isset($settings['pn_fluent_community_compatibale']) && $settings['pn_fluent_community_compatibale'] && is_plugin_active('fluent-community/fluent-community.php') ) {
+			$userData = wp_get_current_user();
+			if(isset($userData->ID)){
+				$receiver_id = $feed->user_id;
+
+				$notification = get_user_meta($receiver_id, 'fluent_community_pn_notification_token_id', true);
+				if(! empty( $notification ) ) {
+					$sender_info = get_userdata($comment->user_id);
+					$title	 	= $sender_info->display_name.' '.esc_html__('reacted on feed', 'push-notification' );
+					$message 	= esc_html__('reacted on feed', 'push-notification' );
+					$this->pn_fluent_community_send_notification($notification,$sender_info,$title,$message);
 				}
 			}
 		}
@@ -1566,8 +2177,57 @@ class Push_Notification_Frontend{
 		}
 		return $response_array;
 	}
-}
 
+	public function get_activity_link($activity) {
+		$link = home_url(); // fallback
+		$anchor = '#activity-' . $activity->id;
+	
+		// Get user domain
+		$user_domain = bp_core_get_user_domain($activity->user_id);
+	
+		switch ($activity->component) {
+			case 'groups':
+				$group = groups_get_group(['group_id' => $activity->item_id]);
+	
+				if (!empty($group->slug)) {
+					$base = trailingslashit(bp_get_groups_directory_permalink() . $group->slug);
+					$link = $base . (strpos($base, $anchor) === false ? $anchor : '');
+				}
+				break;
+	
+			case 'activity':
+				$base = trailingslashit($user_domain . bp_get_activity_slug());
+				$link = $base . (strpos($base, $anchor) === false ? $anchor : '');
+				break;
+	
+			case 'friends':
+				$link = $user_domain;
+				break;
+	
+			case 'blogs':
+			case 'forums':
+				if (!empty($activity->primary_link)) {
+					$link = $activity->primary_link;
+					if (strpos($link, '#') === false) {
+						$link .= $anchor; // append only if no hash
+					}
+				}
+				break;
+	
+			default:
+				if (!empty($activity->primary_link)) {
+					$link = $activity->primary_link;
+					if (strpos($link, '#') === false) {
+						$link .= $anchor;
+					}
+				}
+				break;
+		}
+	
+		return esc_url($link);
+	}
+	
+}
 function push_notification_frontend_class(){
 	if(!is_admin() || wp_doing_ajax()){
 		$notificationFrontEnd = new Push_Notification_Frontend(); 

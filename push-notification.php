@@ -4,7 +4,7 @@ Plugin Name: Push Notifications for WP - Self Hosted Web Push Notifications
 Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
 Author: Magazine3
-Version: 1.42
+Version: 1.43
 Author URI: http://pushnotifications.io/
 Text Domain: push-notification
 Domain Path: /languages
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define('PUSH_NOTIFICATION_PLUGIN_FILE',  __FILE__ );
 define('PUSH_NOTIFICATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('PUSH_NOTIFICATION_PLUGIN_URL', plugin_dir_url( __FILE__ ));
-define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.42');
+define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.43');
 define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 /**
@@ -173,8 +173,9 @@ $icon_url => icon link url optional
 
 */
 
-function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $message = "", $link_url = "", $icon_url = "", $image_url = "" ) {
 
+function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $message = "", $link_url = "", $icon_url = "", $image_url = "" ) {
+	$response = array('status' => false,'message' => esc_html__('Invalid Request','push-notification'));
 	if ( ! empty( $user_id) && !empty($title) && !empty($message) && !empty($link_url)) {
 
 		$verifyUrl = 'campaign/pn_send_push_filter';
@@ -184,25 +185,53 @@ function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $messa
 		}else{
 			$weblink = home_url();
 		}
-		$auth_settings = push_notification_auth_settings();
+
+		if ( is_multisite() ) {
+			$auth_settings = get_site_option( 'push_notification_auth_settings', array() );
+		}else{
+			$auth_settings = get_option( 'push_notification_auth_settings', array() );
+		}
 		foreach($audience_token_id as $key=>$value) {
-            if( isset($auth_settings['user_token']) && !empty( $value ) ){
-                $data = array(
-                            "user_token"        =>$auth_settings['user_token'],
-                            "audience_token_id" =>$value,
-                            "website"   =>$weblink,
-                            'title'     =>$title,
-                            'message'   =>$message,
-                            'link_url'  =>$link_url,
-                            'icon_url'  =>$icon_url,
-                            'image_url' =>$image_url
-                        );
-                $response = PN_Server_Request::pnSendPushNotificatioinFilter($data);
-            }
-        }
+			if( isset($auth_settings['user_token']) && !empty( $value ) ){
+				$data = array(
+							"user_token"        =>$auth_settings['user_token'],
+							"audience_token_id" =>$value,
+							"website"   =>$weblink,
+							'title'     =>$title,
+							'message'   =>$message,
+							'link_url'  =>$link_url,
+							'icon_url'  =>$icon_url,
+							'image_url' =>$image_url
+						);
+				$url = 'https://pushnotifications.io/api/'.$verifyUrl;
+
+				$postdata = array('body'=> $data);
+
+				$remoteResponse = wp_remote_post($url, $postdata);
+				if( is_wp_error( $remoteResponse ) ){
+					if(!empty($remoteResponse->get_error_message()) ) {       
+						$error_message = strtolower($remoteResponse->get_error_message());
+						$error_pos = strpos($error_message, 'operation timed out');
+						if($error_pos !== false){
+							$message = esc_html('Request timed out, please try again','push-notification');
+						}else{
+							$message = esc_html($remoteResponse->get_error_message());
+						}
+					}else{
+						$message = esc_html("could not connect to server",'push-notification');
+					}
+					$response = array('status'=>401, "message"=>$message);
+
+				}else{
+					$response['status'] = true;
+					$response['message'] = esc_html('Sent Successfully','push-notification');
+
+				}
+			}
+		}
 	}else{
 		$response['status'] = false;
-		$response['message'] = esc_html__('User id, title, link_url and message field are required','push-notification');
+		$response['message'] = esc_html('User id, title, link_url and message field are required','push-notification');
 	}
 	return $response;
 }

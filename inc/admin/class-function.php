@@ -87,7 +87,7 @@ class PN_Server_Request{
 
 
 
-	public static function registerSubscribers($token_id, $user_agent, $os, $ip_address, $category){
+	public static function registerSubscribers($token_id, $user_agent, $os, $ip_address, $category,$author = null){
 
 		$verifyUrl = 'register/audience/token';
 		$notification_settings= push_notification_settings();
@@ -123,6 +123,7 @@ class PN_Server_Request{
 					'ip_address'=> $ip_address,
 
 					'category'=> $category,
+					'author'=> $author,
 
 					'is_multisite'=> $is_multisite,
 					'language_code'=> $language_code,
@@ -335,6 +336,12 @@ class PN_Server_Request{
 			$verifyUrl = 'campaign/single'; 
 		}
 
+		
+		$selected_author = "";
+		if(isset($notification_settings['on_category']) && $notification_settings['on_category']){			
+			$selected_author = isset($notification_settings['author'])?$notification_settings['author']: "";
+		}
+
 		$data = array("user_token"=>$payload['user_token'], 
 					"website"=>   $weblink, 
 					'title'=>$payload['title'], 
@@ -343,6 +350,7 @@ class PN_Server_Request{
 					'icon_url'=>$payload['icon_url'],
 					'image_url'=>$payload['image_url'],
 					'category'=>$payload['category'],
+					'author'=>$selected_author,
 					'audience_token_id'=>$payload['audience_token_id'],
 					'notification_schedule'=>$payload['notification_schedule'],
 					'notification_time'=>$payload['notification_time'],

@@ -207,13 +207,19 @@ function push_notification_saveToken(currentToken){
 	  for (var i=0; i <=  optElm.length - 1 ; i++) {
 		  optioArr.push(optElm[i].value);
 	  }
+	const optioArrAuthor = [];
+	const optElmAuthor = document.querySelectorAll("#pn-author-checkboxes input:checked");
+	for (var i=0; i <=  optElmAuthor.length - 1 ; i++) {
+		optioArrAuthor.push(optElmAuthor[i].value);
+	}
+	var authorArraystr = [...optioArrAuthor].join(',');
     var catArraystr = [...optioArr].join(',');
 	var grabOs = pushnotificationFCMGetOS();
 	var browserClient = pushnotificationFCMbrowserclientDetector();
 	var currentUrl = window.location.href;
 	xhttp.open("POST", pnScriptSetting.ajax_url, true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers&url='+currentUrl);
+	xhttp.send('token_id='+currentToken+'&category='+catArraystr+'&author='+authorArraystr+'&user_agent='+browserClient+'&os='+grabOs+'&nonce='+pnScriptSetting.nonce+'&action=pn_register_subscribers&url='+currentUrl);
 }              
 
 

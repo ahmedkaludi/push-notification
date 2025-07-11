@@ -249,6 +249,14 @@ jQuery(document).ready(function($){
 		}
 		target.val(value);
 	})
+	jQuery('.checkbox_operator_multi').click(function(e){
+		var value = 0;
+		var target = jQuery(this).next('.checkbox_target_multi');
+		if(jQuery(this).prop("checked")==true){
+			var value = 1;
+		}
+		target.val(value);
+	})
 	jQuery('#utm_tracking_checkbox').click(function(){
 		if(jQuery(this).prop("checked")==true){
 			jQuery("#utm_tracking_wrapper").show();
@@ -278,6 +286,25 @@ jQuery(document).ready(function($){
 			jQuery(".js_custom_category_selector_wrapper").parents('tr').hide();
 		}
 	});
+	var pn_push_on_category_checkbox = jQuery('#pn_push_on_category_checkbox');
+	if(pn_push_on_category_checkbox.prop("checked")==true){
+		jQuery("#category_selector_wrapper").show();
+		jQuery(".js_category_selector_wrapper").show();
+		jQuery(".js_custom_category_selector_wrapper").show();
+		jQuery("#segment_category_selector_wrapper").show();
+
+		jQuery(".js_category_selector_wrapper").parents('tr').show();
+		jQuery(".js_custom_category_selector_wrapper").parents('tr').show();
+		
+	}else{
+		jQuery("#category_selector_wrapper").hide();
+		jQuery(".js_category_selector_wrapper").hide();
+		jQuery(".js_custom_category_selector_wrapper").hide();
+		jQuery("#segment_category_selector_wrapper").hide();
+
+		jQuery(".js_category_selector_wrapper").parents('tr').hide();
+		jQuery(".js_custom_category_selector_wrapper").parents('tr').hide();
+	}
 
 	jQuery('#pn_display_popup_after_login').click(function(){
 		var parent_tr = jQuery("#pn_role_selector_wrapper").parents('tr');
@@ -705,6 +732,7 @@ jQuery(document).ready(function($){
 	
 	$('.my-color-field').wpColorPicker();
 	pn_for_wp_select2();
+	pn_for_wp_select2_author();
 	
 	function initializeSelect2() {
 		if (jQuery('#notification-custom-roles').length > 0) {
@@ -832,6 +860,47 @@ function pn_for_wp_select2(){
                 defaultResults: defaultResults,
                 multiple: true,
                 placeholder: "Select Category"
+            });
+            currentP.val(defaultSelected).trigger("change");
+
+        });
+
+    }
+}
+function pn_for_wp_select2_author(){
+    var $select2 = jQuery('.pn_author_select2');
+    
+    if($select2.length > 0){
+        jQuery($select2).each(function(i, obj) {
+            var currentP = jQuery(this);  
+            var $defaultSelected = currentP.find("option[value]:is([selected])");
+            var $defaultResults = currentP.find("option[value]");
+            var defaultResults = [];
+            $defaultResults.each(function () {
+                var $option = jQuery(this);
+                defaultResults.push({
+                    id: $option.attr('value'),
+                    text: $option.text()
+                });
+            });
+            var defaultSelected = [];
+            $defaultSelected.each(function () {
+                var $option = jQuery(this);
+                defaultSelected.push($option.val());
+            });
+            var ajaxnewurl = ajaxurl+ '?action=pn_select2_author_data&nonce='+pn_setings.remote_nonce;
+            currentP.select2({           
+                ajax: {             
+                    url: ajaxnewurl,
+                    delay: 250, 
+                    cache: false,
+                },            
+                minimumInputLength: 2, 
+                minimumResultsForSearch : 50,
+                dataAdapter: jQuery.fn.select2.amd.require('select2/data/extended-ajax'),
+                defaultResults: defaultResults,
+                multiple: true,
+                placeholder: "Select Author"
             });
             currentP.val(defaultSelected).trigger("change");
 

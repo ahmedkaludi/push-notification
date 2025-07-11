@@ -246,15 +246,6 @@ class Push_Notification_Admin{
 					esc_html__('Notification Segment','push-notification'),
 					'__return_false',
 					'push_notification_segment_settings_section');
-
-					echo'<style>table {
-						border-collapse: collapse;
-						}
-						td, th {
-						padding: 0;
-						margin: 0;
-						border: none;
-						}</style>';
 			}
 			add_settings_section('push_notification_compatibility_settings_section',
 			esc_html__('Compatibility','push-notification'), 
@@ -305,10 +296,30 @@ class Push_Notification_Admin{
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
 
+			$soc_display="style='display:none;margin-left:10px;'";
+			if(isset($notification['on_category']) && $notification['on_category']){
+				$soc_display="style='display:block;margin-left:10px;'";
+			}
+			add_settings_field(
+				'pn_select_custom_author',								// ID
+				'<label class="js_custom_category_selector_wrapper" for="pn_select_custom_author" '.$soc_display.'><b>'.esc_html__('On Selected Author', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_select_specific_author_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
 			add_settings_field(
 				'pn_display_popup_after_login',								// ID
 				esc_html__('Logged in Users', 'push-notification'),// Title
 				array( $this, 'pn_display_popup_after_login_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
+
+			add_settings_field(
+				'pn_device_target',								// ID
+				esc_html__('Device Target', 'push-notification'),// Title
+				array( $this, 'pn_device_target_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
@@ -356,8 +367,15 @@ class Push_Notification_Admin{
 			);
 			add_settings_field(
 				'pn_buddyboss_compatibale',								// ID
-				'<label for="pn_buddyboss_compatibale"><b>'.esc_html__('BuddyBoss Plugin', 'push-notification').'</b></label>',// Title
+				'<label for="pn_buddyboss_compatibale"><b>'.esc_html__('BuddyPress / BuddyBoss', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_buddyboss_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_fluent_community_compatibale',								// ID
+				'<label for="pn_fluent_community_compatibale"><b>'.esc_html__('Fluent Community', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_fluent_community_callback'),// Callback
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
@@ -387,6 +405,14 @@ class Push_Notification_Admin{
 				'pn_key_posttype_select',								// ID
 				'<label style="margin-left:5px;"><b>'.esc_html__('Select Post Types', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_key_posttype_select_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_user_settings_section'	// Settings Section ID
+			);
+
+			add_settings_field(
+				'pn_key_notification_limit',								// ID
+				'<label for="pn_key_notification_limit"><b>'.esc_html__('Set Notification Limit', 'push-notification').'</b></label>',
+				array( $this, 'user_settings_notification_limit_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
@@ -566,6 +592,13 @@ class Push_Notification_Admin{
 				'pn_key_popup_display_setings_border_radius',								// ID
 				esc_html__(' Popup Border Radius', 'push-notification'),// Title
 				array( $this, 'pn_key_popup_display_setings_border_radius_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_popup_display_setings_custom_css',								// ID
+				esc_html__('Custom CSS For Popup', 'push-notification'),// Title
+				array( $this, 'pn_key_popup_display_setings_custom_css_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_pop_display_settings_section'	// Settings Section ID
 			);
@@ -793,11 +826,15 @@ class Push_Notification_Admin{
 			<div id="pn_notification_bell" class="pn-other-settings-options pn-tabs" style="display:none">
 					<div id="dashboard_right_now" class="postbox" >
 						<h2 class="pn_select_design" style="margin-top:6px;">'.esc_html__('Select push notification design', 'push-notification').'</h2>
-						<div class="pn-image-container">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m.png" alt="Image 1" class="pn-clickable-image pn-clickable-image-selected" notification_type="message">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i.png" alt="Image 2" class="pn-clickable-image" notification_type="message-with-icon">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_b.png" alt="Image 3" class="pn-clickable-image" notification_type="message-with-banner">
-							<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i_b.png" alt="Image 1" class="pn-clickable-image" notification_type="message-with-icon-and-banner">
+						<div class="pn-image-container">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m.png" alt="Image 1" class="pn-clickable-image pn-clickable-image-selected" notification_type="message">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i.png" alt="Image 2" class="pn-clickable-image" notification_type="message-with-icon">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_b.png" alt="Image 3" class="pn-clickable-image" notification_type="message-with-banner">';
+							//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+							echo'<img src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/m_i_b.png" alt="Image 1" class="pn-clickable-image" notification_type="message-with-icon-and-banner">
 						</div>
 						<div class="inside device-container-test">
 						<div class="pn-form-part">
@@ -841,8 +878,9 @@ class Push_Notification_Admin{
 					</div>
 				</div>
 				<div id="pn_campaings" style="display:none;" class="pn-tabs">
-					<div id="pn_cam_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
-					<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
+					<div id="pn_cam_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">';
+					//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+					echo'<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
 					</div>
 
 					<div class="row">
@@ -979,8 +1017,9 @@ class Push_Notification_Admin{
 		        echo '</div></div>
 
 				<div id="pn_subscribers" style="display:none;" class="pn-tabs">
-					<div id="pn_subscriber_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">
-					<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
+					<div id="pn_subscriber_loading" style="display:none; position:absolute; text-align: center; width: 100%; top: 500px;">';
+					//phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
+					echo'<img style="width: 100px;" src="'.esc_url( PUSH_NOTIFICATION_PLUGIN_URL ).'assets/image/pn_camp_loading.gif" title="loading" />
 					</div>
 					<div class="row" id="pn_subscriber_custom_div">
 					<h3>'.esc_html__('Subscribers', 'push-notification').'</h3>
@@ -1122,7 +1161,7 @@ class Push_Notification_Admin{
 				</script>
 			<?php
 			echo "<fieldset>";
-			PN_Field_Generator::get_input_password('user_token', 'user_auth_token_key');
+			PN_Field_Generator::get_input('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
 			echo '<span class="resp_message"></span></fieldset>
 			<p>'.esc_html__('This plugin requires a free API key form PushNotification.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
@@ -1163,6 +1202,18 @@ class Push_Notification_Admin{
 
 	public function user_settings_onpublish_callback(){		
 		PN_Field_Generator::get_input_checkbox('on_publish', '1', 'pn_push_on_publish', 'pn-checkbox pn_push_on_publish');
+	}
+	public function user_settings_notification_limit_callback(){
+		PN_Field_Generator::get_input_number('pn_key_notification_limit_number', 'pn_key_notification_limit_number_id');
+		$data = array(
+			'per_day'=> esc_html__('Per Day', 'push-notification'),
+			'per_hour'=> esc_html__('Per Hour', 'push-notification'),
+			'per_month'=> esc_html__('Per Month', 'push-notification'),
+		);
+		PN_Field_Generator::get_input_select('pn_key_notification_limit', '', $data, 'pn_key_notification_limit_id', '');		
+		
+		echo "<p class='description'>".esc_html__('Set the maximum number of push notifications that can be sent within selected limit.
+Keep empty or 0 to disable the limit',"push-notification")."</p>";
 	}
 
 	public function pn_key_posttype_select_callback(){		
@@ -1225,7 +1276,18 @@ class Push_Notification_Admin{
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_buddyboss_compatibale" name="push_notification_settings[pn_buddyboss_compatibale]"  value="1" '.esc_attr($pn_buddyboss_compatibale).'/>
-					<p class="help">'.esc_html__('It allows you to send notification based on buddyboss events. Such as posting in timeling, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on buddypress/buddyboss events. Such as posting in timeling, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+	}
+	public function pn_fluent_community_callback(){		
+		$notification = push_notification_settings();
+		$pn_fluent_community_compatibale = "";
+		if (isset($notification['pn_fluent_community_compatibale']) && $notification['pn_fluent_community_compatibale']) {
+			$pn_fluent_community_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_fluent_community_compatibale" name="push_notification_settings[pn_fluent_community_compatibale]"  value="1" '.esc_attr($pn_fluent_community_compatibale).'/>
+					<p class="help">'.esc_html__('It allows you to send notification based on fulent community events. Such as posting in feed, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	
@@ -1291,6 +1353,40 @@ class Push_Notification_Admin{
 						}
 						
 						echo '<option value="'.esc_attr($value['id']).'"  '.esc_attr($selected_option).'>'. esc_html($value['text']).'</option>';
+					}
+			echo '</select></div></div>';
+	}
+
+	public function pn_select_specific_author_callback() {
+
+			$notification = push_notification_settings();		
+
+			if ( isset( $notification['on_category'] ) && $notification['on_category'] ) {
+				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:block;">';
+			}else{
+				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:none;">';
+			}
+		
+			echo '<div class="pn-field_wrap">';
+				
+			$settings = push_notification_settings();
+			
+			$author_val = isset($settings['author'])?$settings['author']:array();
+			$selected_author = !is_array($author_val) ? explode(',',$author_val ) : $author_val;
+			$authors = get_users([
+							'role' => 'author',
+							'orderby' => 'display_name',
+							'order' => 'ASC',
+						]);
+			echo "<div id='segment_category_selector_wrapper'>";
+				echo '<select name="push_notification_settings[author][]" class="regular-text pn_author_select2">';
+					foreach ($authors as $key => $author) {
+						$selected_option ='';
+						if (in_array($author->ID,$selected_author) ||  in_array(get_cat_name($author->ID),$selected_author)) {
+							$selected_option ='selected=selected';
+						}
+						
+						echo '<option value="'.esc_attr($author->ID).'"  '.esc_attr($selected_option).'>'. esc_html($author->display_name).'</option>';
 					}
 			echo '</select></div></div>';
 	}
@@ -1369,6 +1465,30 @@ class Push_Notification_Admin{
 
 		PN_Field_Generator::get_input_checkbox($name, $value, $id, $class);
 	}
+	public function pn_device_target_callback(){
+		$name = 'pn_device_target';
+		$desktop_value = 0;
+		$mobile_value = 0;
+		$class = $id = 'pn_device_target';
+
+		$settings = push_notification_settings();
+		if(isset($settings[$name]['desktop']) && $settings[$name]['desktop'] == 1){
+			$desktop_value = 1;
+		}
+		if(isset($settings[$name]['mobile']) && $settings[$name]['mobile'] == 1){
+			$mobile_value = 1;
+		}
+		?>
+		<div class="checkbox_wrapper">
+			<input type="checkbox" class="regular-text checkbox_operator_multi" id="pn_device_target_desktop" <?php if ( $desktop_value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($desktop_value); ?>"/>
+			<input type="hidden" name="push_notification_settings[pn_device_target][desktop]" class="regular-text checkbox_target_multi" id="pn_device_target_desktop" value="<?php echo esc_attr($desktop_value); ?>" data-truevalue="<?php echo esc_attr($desktop_value); ?>"/>
+			<label style="display:inline-block" for="pn_device_target_desktop"><?php echo esc_html__('Desktop', 'push-notification'); ?></label>&nbsp;&nbsp;
+			<input type="checkbox" class="regular-text checkbox_operator_multi" id="<?php echo esc_attr($id); ?>" <?php if ( $mobile_value ) echo esc_attr("checked"); ?> value="<?php echo esc_attr($mobile_value); ?>"/>
+			<input type="hidden" name="push_notification_settings[pn_device_target][mobile]" class="regular-text checkbox_target_multi" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($mobile_value); ?>" data-truevalue="<?php echo esc_attr($mobile_value); ?>"/>
+			<label style="display:inline-block" for="<?php echo esc_attr($id); ?>"><?php echo esc_html__('Mobile', 'push-notification'); ?></label>
+		</div>
+		<?php
+	}
 
 	public function pn_key_showon_apk_only_callback(){		
 		$notification = push_notification_settings();
@@ -1427,6 +1547,10 @@ class Push_Notification_Admin{
 	public function pn_key_popup_display_setings_border_radius_callback(){        
         PN_Field_Generator::get_input_number('popup_display_setings_border_radius', 'popup_display_setings_border_radius_id');
 		echo "<p class='description'>".esc_html__('Set Border radius of Popup (in px)',"push-notification")."</p>";
+    }
+	public function pn_key_popup_display_setings_custom_css_callback(){        
+        PN_Field_Generator::get_input_textarea('popup_display_setings_custom_css', 'popup_display_setings_custom_css_id',esc_html__('Add your own CSS code here.',"push-notification"),70,5);
+		echo "<p class='description'>".esc_html__('You can use any valid CSS syntax. This will be applied on the frontend popup.',"push-notification")."</p>";
     }
 	public function pn_key_banner_accept_btn_callback(){		
 		PN_Field_Generator::get_input('popup_banner_accept_btn', 'popup_banner_accept_btn_id');
@@ -1617,185 +1741,264 @@ class Push_Notification_Admin{
 			}
 		}
 	}
-	public function pn_send_notification(){
-		if(empty( $_POST['nonce'])){
-			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+
+	public function pn_can_send_notification() {
+		$pn_settings = push_notification_settings();
+		$type  = null;
+		$limit = 0;
+		if ( isset($pn_settings['pn_key_notification_limit']) ){
+			$type  = $pn_settings['pn_key_notification_limit'];
 		}
-		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
-			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
-		}else{
-			if ( ! current_user_can( 'manage_options' ) ) {
+		if ( isset($pn_settings['pn_key_notification_limit_number']) ){
+			$limit  = $pn_settings['pn_key_notification_limit_number'];
+		}
+		if (empty($type) || empty($limit)) {
+			return true;
+		}
+
+		$now = current_time('timestamp');
+		$date_key = '';
+
+		switch ($type) {
+			case 'per_hour':
+				$date_key = 'pn_sent_hour_' . gmdate('YmdH', $now);
+				break;
+			case 'per_day':
+				$date_key = 'pn_sent_day_' . gmdate('Ymd', $now);
+				break;
+			case 'per_month':
+				$date_key = 'pn_sent_month_' . gmdate('Ym', $now);
+				break;
+		}
+
+		$count = (int) get_option($date_key, 0);
+
+		return ($limit === 0 || $count < $limit);
+	}
+
+	function pn_log_notification_sent() {
+		$pn_settings = push_notification_settings();
+		$type  = null;
+		$limit = 0;
+		if ( isset($pn_settings['pn_key_notification_limit']) ){
+			$type  = $pn_settings['pn_key_notification_limit'];
+		}
+		if ( isset($pn_settings['pn_key_notification_limit_number']) ){
+			$limit  = $pn_settings['pn_key_notification_limit_number'];
+		}
+
+		if (empty($type) || $limit === 0) {
+			return true;
+		}
+
+		$now = current_time('timestamp');
+		$date_key = '';
+
+		switch ($type) {
+			case 'per_hour':
+				$date_key = 'pn_sent_hour_' . gmdate('YmdH', $now);
+				break;
+			case 'per_day':
+				$date_key = 'pn_sent_day_' . gmdate('Ymd', $now);
+				break;
+			case 'per_month':
+				$date_key = 'pn_sent_month_' . gmdate('Ym', $now);
+				break;
+		}
+
+		if (!empty($date_key)) {
+			update_option($date_key, (int) get_option($date_key, 0) + 1);
+		}
+	}
+
+
+
+	public function pn_send_notification(){
+
+		if ($this->pn_can_send_notification()) {
+
+			if(empty( $_POST['nonce'])){
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
-			global $wpdb;
-			$auth_settings = push_notification_auth_settings();
-			$notification_settings = push_notification_settings();
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$title = sanitize_text_field(stripcslashes($_POST['title']));
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$message = sanitize_textarea_field(stripcslashes($_POST['message']));
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$link_url = esc_url_raw($_POST['link_url']);
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$image_url = esc_url_raw($_POST['image_url']);
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$icon_url = isset($_POST['icon_url'])?esc_url_raw($_POST['icon_url']):$notification_settings['notification_icon'];
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$audience_token_id = isset($_POST['audience_token_id'])?sanitize_text_field($_POST['audience_token_id']):'';
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
-			//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$page_subscribed = isset($_POST['page_subscribed'])?sanitize_text_field($_POST['page_subscribed']):'';
-			$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field(wp_unslash($_POST['notification_schedule'])):'';
+			else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
+				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+			}else{
+				if ( ! current_user_can( 'manage_options' ) ) {
+					wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
+				}
+				global $wpdb;
+				$auth_settings = push_notification_auth_settings();
+				$notification_settings = push_notification_settings();
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$title = sanitize_text_field(stripcslashes($_POST['title']));
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$message = sanitize_textarea_field(stripcslashes($_POST['message']));
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$link_url = esc_url_raw($_POST['link_url']);
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$image_url = esc_url_raw($_POST['image_url']);
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$icon_url = isset($_POST['icon_url'])?esc_url_raw($_POST['icon_url']):$notification_settings['notification_icon'];
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$audience_token_id = isset($_POST['audience_token_id'])?sanitize_text_field($_POST['audience_token_id']):'';
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$audience_token_url = isset($_POST['audience_token_url'])?sanitize_text_field($_POST['audience_token_url']):'';
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$send_type = isset($_POST['send_type'])?sanitize_text_field($_POST['send_type']):'';
+				//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$page_subscribed = isset($_POST['page_subscribed'])?sanitize_text_field($_POST['page_subscribed']):'';
+				$notification_schedule = isset($_POST['notification_schedule'])?sanitize_text_field(wp_unslash($_POST['notification_schedule'])):'';
 
-			$notification_date = isset($_POST['notification_date'])?sanitize_text_field(wp_unslash($_POST['notification_date'])):'';
+				$notification_date = isset($_POST['notification_date'])?sanitize_text_field(wp_unslash($_POST['notification_date'])):'';
 
-			$notification_time = isset($_POST['notification_time'])?sanitize_text_field(wp_unslash($_POST['notification_time'])):'';
-			if($send_type=='custom-select'){
-				$audience_token_id = isset($audience_token_id)?explode(',',$audience_token_id):'';
-			}else if($send_type=='custom-upload'){
-				$audience_token_id = str_replace('\\','',$audience_token_id );
-				$audience_token_id = json_decode($audience_token_id,true);
-			}
-
-			if(isset($notification_settings['utm_tracking_checkbox']) && $notification_settings['utm_tracking_checkbox']){
-				$utm_details = array(
-				    'utm_source'=> $notification_settings['notification_utm_source'],
-				    'utm_medium'=> $notification_settings['notification_utm_medium'],
-				    'utm_campaign'=> $notification_settings['notification_utm_campaign'],
-				    'utm_term'  => $notification_settings['notification_utm_term'],
-				    'utm_content'  => $notification_settings['notification_utm_content'],
-				    );
-				$link_url = add_query_arg( array_filter($utm_details), $link_url  );
-			}
-			$user_ids=[];
-			if( isset( $auth_settings['user_token'] ) ){
-				$push_notify_token=[];
-				if(!empty($audience_token_id) && is_array($audience_token_id))
-				{
-					foreach($audience_token_id as $token_id){
-						
-						if($send_type=='custom-select'){
-							$token_ids = get_user_meta($token_id, 'pnwoo_notification_token',true);
-							$user_ids[] = $token_id;
-						}else if($send_type=='custom-upload'){
-							if(!empty($token_id['email']))
-							{	
-								$user = get_user_by( 'email', trim($token_id['email']) );
-								if(!$user){
-									$user = get_user_by( 'login', trim($token_id['username']) );
-								}
-							}
-							if($user && isset($user->ID)){
-								$token_ids = get_user_meta($user->ID, 'pnwoo_notification_token',true);
-								if($token_ids){
-									$user_ids[] = $token_ids;
-								}
-							}
-						}
-						if(is_array($token_ids) && !empty($token_ids)){
-							$push_notify_token = array_merge($push_notify_token,$token_ids);
-						}
-						else if($token_ids){
-							$push_notify_token[]=$token_ids;
-						}
-
-					}
+				$notification_time = isset($_POST['notification_time'])?sanitize_text_field(wp_unslash($_POST['notification_time'])):'';
+				if($send_type=='custom-select'){
+					$audience_token_id = isset($audience_token_id)?explode(',',$audience_token_id):'';
+				}else if($send_type=='custom-upload'){
+					$audience_token_id = str_replace('\\','',$audience_token_id );
+					$audience_token_id = json_decode($audience_token_id,true);
 				}
 
-				if( ! empty($send_type) && $send_type!='custom-roles'){
-					if($send_type=='custom-page-subscribed'){
-						$authData = push_notification_auth_settings();
-						if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated'] ==1){
-							$push_notify_token =pn_get_tokens_by_url($page_subscribed);
+				if(isset($notification_settings['utm_tracking_checkbox']) && $notification_settings['utm_tracking_checkbox']){
+					$utm_details = array(
+						'utm_source'=> $notification_settings['notification_utm_source'],
+						'utm_medium'=> $notification_settings['notification_utm_medium'],
+						'utm_campaign'=> $notification_settings['notification_utm_campaign'],
+						'utm_term'  => $notification_settings['notification_utm_term'],
+						'utm_content'  => $notification_settings['notification_utm_content'],
+						);
+					$link_url = add_query_arg( array_filter($utm_details), $link_url  );
+				}
+				$user_ids=[];
+				if( isset( $auth_settings['user_token'] ) ){
+					$push_notify_token=[];
+					if(!empty($audience_token_id) && is_array($audience_token_id))
+					{
+						foreach($audience_token_id as $token_id){
+							
+							if($send_type=='custom-select'){
+								$token_ids = get_user_meta($token_id, 'pnwoo_notification_token',true);
+								$user_ids[] = $token_id;
+							}else if($send_type=='custom-upload'){
+								if(!empty($token_id['email']))
+								{	
+									$user = get_user_by( 'email', trim($token_id['email']) );
+									if(!$user){
+										$user = get_user_by( 'login', trim($token_id['username']) );
+									}
+								}
+								if($user && isset($user->ID)){
+									$token_ids = get_user_meta($user->ID, 'pnwoo_notification_token',true);
+									if($token_ids){
+										$user_ids[] = $token_ids;
+									}
+								}
+							}
+							if(is_array($token_ids) && !empty($token_ids)){
+								$push_notify_token = array_merge($push_notify_token,$token_ids);
+							}
+							else if($token_ids){
+								$push_notify_token[]=$token_ids;
+							}
+
 						}
 					}
-					if(empty($push_notify_token)){
-						if($send_type=='custom-select'){
+
+					if( ! empty($send_type) && $send_type!='custom-roles'){
+						if($send_type=='custom-page-subscribed'){
+							$authData = push_notification_auth_settings();
+							if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated'] ==1){
+								$push_notify_token =pn_get_tokens_by_url($page_subscribed);
+							}
+						}
+						if(empty($push_notify_token)){
+							if($send_type=='custom-select'){
+								wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
+							}else if($send_type=='custom-upload'){
+								wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the csv list', 'push-notification')));
+							}else{
+								wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found', 'push-notification')));
+							}
+						}
+					}
+					if($send_type=='custom-roles'){
+						$roles = isset($audience_token_id)?explode(',',$audience_token_id):'';
+						$push_notify_token = [];
+						$audience_token_url = 'campaign_for_individual_tokens';
+						$role_wise_web_token_ids = get_option('pn_website_token_ids',[]);
+						$website_ids= [];
+						foreach ($roles as $key=> $value ) {
+							$value = str_replace(' ', '_', $value);
+							if (isset($role_wise_web_token_ids[$value])) {
+								$website_ids = array_merge($website_ids,$role_wise_web_token_ids[$value]);
+							}
+						}
+						$push_notify_token = $website_ids;
+						if(empty($push_notify_token)){
 							wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
-						}else if($send_type=='custom-upload'){
-							wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the csv list', 'push-notification')));
-						}else{
-							wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found', 'push-notification')));
 						}
+						$push_notify_token = $website_ids;
 					}
-				}
-				if($send_type=='custom-roles'){
-					$roles = isset($audience_token_id)?explode(',',$audience_token_id):'';
-					$push_notify_token = [];
-					$audience_token_url = 'campaign_for_individual_tokens';
-					$role_wise_web_token_ids = get_option('pn_website_token_ids',[]);
-					$website_ids= [];
-					foreach ($roles as $key=> $value ) {
-						$value = str_replace(' ', '_', $value);
-						if (isset($role_wise_web_token_ids[$value])) {
-							$website_ids = array_merge($website_ids,$role_wise_web_token_ids[$value]);
-						}
-					}
-					$push_notify_token = $website_ids;
-					if(empty($push_notify_token)){
-						wp_send_json(array("status"=> 404, 'message'=>esc_html__('No Active subscriber found from the selection', 'push-notification')));
-					}
-					$push_notify_token = $website_ids;
-				}
 
-				$payload =array(
-					'user_token'=>$auth_settings['user_token'],
-					'title'=>$title,
-					'message'=>$message,
-					'link_url'=>$link_url,
-					'icon_url'=>$icon_url,
-					'image_url'=>$image_url,
-					'category'=>'',
-					'audience_token_id'=>$push_notify_token,
-					'audience_token_url'=>$audience_token_url,
-					'notification_schedule'=>$notification_schedule,
-					'notification_time'=>$notification_time,
-					'notification_date'=>$notification_date,
-				);
-				$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
-				
-				if($response){
-				 	
-					 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API')){
-						$table_name = $wpdb->prefix . 'um_notifications';
-						foreach($user_ids as $pn_user_id){
-							// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
-							$insert = $wpdb->insert(
-								$table_name,
-								array(
-									'time'    => gmdate( 'Y-m-d H:i:s' ),
-									'user'    => $pn_user_id,
-									'status'  => 'unread',
-									'photo'   => $icon_url,
-									'type'    => 'new_pm',
-									'url'     => $link_url,
-									'content' => $message,
-								)
-							);
-							if($insert){
-								$new_notify = get_user_meta( $pn_user_id, 'um_new_notifications');
-								if($new_notify && is_array($new_notify)){
-									$new_notify[] = $wpdb->insert_id;
-									update_user_meta( $pn_user_id, 'um_new_notifications', $new_notify );
+					$payload =array(
+						'user_token'=>$auth_settings['user_token'],
+						'title'=>$title,
+						'message'=>$message,
+						'link_url'=>$link_url,
+						'icon_url'=>$icon_url,
+						'image_url'=>$image_url,
+						'category'=>'',
+						'audience_token_id'=>$push_notify_token,
+						'audience_token_url'=>$audience_token_url,
+						'notification_schedule'=>$notification_schedule,
+						'notification_time'=>$notification_time,
+						'notification_date'=>$notification_date,
+					);
+					$response = PN_Server_Request::sendPushNotificatioDataNew($payload);
+					
+					if($response){
+						$this->pn_log_notification_sent();
+						
+						if(class_exists('um_ext\um_notifications\core\Notifications_Main_API')){
+							$table_name = $wpdb->prefix . 'um_notifications';
+							foreach($user_ids as $pn_user_id){
+								// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
+								$insert = $wpdb->insert(
+									$table_name,
+									array(
+										'time'    => gmdate( 'Y-m-d H:i:s' ),
+										'user'    => $pn_user_id,
+										'status'  => 'unread',
+										'photo'   => $icon_url,
+										'type'    => 'new_pm',
+										'url'     => $link_url,
+										'content' => $message,
+									)
+								);
+								if($insert){
+									$new_notify = get_user_meta( $pn_user_id, 'um_new_notifications');
+									if($new_notify && is_array($new_notify)){
+										$new_notify[] = $wpdb->insert_id;
+										update_user_meta( $pn_user_id, 'um_new_notifications', $new_notify );
+									}
 								}
+								
 							}
 							
 						}
-						
-					 }
 
-					 wp_send_json($response);
+						wp_send_json($response);
 
+					}else{
+						wp_send_json(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));
+					}
 				}else{
-					wp_send_json(array("status"=> 403, 'message'=>esc_html__('Request not completed', 'push-notification')));
-				}
-			}else{
-				wp_send_json(array("status"=> 503, 'message'=>esc_html__('User token not found', 'push-notification')));	
-			}			
+					wp_send_json(array("status"=> 503, 'message'=>esc_html__('User token not found', 'push-notification')));	
+				}			
 
+			}
+		}else{
+			wp_send_json(array("status"=> 404, 'message'=>esc_html__('Push notification limit reached.', 'push-notification')));
 		}
 	}
 
@@ -1975,6 +2178,12 @@ class Push_Notification_Admin{
 		} 
 		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
+		$max_length = 100; // character count, not words
+		if (mb_strlen($post_content, 'UTF-8') > $max_length) {
+			$message = mb_substr($post_content, 0, $max_length - 3, 'UTF-8') . '...';
+		} else {
+			$message = $post_content;
+		}
 		$link_url = esc_url_raw(get_permalink( $post_id ));
 		if(isset($push_notification_settings['utm_tracking_checkbox']) && $push_notification_settings['utm_tracking_checkbox']){
 			$utm_details = array(
@@ -2238,7 +2447,8 @@ function push_notification_settings(){
 		'popup_display_setings_text_color'=>'#fff',
 		'popup_display_setings_bg_color'=>'#222',
 		'popup_display_setings_border_radius'=>'4',
-		'notification_botton_position'=>'top'
+		'notification_botton_position'=>'top',
+		'pn_key_notification_limit_number'=>0
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
@@ -2602,6 +2812,50 @@ function pn_select2_category_data(){
 	wp_die();
 
 }
+
+add_action( 'wp_ajax_pn_select2_author_data', 'pn_select2_author_data' );
+function pn_select2_author_data() {
+
+	if ( ! isset( $_GET['nonce'] ) ) {
+		return;
+	}
+
+	if ( isset( $_GET['nonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'pn_notification' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+
+	$args = [
+		'role'           => 'author',
+		'orderby'        => 'display_name',
+		'order'          => 'ASC',
+		'number'         => 20,
+	];
+
+	if ( $search ) {
+		$args['search'] = '*' . esc_attr( $search ) . '*';
+		$args['search_columns'] = ['display_name', 'user_login', 'user_nicename'];
+	}
+
+	$authors = get_users( $args );
+
+	$result = [];
+	foreach ( $authors as $author ) {
+		$result[] = [
+			'id'   => $author->ID,
+			'text' => $author->display_name,
+		];
+	}
+
+	wp_send_json( [ 'results' => $result ] );
+	wp_die();
+}
+
 
 add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data' );
 
