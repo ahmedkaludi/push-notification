@@ -2418,7 +2418,12 @@ if ( is_admin() || wp_doing_ajax() ) {
 // Put it here because in Gutenberg is_admin gives us false
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 function push_notification_settings(){
-	$push_notification_settings = get_option( 'push_notification_settings', array() );
+	$push_notification_settings = array();
+	if ( is_multisite() ) {
+		$push_notification_settings = get_site_option( 'push_notification_settings', $push_notification_settings );
+	}else{
+		$push_notification_settings = get_option( 'push_notification_settings', $push_notification_settings );
+	}
 	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/bell-icon.png';
 	if(function_exists('pwaforwp_defaultSettings')){
 		$pwaforwpSettings = pwaforwp_defaultSettings();

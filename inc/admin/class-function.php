@@ -216,13 +216,15 @@ class PN_Server_Request{
 
 		if ( is_multisite() ) {
 
-            $weblink = get_site_url();              
+             $weblink =  get_home_url(get_main_site_id());
+			 $is_multisite = 'yes';             
 
         }
 
         else {
 
             $weblink = home_url();
+			$is_multisite = 'no';  
 
         }
 
@@ -249,6 +251,7 @@ class PN_Server_Request{
 					'category'=>$category,
 					'language_code'=>$language_code,
 					'lang_compatibility'=>$lang_compatibility,
+					'is_multisite'=>$is_multisite
 
 				);
 
