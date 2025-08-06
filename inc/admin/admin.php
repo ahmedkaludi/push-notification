@@ -1164,7 +1164,7 @@ class Push_Notification_Admin{
 			PN_Field_Generator::get_input('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
 			echo '<span class="resp_message"></span></fieldset>
-			<p>'.esc_html__('This plugin requires a free API key form PushNotification.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
+			<p>'.esc_html__('This plugin requires a free API key form pushnotifications.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
 		}else{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>";
 			if(PN_Server_Request::getProStatus()=='active'){
@@ -1190,7 +1190,7 @@ class Push_Notification_Admin{
 			echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Refresh', 'push-notification')."</button>";
 		}
 
-		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete ', 'push-notification')."<a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
+		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete ', 'push-notification')."<a href='https://pushnotifications.io/docs/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
 	}//function closed
 
 	public function user_settings_notification_icon_callback(){

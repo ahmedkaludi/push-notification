@@ -2,7 +2,7 @@
 /*
 Plugin Name: Push Notifications for WP - Self Hosted Web Push Notifications
 Plugin URI: https://wordpress.org/plugins/push-notification/
-Description: Push Notification allow admin to automatically notify your audience when you have published new content on your site or custom notices
+Description: Push Notifications allow admins to automatically notify their audience whenever new content or custom notices are published on the site.
 Author: Magazine3
 Version: 1.43
 Author URI: http://pushnotifications.io/

@@ -5,36 +5,39 @@ Tested up to: 6.8
 Stable tag: 1.43
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Tags: Push Notifications, Mobile, amp, Web Push Notifications
+Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications
+
 Push Notifications for WP - Self Hosted Web Push Notifications makes it easy to send Web Push notifications to your users for FREE with 2 Mins setup.
 
 == Description ==
-Push Notifications for WP - Self Hosted Web Push Notifications makes it easy to send Web Push notifications to your users for FREE with 2 Mins setup [Documentation](https://pushnotifications.helpscoutdocs.com/). 
+Push Notifications for WP - Self Hosted Web Push Notifications makes it easy to send Web Push notifications to your users for FREE with 2 Mins setup [Documentation](https://pushnotifications.io/docs/). 
 
 Send push notifications automatically when a post is published or updated. You can also send custom notifications from the app dashboard. The audience reports and campaign reports are available as well.
 
-= Features: =
-* Free & Easy setup
-* PWA Friendly (with offline push notifications)
-* AMP Compatibility
-* Native WordPress Integration
-* <strong>Notifications </strong>: Notifications appear as message alerts.
-* Publishing a post will trigger push notifications.
-* Update a post a draft will not trigger push notifications.
-* Compability with community by PeepSo plugin.
-* Compability with Polylang plugin.
-* Compability with Gravity form plugin.
-* Compability with BuddyBoss Plugin.
-* Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
-* Display campaign list on frontend using the [pn_campaigns] shortcode 
+= Key Features: =
+
+*<strong>Automatic Notifications</strong>: Instantly notify your followers whenever you publish a new post. 
+*<strong>Custom Notifications</strong>: Use the custom push notification form to send fully personalized notifications — even target specific subscribers or broadcast to all.
+*<strong>Notification Subscription Popup</strong>: Control when and how the subscription prompt appears to your visitors. Fully customize the message, style, and even add custom CSS to match your site’s design.
+*<strong>Scheduled Notifications</strong>: Plan and schedule notifications to be delivered in the future—based on schedule time.
+*<strong>Supported Browsers</strong>: Works seamlessly with Chrome (Desktop & Android), Safari (macOS), Microsoft Edge (Desktop & Android), Opera (Desktop & Android), and Firefox (Desktop & Android) on HTTPS websites.
+*<strong>Push Notification Design</strong>: Choose from four predefined, visually appealing designs. Note: The final appearance may vary depending on the user's device and browser.
+*<strong>Automatic Notification Control</strong>: Choose whether to send notifications for specific post types.
+*<strong>Notification Limit</strong>: Set the maximum number of push notifications that can be sent within a defined time frame.
+*<strong>Notification by User Roles</strong>: Send notifications based on user roles such as Editor, Author, Contributor, Subscriber, and more.
+*<strong>UTM Tracking</strong>: Easily track the performance of your push notifications by adding UTM parameters to your links. Monitor clicks.   
+*<strong>Campaigns List</strong>: Easily view sent messages in your dashboard along with their status and click statistics.
+*<strong>Subscribers List</strong>: View the complete list of subscribers, including both active and expired ones.
+*<strong>Visibility</strong>: Control where the push notification subscription popup appears — choose specific pages, posts, categories, tags, and more.
+*<strong>Works with PWAforWP/SuperPWA</strong>: Push notifications work seamlessly with or without a PWA setup.
+*<strong>Global Notification</strong>: Use the global function pn_send_push_notification_filter to send push notifications from anywhere.
+*<strong>Shortcode</strong>:Display campaign list on frontend using the [pn_campaigns] shortcode 
+*<strong>Compatibility</strong>: Push notifications work seamlessly with most plugins. However, if you want to trigger notifications based on actions from other plugins, specific compatibility may be required. We’ve already implemented compatibility with popular plugins like Polylang, PeepSo, Gravity Forms, BuddyPress/BuddyBoss, and Fluent Community.
 
 = Pro Features: =
-* Send Notification as per Segmentation
-* Send Notification as per Categories
-* Send notification to iOS users
-
-* <strong>Continuous Development</strong>: We will be working hard to continuously develop this Push Notification solution and release updates constantly so that your forms can continue to work flawlessly.
-* Dashboard System Status which helps you understand the setup status of the Push Notification.
+*<strong>Segmentation</strong>: Allow users to subscribe to notifications for specific categories or authors and receive notifications based on their preferences.
+*<strong>Notification to iOS users</strong>:
+*<strong>Continuous Development</strong>: We will be working hard to continuously develop this Push Notification solution and release updates constantly so that your forms can continue to work flawlessly.
 * More Push Notification Features Coming soon.
 
 **We Act Fast on Feedback!**
