@@ -1,3 +1,8 @@
+= 1.44 (06 August 2025) =
+* Added: Need to add suggestions in the campaign option. #163
+* Added: Implemented a feature in backend to track New premium customers. #164  
+* Fixed: Push notification not send on post update on multisite setup #167 
+
 = 1.43 (19 June 2025) =
 * Added: Added compatibility with Fluent community #154
 * Fixed: PHP Warning & Notice in push-notification.php: $audience_token_id Returns Nothing, $response Undefined #152

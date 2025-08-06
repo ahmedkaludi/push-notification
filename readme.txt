@@ -3,7 +3,7 @@ Contributors: magazine3
 Requires at least: 3.0  
 Tested up to: 6.8 
 Requires PHP: 5.6.20 
-Stable tag: 1.43  
+Stable tag: 1.44 
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
@@ -89,6 +89,11 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 
 == Changelog ==
 
+= 1.44 (06 August 2025) =
+* Added: Need to add suggestions in the campaign option. #163
+* Added: Implemented a feature in backend to track New premium customers. #164  
+* Fixed: Push notification not send on post update on multisite setup #167 
+
 = 1.43 (19 June 2025) =
 * Added: Compatibility with Fluent Community #154  
 * Fixed: PHP Warning & Notice in push-notification.php: $audience_token_id returns nothing, $response undefined #152  
@@ -145,8 +150,5 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 = 1.35 (06 June 2024) =
 * Fixed: Install banner — Yes or No option not showing #112  
 * Fixed: PHP errors on user end #111  
-
-= 1.33.1 (09 May 2024) =
-* Fixed: Issue with plugin activation #103  
 
 Full changelog available at: [changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)
