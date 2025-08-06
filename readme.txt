@@ -66,14 +66,26 @@ Push Notifications for WP uses the following third-party libraries:
 
 == Frequently Asked Questions ==
 
-= How to install and use this Push Notification plugin? =  
-After you activate this plugin, go to the Push Notification Options settings to connect the API accordingly.
+= How do I install and configure Push Notifications for WP? =  
+Once the plugin is activated, navigate to **Push Notification Options** in your WordPress dashboard. Follow the steps to connect your API and configure settings as per your preferences. Full setup takes under 2 minutes.  
+📄 Documentation: https://pushnotifications.io/docs/
 
-= How do I report bugs and suggest new features? =  
-You can report the bugs for this Push Notification plugin [here](https://github.com/ahmedkaludi/push-notification/issues)
+= Can I send notifications automatically when I publish a post? =  
+Yes. Once configured, Push Notifications for WP will automatically send a push notification when you publish or update a post, provided automatic notifications are enabled in the settings.
 
-= Will you include features to my request? =  
-Yes, absolutely! We would suggest you send your feature request by creating an issue on [GitHub](https://github.com/ahmedkaludi/push-notification/issues/new/). It helps us organize the feedback easily.
+= How do I send a custom push notification? =  
+You can send a custom message at any time via the **Custom Notification** form in the Push Notifications for WP dashboard. Choose the audience, write your message, and send instantly or schedule it for later.
+
+= Is Push Notifications for WP multisite compatible? =  
+Yes. Push Notifications for WP allows you to send push notifications across **network sites** in a multisite installation from a single place.
+
+= How do I report bugs or suggest new features for Push Notifications for WP? =  
+We love feedback! Please report bugs or suggest new features on our GitHub page:  
+https://github.com/ahmedkaludi/push-notification/issues  
+Or contact us directly: https://pushnotifications.io/contact
+
+= Will you add a feature I request to Push Notifications for WP? =  
+We’re actively improving Push Notifications for WP and prioritize user feedback. You can [submit your feature request on GitHub](https://github.com/Magazine3/Push-Notifications-for-WP/issues) or [contact us directly here](https://pushnotifications.io/contact). We’ll do our best to include your suggestion in a future release.
 
 == Changelog ==
 
