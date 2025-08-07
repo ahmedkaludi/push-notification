@@ -144,6 +144,13 @@ class Push_Notification_Frontend{
 			'date' => true,
 			'status' => true,
 			'campaign_name' => 'Campaign',
+			'heading_background_color' => 'black',
+			'heading_text_color' => '#fff',
+			'table_color' => '#fff',
+			'table_data_color' => 'black',
+			'table_width' => '800px',
+			'pagination' => '1',
+			'total_item' => '0',
 		), $atts, 'pn_campaigns');
 
 		$auth_settings = push_notification_auth_settings();
@@ -157,12 +164,12 @@ class Push_Notification_Frontend{
 		if (!empty($auth_settings['user_token'])) {
 			$campaigns = PN_Server_Request::getCompaignsData($auth_settings['user_token']);
 		}
-
+		
 		ob_start();
 		?>
 		<style>
 			.pn-table-wrapper {
-				max-width: 800px;
+				max-width: <?php echo esc_attr($atts['table_width']); ?>;
 				overflow-x: auto;
 				margin: 1.5em 0;
 			}
@@ -170,7 +177,7 @@ class Push_Notification_Frontend{
 			.pn-table {
 				width: 100%;
 				border-collapse: collapse;
-				background: #fff;
+				background: <?php echo esc_attr($atts['table_color']); ?>;
 				box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 				border: 1px solid #ccc;
 			}
@@ -180,10 +187,12 @@ class Push_Notification_Frontend{
 				padding: 8px 8px;
 				text-align: left;
 				border: 1px solid #ccc;
+				color: <?php echo esc_attr($atts['table_data_color']); ?>;
 			}
 
 			.pn-table th {
-				background: #f5f5f5;
+				background:<?php echo esc_attr($atts['heading_background_color']); ?>;
+				color: <?php echo esc_attr($atts['heading_text_color']); ?>;
 				font-weight: 400;
 			}
 
@@ -244,7 +253,7 @@ class Push_Notification_Frontend{
 			<div id="pn_campaings_custom_div" attr="<?php echo esc_attr(json_encode($atts)) ?>">
 			<table class="pn-table">
 				<thead>
-					<tr>
+					<tr style="background-color:black !important; color:white;">
 						<?php if ($atts['title']) : ?><th><?php esc_html_e('Title', 'push-notification'); ?></th><?php endif; ?>
 						<?php if ($atts['message']) : ?><th><?php esc_html_e('Message', 'push-notification'); ?></th><?php endif; ?>
 						<?php if ($atts['date']) : ?><th><?php esc_html_e('Sent on', 'push-notification'); ?></th><?php endif; ?>
@@ -253,9 +262,15 @@ class Push_Notification_Frontend{
 				</thead>
 				<tbody>
 					<?php
+					$counter = 0;
 					if (!empty($campaigns['campaigns']['data'])) :
 						$timezone_string = get_option('timezone_string') ?: 'UTC';
 						foreach ($campaigns['campaigns']['data'] as $campaign) :
+							
+							if (isset($atts['total_item']) && $atts['total_item'] > 0 && $counter >= $atts['total_item']) {
+								break;
+							}
+							$counter++;
 							$message = wp_strip_all_tags($campaign['message']);
 							if (strlen($message) > 100) {
 								$message = substr($message, 0, strrpos(substr($message, 0, 100), ' ')) . '...';
@@ -283,6 +298,7 @@ class Push_Notification_Frontend{
 					<?php endif; ?>
 				</tbody>
 			</table>
+			<?php if ($atts['pagination'] == '1' && !empty($campaigns['campaigns'])) : ?>
 			<div class="tablenav-pages">
 				<span class="displaying-num"><?php echo esc_html($campaigns['campaigns']['total']) . ' ' . esc_html__('items', 'push-notification'); ?></span>
 				<span class="pagination-links">
@@ -323,6 +339,7 @@ class Push_Notification_Frontend{
 					<?php endif; ?>
 				</span>
 			</div>
+			<?php endif; ?>
 		</div>
     
 		<?php

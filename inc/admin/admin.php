@@ -310,8 +310,16 @@ class Push_Notification_Admin{
 
 			add_settings_field(
 				'pn_display_popup_after_login',								// ID
-				esc_html__('Logged in Users', 'push-notification'),// Title
+				'<label for="pn_display_popup_after_login" ><b>'.esc_html__('Logged in Users', 'push-notification').'</b></label>',// Title
 				array( $this, 'pn_display_popup_after_login_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);			
+
+			add_settings_field(
+				'pn_select_custom_roles',								// ID
+				'<label for="pn_select_custom_roles" style="margin-left:10px;"><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_select_specific_roles_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
@@ -320,14 +328,6 @@ class Push_Notification_Admin{
 				'pn_device_target',								// ID
 				esc_html__('Device Target', 'push-notification'),// Title
 				array( $this, 'pn_device_target_callback'),// Callback
-				'push_notification_segment_settings_section',	// Page slug
-				'push_notification_segment_settings_section'	// Settings Section ID
-			);
-
-			add_settings_field(
-				'pn_select_custom_roles',								// ID
-				'<label for="pn_select_custom_roles" style="margin-left:10px;"><b>'.esc_html__('Select Roles', 'push-notification').'</b></label>',// Title
-				array( $this, 'pn_select_specific_roles_callback'),// Callback
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
@@ -1121,7 +1121,7 @@ class Push_Notification_Admin{
 
 				<div id="pn_help" style="display:none;" class="pn-tabs">
 					<h3>'.esc_html__('Documentation', 'push-notification').'</h3>
-					<a target="_blank" class="button pn-submit-button" href="https://pushnotifications.helpscoutdocs.com/">'.esc_html__('View Setup Documentation', 'push-notification').'</a>
+					<a target="_blank" class="button pn-submit-button" href="https://pushnotifications.io/docs/">'.esc_html__('View Setup Documentation', 'push-notification').'</a>
 
                    	<h3>'.esc_html__('Ask for Technical Support', 'push-notification') .'</h3>
                    	<p>'.esc_html__('We are always available to help you with anything', 'push-notification').'</p>
@@ -1164,7 +1164,7 @@ class Push_Notification_Admin{
 			PN_Field_Generator::get_input('user_token', 'user_auth_token_key');
 			PN_Field_Generator::get_button('Validate', 'user_auth_vadation');
 			echo '<span class="resp_message"></span></fieldset>
-			<p>'.esc_html__('This plugin requires a free API key form PushNotification.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
+			<p>'.esc_html__('This plugin requires a free API key form pushnotifications.io', 'push-notification').' <a target="_blank" href="'.esc_url_raw(PN_Server_Request::$notificationlanding."register").'">'.esc_html__('Get the Key', 'push-notification').'</a></p>';
 		}else{
 			echo "<input type='text' class='regular-text' value='xxxxxxxxxxxxxxxxxx'>";
 			if(PN_Server_Request::getProStatus()=='active'){
@@ -1190,7 +1190,7 @@ class Push_Notification_Admin{
 			echo "<button type='button' class='button dashicons-before dashicons-update pn-submit-button' id='pn-refresh-apikey' style='margin-left:2%; line-height: 1.4;'>".esc_html__('Refresh', 'push-notification')."</button>";
 		}
 
-		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete ', 'push-notification')."<a href='https://pushnotifications.helpscoutdocs.com/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
+		echo "<br/><br/><div>".esc_html__('Need help! Read the Complete ', 'push-notification')."<a href='https://pushnotifications.io/docs/' target='_blank'>".esc_html__('Documentation', 'push-notification')."</a>.</div><br/>";
 	}//function closed
 
 	public function user_settings_notification_icon_callback(){
@@ -1243,7 +1243,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_polylang_compatibale" name="push_notification_settings[pn_polylang_compatibale]"  value="1" '.esc_attr($pn_polylang_compatibale).'/>
-					<p class="help">'.esc_html__('It allows you to send notification based on languages.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on languages.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 	public function pn_peepso_callback(){		
 		$notification = push_notification_settings();
@@ -1254,7 +1254,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_peepso_compatibale" name="push_notification_settings[pn_peepso_compatibale]"  value="1" '.esc_attr($pn_peepso_compatibale).'/>
-					<p class="help">'.esc_html__('It allows you to send notification based on peepso events. Such as posting in feed, chating and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on peepso events. Such as posting in feed, chating and more.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 	public function pn_gravity_callback(){		
 		$notification = push_notification_settings();
@@ -1265,7 +1265,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_gravity_compatibale" name="push_notification_settings[pn_gravity_compatibale]"  value="1" '.esc_attr($pn_gravity_compatibale).'/>
-					<p class="help">'.esc_html__('It allows you to send notification based on gravity form submission.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on gravity form submission.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 	public function pn_buddyboss_callback(){		
 		$notification = push_notification_settings();
@@ -1276,7 +1276,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_buddyboss_compatibale" name="push_notification_settings[pn_buddyboss_compatibale]"  value="1" '.esc_attr($pn_buddyboss_compatibale).'/>
-					<p class="help">'.esc_html__('It allows you to send notification based on buddypress/buddyboss events. Such as posting in timeling, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on buddypress/buddyboss events. Such as posting in timeling, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 	public function pn_fluent_community_callback(){		
 		$notification = push_notification_settings();
@@ -1287,7 +1287,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		echo '<div class="pn-field_wrap">';
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_fluent_community_compatibale" name="push_notification_settings[pn_fluent_community_compatibale]"  value="1" '.esc_attr($pn_fluent_community_compatibale).'/>
-					<p class="help">'.esc_html__('It allows you to send notification based on fulent community events. Such as posting in feed, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.helpscoutdocs.com/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+					<p class="help">'.esc_html__('It allows you to send notification based on fulent community events. Such as posting in feed, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	
@@ -2418,7 +2418,12 @@ if ( is_admin() || wp_doing_ajax() ) {
 // Put it here because in Gutenberg is_admin gives us false
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 function push_notification_settings(){
-	$push_notification_settings = get_option( 'push_notification_settings', array() );
+	$push_notification_settings = array();
+	if ( is_multisite() ) {
+		$push_notification_settings = get_site_option( 'push_notification_settings', $push_notification_settings );
+	}else{
+		$push_notification_settings = get_option( 'push_notification_settings', $push_notification_settings );
+	}
 	$icon = PUSH_NOTIFICATION_PLUGIN_URL.'assets/image/bell-icon.png';
 	if(function_exists('pwaforwp_defaultSettings')){
 		$pwaforwpSettings = pwaforwp_defaultSettings();

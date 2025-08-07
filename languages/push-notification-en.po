@@ -125,7 +125,7 @@ msgid "Send Notification"
 msgstr ""
 
 #: inc/admin/admin.php:363
-msgid "This plugin requires a free API key form PushNotification.io"
+msgid "This plugin requires a free API key form pushnotifications.io"
 msgstr ""
 
 #: inc/admin/admin.php:363

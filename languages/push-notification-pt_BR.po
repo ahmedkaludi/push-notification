@@ -96,8 +96,8 @@ msgid "Send Notification"
 msgstr "Enviar Notificação"
 
 #: inc/admin/admin.php:315
-msgid "This plugin requires a free API key form PushNotification.io"
-msgstr "Este plugin requer uma Chave de API gratuita de PushNotification.io"
+msgid "This plugin requires a free API key form pushnotifications.io"
+msgstr "Este plugin requer uma Chave de API gratuita de pushnotifications.io"
 
 #: inc/admin/admin.php:315
 msgid "Get the Key"
