@@ -14,6 +14,10 @@ class Push_Notification_Admin{
 		if (! is_network_admin()) {
 			add_action( 'admin_menu', array( $this, 'add_menu_links') );
 		}
+		if ( is_multisite() ) {
+			add_action('admin_post_save_push_notification_settings', array( $this,'save_push_notification_settings'));
+		}
+		
 		add_action( 'admin_init', array( $this, 'settings_init') );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ) );
 		add_action( 'wp_ajax_pn_verify_user', array( $this, 'pn_verify_user' ) ); 
@@ -44,6 +48,39 @@ class Push_Notification_Admin{
 			}
 		}
 	}
+
+	public function save_push_notification_settings() {
+		if (!is_multisite()) {
+			return;
+		}
+
+		// Validate permissions and nonce
+		if (!current_user_can('manage_network_options')) {
+			wp_die('Unauthorized request');
+		}
+
+		if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'save_push_notification_settings_nonce')) {
+			wp_die('Nonce verification failed');
+		}
+
+		if (isset($_POST['push_notification_settings']) && is_array($_POST['push_notification_settings'])) {
+			$raw_data = $_POST['push_notification_settings'];
+			$sanitized = [];
+
+			foreach ($raw_data as $key => $value) {
+				// Sanitize arrays like posttypes, include_targeting_type etc.
+				if (is_array($value)) {
+					$sanitized[$key] = array_map('sanitize_text_field', $value);
+				} else {
+					$sanitized[$key] = sanitize_text_field($value);
+				}
+			}
+			update_site_option('push_notification_settings', $sanitized);
+		}
+		wp_redirect(network_admin_url('admin.php?page=push-notification-global-setting&updated=true'));
+		exit;
+	}
+
 	/*
 	* This function will Messaging functions in service worker
 	* 
@@ -204,11 +241,20 @@ class Push_Notification_Admin{
 					?>
 				</h2>
 			</div>
+			<?php	$form_action = ( is_multisite() && is_network_admin() )
+					? admin_url('admin-post.php')
+					: admin_url('options.php');
+				?>
 
-				<form action="<?php echo esc_url(admin_url("options.php")); ?>" method="post" enctype="multipart/form-data" class="push_notification-settings-form">		
+				<form action="<?php echo esc_url($form_action); ?>" method="post" enctype="multipart/form-data" class="push_notification-settings-form">
 					<div class="form-wrap">
 						<?php
-						settings_fields( 'push_notification_setting_dashboard_group' );
+						if (is_multisite() && is_network_admin()) {
+							echo '<input type="hidden" name="action" value="save_push_notification_settings">';
+							wp_nonce_field('save_push_notification_settings_nonce');
+						} else {
+							settings_fields('push_notification_setting_dashboard_group');
+						}
 						echo "<div class='push_notification-dashboard'>";
 							// Status
 							echo "<div id='pn_connect' class='pn-tabs'>";
@@ -222,11 +268,11 @@ class Push_Notification_Admin{
 					</div>
 				</form>
 		</div><?php
-	} 
-
+	}
 	public function settings_init(){
-		register_setting( 'push_notification_setting_dashboard_group', 'push_notification_settings' );
-		// register_setting( 'push_notification_setting_dashboard_group', 'push_notification_global_setting' );
+		if (! is_multisite() ) {
+			register_setting('push_notification_setting_dashboard_group', 'push_notification_settings');
+		}
 
 		add_settings_section('push_notification_dashboard_section',
 			' ', 
@@ -3272,3 +3318,5 @@ add_action( 'wp_ajax_update_pn_meta' , 'pn_update_meta_ajax_callback' );
 	}
 }
 add_action( 'admin_enqueue_scripts', 'pn_enqueue_admin_meta_script' );
+
+
