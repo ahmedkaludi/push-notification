@@ -87,6 +87,15 @@ Or contact us directly: https://pushnotifications.io/contact
 = Will you add a feature I request to Push Notifications for WP? =  
 We’re actively improving Push Notifications for WP and prioritize user feedback. You can [submit your feature request on GitHub](https://github.com/Magazine3/Push-Notifications-for-WP/issues) or [contact us directly here](https://pushnotifications.io/contact). We’ll do our best to include your suggestion in a future release.
 
+== Screenshots ==
+
+1. Plugin settings page showing API key, plan type, and expiry date.
+2. Dashboard showing total subscribers, notification settings, and tracking options.
+3. Interface for selecting notification design and composing message.
+4. Campaigns section showing a list of sent and pending campaigns with actions to delete or reuse.
+5. Compatibility section showing third-party plugin integration options.
+6. Visibility section for controlling where the subscription popup appears.
+
 == Changelog ==
 
 = 1.44 (06 August 2025) =
