@@ -1513,8 +1513,8 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 	}
 	public function pn_device_target_callback(){
 		$name = 'pn_device_target';
-		$desktop_value = 0;
-		$mobile_value = 0;
+		$desktop_value = 1;
+		$mobile_value = 1;
 		$class = $id = 'pn_device_target';
 
 		$settings = push_notification_settings();
@@ -2499,7 +2499,8 @@ function push_notification_settings(){
 		'popup_display_setings_bg_color'=>'#222',
 		'popup_display_setings_border_radius'=>'4',
 		'notification_botton_position'=>'top',
-		'pn_key_notification_limit_number'=>0
+		'pn_key_notification_limit_number'=>0,
+		'pn_device_target' => array('desktop'=> 1 ,'mobile' =>1 )
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
