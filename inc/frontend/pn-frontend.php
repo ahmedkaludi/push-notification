@@ -616,6 +616,28 @@ class Push_Notification_Frontend{
 				}
 			}
 		}
+        // Auto-segmentation data
+		$segmentation_type = isset($pn_Settings['segmentation_type']) ? $pn_Settings['segmentation_type'] : 'manual';
+		$auto_segment_enabled = ($segmentation_type == 'auto');
+		$auto_categories = array();
+		$auto_authors = array();
+		
+		
+		if ($auto_segment_enabled && (is_single() || is_page())) {
+			global $post;
+			if ($post) {
+
+				$post_categories = get_the_category($post->ID);
+				if (!empty($post_categories)) {
+					foreach ($post_categories as $category) {
+						$auto_categories[] = $category->slug;
+					}
+				}
+				
+				$auto_authors[] = $post->post_author;
+			}
+		}
+		
         $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
 					'pn_config'=> $messageConfig,
@@ -628,7 +650,11 @@ class Push_Notification_Frontend{
 					'popup_show_afternpageview'=> $pn_Settings['notification_popup_show_afternpageview'],
 					'pn_token_exists' =>apply_filters('pn_token_exists',$pn_token_exists),
 					'superpwa_apk_only' => $superpwa_apk_only,
-					'pwaforwp_apk_only' => $pwaforwp_apk_only
+					'pwaforwp_apk_only' => $pwaforwp_apk_only,
+					'segmentation_type' => $segmentation_type,
+					'auto_segment_enabled' => $auto_segment_enabled,
+					'auto_categories' => $auto_categories,
+					'auto_authors' => $auto_authors
 					);
         return $settings;
 	}
@@ -1013,15 +1039,47 @@ class Push_Notification_Frontend{
 			$position = $settings['notification_position'];
 		}
 		$css_position_escaped = '';
-		$setting_category = !empty($settings['category'])? $settings['category'] : [];
-		$selected_category =  !is_array($setting_category) ? explode(',',$setting_category) : $setting_category;
-		$catArray = !is_array($selected_category) ? explode(',',$selected_category) : $selected_category;
+		// Check segmentation type and auto-segment settings
+		$segmentation_type = isset($settings['segmentation_type']) ? $settings['segmentation_type'] : 'manual';
+		$auto_segment_enabled = ($segmentation_type == 'auto') || (isset($settings['pn_auto_segment_post_context']) && $settings['pn_auto_segment_post_context']);
+		
+		if ($auto_segment_enabled) {
+			// Auto-determine category and author from current post
+			$current_post_categories = array();
+			$current_post_author = '';
+			
+			if (is_single() || is_page()) {
+				global $post;
+				if ($post) {
+					// Get current post categories
+					$post_categories = get_the_category($post->ID);
+					if (!empty($post_categories)) {
+						foreach ($post_categories as $category) {
+							$current_post_categories[] = $category->slug;
+						}
+					}
+					
+					// Get current post author
+					$current_post_author = $post->post_author;
+				}
+			}
+			
+			// Use current post data for segmentation
+			$catArray = $current_post_categories;
+			$authorArray = $current_post_author ? array($current_post_author) : array();
+			$all_category = 0; // Don't show "All Categories" option
+		} else {
+			// Use existing segmentation logic for manual segmentation
+			$setting_category = !empty($settings['category'])? $settings['category'] : [];
+			$selected_category =  !is_array($setting_category) ? explode(',',$setting_category) : $setting_category;
+			$catArray = !is_array($selected_category) ? explode(',',$selected_category) : $selected_category;
 
-		$setting_author = !empty($settings['author'])? $settings['author'] : [];
-		$selected_author =  !is_array($setting_author) ? explode(',',$setting_author) : $setting_author;
-		$authorArray = !is_array($selected_author) ? explode(',',$selected_author) : $selected_author;
+			$setting_author = !empty($settings['author'])? $settings['author'] : [];
+			$selected_author =  !is_array($setting_author) ? explode(',',$setting_author) : $setting_author;
+			$authorArray = !is_array($selected_author) ? explode(',',$selected_author) : $selected_author;
 
-		$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
+			$all_category = (isset($settings['segment_on_category'])) ? $settings['segment_on_category'] : 0;
+		}
 		
 		switch ($position) {
 			case 'bottom-left':
@@ -1168,7 +1226,8 @@ class Push_Notification_Frontend{
 				   		</span>';
 				   		}
 			   		echo '</div>';
-						if(!empty($settings['on_category']) && $settings['on_category'] == 1){
+						// Only show segmentation options if manual segmentation is enabled and auto-segment is not enabled
+						if($segmentation_type == 'manual' && !$auto_segment_enabled && !empty($settings['on_category']) && $settings['on_category'] == 1){
 							if($all_category || !empty($catArray)){
 								echo '<div id="pn-activate-permission-categories-text">
 									'.esc_html__('On which category would you like to receive?', 'push-notification').'

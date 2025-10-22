@@ -76,7 +76,7 @@ function pushnotification_load_messaging(reg){
 		}
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		setTimeout(function() {
-			if(wrapper){ wrapper[0].style.display="flex"; }
+			if(wrapper && wrapper[0]){ wrapper[0].style.display="flex"; }
 	   }, pnScriptSetting.popup_show_afternseconds);
 	}
 	document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
@@ -202,18 +202,41 @@ function push_notification_saveToken(currentToken){
 		console.log(this.responseText);
 	  }
 	};
-	const optioArr = [];
-	const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
-	  for (var i=0; i <=  optElm.length - 1 ; i++) {
-		  optioArr.push(optElm[i].value);
-	  }
-	const optioArrAuthor = [];
-	const optElmAuthor = document.querySelectorAll("#pn-author-checkboxes input:checked");
-	for (var i=0; i <=  optElmAuthor.length - 1 ; i++) {
-		optioArrAuthor.push(optElmAuthor[i].value);
+	// Check if auto-segmentation is enabled
+	var autoSegmentEnabled = pnScriptSetting.auto_segment_enabled || false;
+	var optioArr = [];
+	var optioArrAuthor = [];
+	
+	// Debug logging
+	console.log('Auto-segment enabled:', autoSegmentEnabled);
+	console.log('Auto categories:', pnScriptSetting.auto_categories);
+	console.log('Auto authors:', pnScriptSetting.auto_authors);
+	
+	if (autoSegmentEnabled) {
+		// Use auto-determined category and author data
+		optioArr = pnScriptSetting.auto_categories || [];
+		optioArrAuthor = pnScriptSetting.auto_authors || [];
+		console.log('Using auto data - categories:', optioArr, 'authors:', optioArrAuthor);
+	} else {
+		// Use user-selected categories and authors
+		const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
+		for (var i=0; i <=  optElm.length - 1 ; i++) {
+			optioArr.push(optElm[i].value);
+		}
+		const optElmAuthor = document.querySelectorAll("#pn-author-checkboxes input:checked");
+		for (var i=0; i <=  optElmAuthor.length - 1 ; i++) {
+			optioArrAuthor.push(optElmAuthor[i].value);
+		}
+		console.log('Using manual selection - categories:', optioArr, 'authors:', optioArrAuthor);
 	}
+	
 	var authorArraystr = [...optioArrAuthor].join(',');
     var catArraystr = [...optioArr].join(',');
+	
+	// Debug the final values being sent
+	console.log('Final category string:', catArraystr);
+	console.log('Final author string:', authorArraystr);
+	
 	var grabOs = pushnotificationFCMGetOS();
 	var browserClient = pushnotificationFCMbrowserclientDetector();
 	var currentUrl = window.location.href;

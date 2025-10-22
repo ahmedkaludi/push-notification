@@ -310,6 +310,8 @@ class Push_Notification_Admin{
 				}
 			}
 
+			
+
 			add_settings_field(
 				'pn_key_segment_select',								// ID
 				'<label for="pn_push_on_category_checkbox"><b>'.esc_html__('Segmentation', 'push-notification').'</b></label>',// Title
@@ -319,9 +321,17 @@ class Push_Notification_Admin{
 			);
 			$notification = push_notification_settings();
 			$s_display="style='display:none;margin-left:10px;'";
-			if(isset($notification['on_category']) && $notification['on_category']){
+			if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segmentation_type']) && $notification['segmentation_type'] == 'manual'){
 				$s_display="style='display:block;margin-left:10px;'";
 			}
+
+			add_settings_field(
+				'pn_segmentation_type',								// ID
+				'<label for="pn_segmentation_type" '.$s_display.'><b>'.esc_html__('Segmentation Type', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_segmentation_type_callback'),// Callback
+				'push_notification_segment_settings_section',	// Page slug
+				'push_notification_segment_settings_section'	// Settings Section ID
+			);
 			add_settings_field(
 				'pn_key_segment_on_categories',								// ID
 				'<label class="js_category_selector_wrapper" for="pn_push_segment_on_category_checkbox" '.$s_display.'><b>'.esc_html__('On All Categories', 'push-notification').'</b></label>',// Title
@@ -343,7 +353,7 @@ class Push_Notification_Admin{
 			);
 
 			$soc_display="style='display:none;margin-left:10px;'";
-			if(isset($notification['on_category']) && $notification['on_category']){
+			if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segmentation_type']) && $notification['segmentation_type'] == 'manual'){
 				$soc_display="style='display:block;margin-left:10px;'";
 			}
 			add_settings_field(
@@ -353,6 +363,7 @@ class Push_Notification_Admin{
 				'push_notification_segment_settings_section',	// Page slug
 				'push_notification_segment_settings_section'	// Settings Section ID
 			);
+
 
 			add_settings_field(
 				'pn_display_popup_after_login',								// ID
@@ -1269,6 +1280,20 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		}
 		PN_Field_Generator::get_input_multi_select('posttypes', array('post'), $data, 'pn_push_on_publish_select', '');
 	}
+	public function pn_segmentation_type_callback(){		
+		$notification = push_notification_settings();
+		$segmentation_type = isset($notification['segmentation_type']) ? $notification['segmentation_type'] : 'manual';
+		
+		echo '<div class="pn-field">';
+		echo '<select id="pn_segmentation_type" name="push_notification_settings[segmentation_type]" class="regular-text">';
+		echo '<option value="manual" '.selected($segmentation_type, 'manual', false).'>'.esc_html__('Manual Segmentation', 'push-notification').'</option>';
+		echo '<option value="auto" '.selected($segmentation_type, 'auto', false).'>'.esc_html__('Auto Segmentation', 'push-notification').'</option>';
+		echo '</select>';
+		echo '<br><p class="help">'.esc_html__('Auto Segmentation will automatically segment users based on the post categories and authors.', 'push-notification').'</p>';
+		echo '<p class="help">'.esc_html__('Manual Segmentation will allow you to manually segment users based on the post categories and authors.', 'push-notification').'</p>';
+		echo '</div>';
+	}
+
 	public function pn_key_segment_select_callback(){		
 		$notification = push_notification_settings();
 		$on_category_checked = "";
@@ -1377,7 +1402,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 
 			$notification = push_notification_settings();		
 
-			if ( isset( $notification['on_category'] ) && $notification['on_category'] ) {
+			if ( isset( $notification['on_category'] ) && $notification['on_category'] && isset($notification['segmentation_type']) && $notification['segmentation_type'] == 'manual' ) {
 				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:block;">';
 			}else{
 				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:none;">';
@@ -1407,7 +1432,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 
 			$notification = push_notification_settings();		
 
-			if ( isset( $notification['on_category'] ) && $notification['on_category'] ) {
+			if ( isset( $notification['on_category'] ) && $notification['on_category'] && isset($notification['segmentation_type']) && $notification['segmentation_type'] == 'manual' ) {
 				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:block;">';
 			}else{
 				echo '<div id="category_selector_wrapper" class="js_custom_category_selector_wrapper" style="display:none;">';
@@ -1504,6 +1529,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		);
 		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
 	}
+
 	public function pn_display_popup_after_login_callback(){		
 		$notification = push_notification_settings();
 		$name = 'pn_display_popup_after_login';
@@ -1518,11 +1544,11 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		$class = $id = 'pn_device_target';
 
 		$settings = push_notification_settings();
-		if(isset($settings[$name]['desktop']) && $settings[$name]['desktop'] == 1){
-			$desktop_value = 1;
+		if(isset($settings[$name]['desktop']) && $settings[$name]['desktop'] == 0){
+			$desktop_value = 0;
 		}
-		if(isset($settings[$name]['mobile']) && $settings[$name]['mobile'] == 1){
-			$mobile_value = 1;
+		if(isset($settings[$name]['mobile']) && $settings[$name]['mobile'] == 0){
+			$mobile_value = 0;
 		}
 		?>
 		<div class="checkbox_wrapper">
@@ -2500,7 +2526,8 @@ function push_notification_settings(){
 		'popup_display_setings_border_radius'=>'4',
 		'notification_botton_position'=>'top',
 		'pn_key_notification_limit_number'=>0,
-		'pn_device_target' => array('desktop'=> 1 ,'mobile' =>1 )
+		'pn_device_target' => array('desktop'=> 1 ,'mobile' =>1 ),
+		'segmentation_type' => 'manual'
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
 	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
