@@ -13,6 +13,31 @@ jQuery(document).ready(function($){
 		$('a[href="' + activeTab + '"]').addClass('nav-tab-active');
 		localStorage.setItem('activeTab', activeTab);
 	}
+
+	// Function to toggle manual segmentation options
+	function toggleManualSegmentationOptions(segmentationType) {
+		var $manualOptions = $('.js_category_selector_wrapper, .js_custom_category_selector_wrapper');
+		
+		if (segmentationType === 'auto') {
+			$manualOptions.parents('tr').hide();
+		} else {
+			$manualOptions.parents('tr').show();
+		}
+	}
+
+	// Handle segmentation type changes
+	$('#pn_segmentation_type').on('change', function() {
+		var segmentationType = $(this).val();
+		toggleManualSegmentationOptions(segmentationType);
+	});
+
+	// Initialize segmentation type display on page load
+	$(document).ready(function() {
+		var initialSegmentationType = $('#pn_segmentation_type').val();
+		if (initialSegmentationType) {
+			toggleManualSegmentationOptions(initialSegmentationType);
+		}
+	});
         
             if(pn_setings.do_tour){
                 
@@ -275,7 +300,7 @@ jQuery(document).ready(function($){
 
 			jQuery(".js_category_selector_wrapper").parents('tr').show();
 			jQuery(".js_custom_category_selector_wrapper").parents('tr').show();
-			
+			jQuery("#pn_segmentation_type").parents('tr').show();
 		}else{
 			jQuery("#category_selector_wrapper").hide();
 			jQuery(".js_category_selector_wrapper").hide();
@@ -284,6 +309,7 @@ jQuery(document).ready(function($){
 
 			jQuery(".js_category_selector_wrapper").parents('tr').hide();
 			jQuery(".js_custom_category_selector_wrapper").parents('tr').hide();
+			jQuery("#pn_segmentation_type").parents('tr').hide();
 		}
 	});
 	var pn_push_on_category_checkbox = jQuery('#pn_push_on_category_checkbox');
@@ -295,6 +321,7 @@ jQuery(document).ready(function($){
 
 		jQuery(".js_category_selector_wrapper").parents('tr').show();
 		jQuery(".js_custom_category_selector_wrapper").parents('tr').show();
+		jQuery("#pn_segmentation_type").parents('tr').show();
 		
 	}else{
 		jQuery("#category_selector_wrapper").hide();
@@ -304,6 +331,8 @@ jQuery(document).ready(function($){
 
 		jQuery(".js_category_selector_wrapper").parents('tr').hide();
 		jQuery(".js_custom_category_selector_wrapper").parents('tr').hide();
+		jQuery("#pn_segmentation_type").parents('tr').hide();
+		
 	}
 
 	jQuery('#pn_display_popup_after_login').click(function(){

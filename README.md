@@ -3,7 +3,7 @@
 **Contributors:** magazine3  
 **Requires at least:** 3.0  
 **Tested up to:** 6.8  
-**Stable tag:** 1.43  
+**Stable tag:** 1.45  
 **License:** GPLv2 or later  
 **License URI:** [http://www.gnu.org/licenses/gpl-2.0.html](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Tags:** Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
