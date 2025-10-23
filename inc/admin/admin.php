@@ -341,7 +341,7 @@ class Push_Notification_Admin{
 			);
 
 			$soc_display="style='display:none;margin-left:10px;'";
-			if(isset($notification['on_category']) && $notification['on_category']){
+			if(isset($notification['on_category']) && $notification['on_category'] && isset($notification['segmentation_type']) && $notification['segmentation_type'] == 'manual'){
 				$soc_display="style='display:block;margin-left:10px;'";
 			}
 			add_settings_field(

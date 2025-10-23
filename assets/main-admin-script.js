@@ -14,9 +14,8 @@ jQuery(document).ready(function($){
 		localStorage.setItem('activeTab', activeTab);
 	}
 
-	// Handle segmentation type changes
-	$('#pn_segmentation_type').on('change', function() {
-		var segmentationType = $(this).val();
+	// Function to toggle manual segmentation options
+	function toggleManualSegmentationOptions(segmentationType) {
 		var $manualOptions = $('.js_category_selector_wrapper, .js_custom_category_selector_wrapper');
 		
 		if (segmentationType === 'auto') {
@@ -24,13 +23,21 @@ jQuery(document).ready(function($){
 		} else {
 			$manualOptions.parents('tr').show();
 		}
+	}
+
+	// Handle segmentation type changes
+	$('#pn_segmentation_type').on('change', function() {
+		var segmentationType = $(this).val();
+		toggleManualSegmentationOptions(segmentationType);
 	});
 
 	// Initialize segmentation type display on page load
-	var initialSegmentationType = $('#pn_segmentation_type').val();
-	if (initialSegmentationType === 'auto') {
-		$('.js_category_selector_wrapper, .js_custom_category_selector_wrapper').hide();
-	}
+	$(document).ready(function() {
+		var initialSegmentationType = $('#pn_segmentation_type').val();
+		if (initialSegmentationType) {
+			toggleManualSegmentationOptions(initialSegmentationType);
+		}
+	});
         
             if(pn_setings.do_tour){
                 
