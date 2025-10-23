@@ -1,3 +1,7 @@
+= 1.45 (23 October 2025) = 
+* Fixed: Push notification changes were not reflected in the multisite setup. #168
+* Fixed: Pushnotification is not working #170
+
 = 1.44 (06 August 2025) =
 * Added: Need to add suggestions in the campaign option. #163
 * Added: Implemented a feature in backend to track New premium customers. #164  

@@ -3,7 +3,7 @@ Contributors: magazine3
 Requires at least: 3.0  
 Tested up to: 6.8 
 Requires PHP: 5.6.20 
-Stable tag: 1.44 
+Stable tag: 1.45 
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
@@ -97,6 +97,9 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 6. Visibility section for controlling where the subscription popup appears.
 
 == Changelog ==
+= 1.45 (23 October 2025) = 
+* Fixed: Push notification changes were not reflected in the multisite setup. #168
+* Fixed: Pushnotification is not working #170
 
 = 1.44 (06 August 2025) =
 * Added: Need to add suggestions in the campaign option. #163
