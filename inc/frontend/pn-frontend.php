@@ -667,6 +667,11 @@ class Push_Notification_Frontend{
 												}
 												isSubscribing = false;
 											}
+											
+											// Check and update all other subscribe buttons on the page
+											if(typeof window.checkAllSubscribeButtons === 'function'){
+												setTimeout(window.checkAllSubscribeButtons, 100);
+											}
 										} else {
 											// Restore button state on error
 											var btn = window.pnSubscribeButtons[buttonId];
@@ -806,31 +811,71 @@ class Push_Notification_Frontend{
 				(function checkSubscriptionStatus(){
 					var authors = button.getAttribute('data-authors').split(',').filter(function(a){ return a; });
 					
+					 if(authors.length === 1){
+						if(authors[0] !== ''){
+							authors = [authors[0]];
+						}
+					}
+					
+					var needToGetFromScript = false;
+					if(authors.length === 0){
+						needToGetFromScript = true;
+					} else if(authors.length === 1){
+						if(authors[0] === ''){
+							needToGetFromScript = true;
+						}
+					}
+					
+					if(needToGetFromScript){
+						if(typeof pnScriptSetting !== 'undefined'){
+							if(pnScriptSetting.auto_authors){
+								if(pnScriptSetting.auto_authors.length > 0){
+									authors = pnScriptSetting.auto_authors.map(function(a){ return String(a); });
+								}
+							}
+						}
+					}
+					
 					// Check if token has been sent to server (user has subscribed before)
 					var tokenSent = localStorage.getItem('sentToServer') === '1';
 					
 					// Check if auto-segmentation is enabled and authors are in subscribed list
 					var allSubscribed = false;
+					var subscribedAuthors = [];
 					if(typeof pnScriptSetting !== 'undefined'){
 						if(pnScriptSetting.auto_segment_enabled){
-						var subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
-						if(authors.length > 0){
-							allSubscribed = true;
-							for(var i = 0; i < authors.length; i++){
-								if(subscribedAuthors.indexOf(String(authors[i])) === -1){
-									allSubscribed = false;
-									break;
+							subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+							if(authors.length > 0){
+								allSubscribed = true;
+								for(var i = 0; i < authors.length; i++){
+									if(subscribedAuthors.indexOf(String(authors[i])) === -1){
+										allSubscribed = false;
+										break;
+									}
 								}
+							}
+						}
+					}
+					
+					// Also check subscribed authors even if auto-segmentation check didn't run
+					if(!allSubscribed){
+						if(authors.length > 0){
+						subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+						allSubscribed = true;
+						for(var i = 0; i < authors.length; i++){
+							if(subscribedAuthors.indexOf(String(authors[i])) === -1){
+								allSubscribed = false;
+								break;
 							}
 						}
 						}
 					}
 					
 					// Show subscribed state if:
-					// 1. User has subscribed before (token sent) AND
-					// 2. Either all authors in this button are subscribed, OR there are no specific authors (general subscription)
-					if(tokenSent){
-						if(authors.length === 0 || allSubscribed){
+					// 1. All authors in button are subscribed, OR
+					// 2. User has subscribed before (token sent) and button has no specific authors (general subscription)
+					if(allSubscribed){
+						if(authors.length > 0){
 							button.classList.add('pn-subscribed');
 							button.style.backgroundColor = '#28a745';
 							var subscribedText = button.getAttribute('data-subscribed-text');
@@ -840,20 +885,85 @@ class Push_Notification_Frontend{
 								}
 							}
 						}
-					} else if(allSubscribed){
-						if(authors.length > 0){
-						// If not token sent but authors are subscribed (edge case)
-						button.classList.add('pn-subscribed');
-						button.style.backgroundColor = '#28a745';
-						var subscribedText = button.getAttribute('data-subscribed-text');
-						if(buttonTextEl){
-							if(subscribedText){
-								buttonTextEl.textContent = subscribedText;
+					} else if(tokenSent){
+						if(authors.length === 0){
+							// General subscription - show subscribed if token was sent
+							button.classList.add('pn-subscribed');
+							button.style.backgroundColor = '#28a745';
+							var subscribedText = button.getAttribute('data-subscribed-text');
+							if(buttonTextEl){
+								if(subscribedText){
+									buttonTextEl.textContent = subscribedText;
+								}
 							}
-						}
 						}
 					}
 				})();
+				
+				// Global function to check and update all shortcode buttons on the page
+				window.checkAllSubscribeButtons = function(){
+					var allButtons = document.querySelectorAll('.pn-subscribe-button');
+					for(var btnIndex = 0; btnIndex < allButtons.length; btnIndex++){
+						var btn = allButtons[btnIndex];
+						if(btn.classList.contains('pn-subscribed')){
+							continue; // Already subscribed
+						}
+						
+						var btnAuthors = btn.getAttribute('data-authors').split(',').filter(function(a){ return a; });
+						
+						if(btnAuthors.length === 1){
+							if(btnAuthors[0] !== ''){
+								btnAuthors = [btnAuthors[0]];
+							}
+						}
+						var needToGetFromScript = false;
+						if(btnAuthors.length === 0){
+							needToGetFromScript = true;
+						} 
+						
+						if(needToGetFromScript){
+							if(typeof pnScriptSetting !== 'undefined'){
+								if(pnScriptSetting.auto_authors){
+									if(pnScriptSetting.auto_authors.length > 0){
+										btnAuthors = pnScriptSetting.auto_authors.map(function(a){ return String(a); });
+									}
+								}
+							}
+						}
+						
+						if(btnAuthors.length > 0){
+							var subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+							var allSubscribed = true;
+							for(var i = 0; i < btnAuthors.length; i++){
+								if(subscribedAuthors.indexOf(String(btnAuthors[i])) === -1){
+									allSubscribed = false;
+									break;
+								}
+							}
+							
+							if(allSubscribed){
+								btn.classList.add('pn-subscribed');
+								btn.style.backgroundColor = '#28a745';
+								var textEl = btn.querySelector('.pn-button-text');
+								var subscribedText = btn.getAttribute('data-subscribed-text');
+								if(textEl){
+									if(subscribedText){
+										textEl.textContent = subscribedText;
+									}
+								}
+							}
+						}
+					}
+				};
+				
+				// Run check after page loads
+				if(document.readyState === 'loading'){
+					document.addEventListener('DOMContentLoaded', function(){
+						setTimeout(window.checkAllSubscribeButtons, 500);
+					});
+				} else {
+					setTimeout(window.checkAllSubscribeButtons, 500);
+				}
 				}
 			}
 		})();
