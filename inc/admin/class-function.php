@@ -107,6 +107,13 @@ class PN_Server_Request{
             $weblink = home_url();
 			$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() );
         }
+		$is_segmentation_enabled = false;
+		if(isset($notification_settings['on_category']) && $notification_settings['on_category']){
+			$is_segmentation_enabled = true;
+		}else{
+			$category = '';
+			$author = '';
+		}
 
         $user_token = $push_notification_auth_settings['user_token'];
 
@@ -128,6 +135,7 @@ class PN_Server_Request{
 					'is_multisite'=> $is_multisite,
 					'language_code'=> $language_code,
 					'lang_compatibility'=> $lang_compatibility,
+					'is_segmentation_enabled'=> $is_segmentation_enabled,
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');

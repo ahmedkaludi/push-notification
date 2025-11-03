@@ -64,20 +64,75 @@ function pushnotification_load_messaging(reg){
 	return return_var;
 }
 	
-  	if(PWAforwpreadCookie("pn_notification_block")==null){
-		const pageAccessedByReload = window.history.length;
-		if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
-			return false;
+  	// Check if we should show popup for auto-segmentation
+	var autoSegmentEnabled = pnScriptSetting.auto_segment_enabled || false;
+	var shouldShowPopup = false;
+	var isPostPage = false;
+	
+	// Check if current page is a post (single post page)
+	// auto_categories and auto_authors are only set on posts when auto-segmentation is enabled
+	if(autoSegmentEnabled){
+		var hasAutoCats = pnScriptSetting.auto_categories && pnScriptSetting.auto_categories.length > 0;
+		var hasAutoAuthors = pnScriptSetting.auto_authors && pnScriptSetting.auto_authors.length > 0;
+		isPostPage = hasAutoCats || hasAutoAuthors;
+	}
+	
+	if(autoSegmentEnabled && isPostPage){
+		// For posts with auto-segmentation: show popup if author hasn't been subscribed to yet
+		var subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+		var currentAuthors = pnScriptSetting.auto_authors || [];
+		
+		// Check if any current author hasn't been subscribed to
+		var hasUnsubscribedAuthor = false;
+		if(currentAuthors && currentAuthors.length > 0){
+			for(var i = 0; i < currentAuthors.length; i++){
+				var currentAuthor = String(currentAuthors[i]);
+				if(subscribedAuthors.indexOf(currentAuthor) === -1){
+					hasUnsubscribedAuthor = true;
+					break;
+				}
+			}
+		} else {
+			// If no authors on this post, don't show popup
+			hasUnsubscribedAuthor = false;
 		}
-
+		
+		if(hasUnsubscribedAuthor || (subscribedAuthors.length === 0 && currentAuthors.length > 0)){
+			shouldShowPopup = true;
+		}
+	}
+	
+	// For non-post pages or manual segmentation: use original cookie-based logic (show only once)
+	if(!shouldShowPopup){
+		if(PWAforwpreadCookie("pn_notification_block")==null){
+			const pageAccessedByReload = window.history.length;
+			if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
+				return false;
+			}
+			shouldShowPopup = true;
+		}
+	}
+	
+	if(shouldShowPopup){
 		var popup_show_afternseconds = 1000;
 		if (pnScriptSetting.popup_show_afternseconds) {
 			popup_show_afternseconds = (parseInt(pnScriptSetting.popup_show_afternseconds) * 1000);
 		}
 		var wrapper = document.getElementsByClassName("pn-wrapper");
 		setTimeout(function() {
-			if(wrapper && wrapper[0]){ wrapper[0].style.display="flex"; }
-	   }, pnScriptSetting.popup_show_afternseconds);
+			if(wrapper && wrapper[0]){ 
+				wrapper[0].style.display="flex"; 
+				
+				// For posts with auto-segmentation: always use popup_banner_message_subsequent
+				var pnMsgElement = document.querySelector('.pn-msg');
+				if(pnMsgElement && (pnScriptSetting.auto_segment_enabled || false) && isPostPage){
+					var subsequentMsg = pnMsgElement.getAttribute('data-subsequent-message');
+					if(subsequentMsg && pnScriptSetting.popup_banner_message_subsequent){
+						pnMsgElement.textContent = subsequentMsg;
+					}
+				}
+			}
+	   }, popup_show_afternseconds);
 	}
 	document.getElementById("pn-activate-permission_link_nothanks").addEventListener("click", function(){
 		var date = new Date;
@@ -100,10 +155,17 @@ function pushnotification_load_messaging(reg){
 			localStorage.setItem('pn_notification_block',true);
 			localStorage.setItem('pn_notification_block_expiry',date.getTime());
 			localStorage.getItem('notification_permission','granted');
-			if(push_notification_isTokenSentToServer()){
-				console.log('Token already saved');
-			}else{
+			
+			// With auto-segmentation enabled, always allow subscription to new categories/authors
+			var autoSegmentEnabled = pnScriptSetting.auto_segment_enabled || false;
+			if(autoSegmentEnabled){
 				push_notification_getRegToken();
+			} else {
+				if(push_notification_isTokenSentToServer()){
+					console.log('Token already saved');
+				}else{
+					push_notification_getRegToken();
+				}
 			}                                   
 		}).catch(function(err) {
 			if(Notification && Notification.permission=='denied'){
@@ -192,14 +254,72 @@ function pn_get_checket_cats(item, index){
 	}	
 }
 
+// Check if current post has different authors than subscribed authors (ignore categories)
+function push_notification_hasNewCategoriesAuthors(){
+	var autoSegmentEnabled = pnScriptSetting.auto_segment_enabled || false;
+	if(!autoSegmentEnabled) return false;
+	
+	// Get all subscribed authors (keep track of all, not just last)
+	var subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+	var currentAuthors = pnScriptSetting.auto_authors || [];
+	
+	// Convert to arrays if not already
+	if(!Array.isArray(subscribedAuthors)) subscribedAuthors = [];
+	if(!Array.isArray(currentAuthors)) currentAuthors = [];
+	
+	// Check if any current author has not been subscribed to yet
+	for(var i = 0; i < currentAuthors.length; i++){
+		var currentAuthor = String(currentAuthors[i]);
+		if(subscribedAuthors.indexOf(currentAuthor) === -1){
+			return true; // Found an unsubscribed author
+		}
+	}
+	
+	return false; // All authors already subscribed
+}
+
 function push_notification_saveToken(currentToken){
   var xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
 	  if (this.readyState == 4 && this.status == 200) {
-		if(this.responseText.status==200){
+		var response = {};
+		try {
+			response = JSON.parse(this.responseText);
+		} catch(e) {
+			response = this.responseText;
+		}
+		if(response.status==200){
+			// Store all subscribed categories and authors for auto-segmentation (keep track of all)
+			var autoSegmentEnabled = pnScriptSetting.auto_segment_enabled || false;
+			if(autoSegmentEnabled){
+				// Get existing subscribed items
+				var subscribedCats = JSON.parse(localStorage.getItem('pn_subscribed_categories') || '[]');
+				var subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+				
+				// Add current categories and authors
+				var currentCats = pnScriptSetting.auto_categories || [];
+				var currentAuthors = pnScriptSetting.auto_authors || [];
+				
+				// Merge and remove duplicates
+				for(var i = 0; i < currentCats.length; i++){
+					if(subscribedCats.indexOf(currentCats[i]) === -1){
+						subscribedCats.push(currentCats[i]);
+					}
+				}
+				for(var i = 0; i < currentAuthors.length; i++){
+					var authorId = String(currentAuthors[i]);
+					if(subscribedAuthors.indexOf(authorId) === -1){
+						subscribedAuthors.push(authorId);
+					}
+				}
+				
+				// Store updated lists
+				localStorage.setItem('pn_subscribed_categories', JSON.stringify(subscribedCats));
+				localStorage.setItem('pn_subscribed_authors', JSON.stringify(subscribedAuthors));
+			}
 			push_notification_setTokenSentToServer(true);
 		}
-		console.log(this.responseText);
+		console.log(response);
 	  }
 	};
 	// Check if auto-segmentation is enabled

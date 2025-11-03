@@ -554,6 +554,13 @@ class Push_Notification_Admin{
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
 			add_settings_field(
+				'pn_key_popup_message_subsequent',								// ID
+				esc_html__('Popup Banner Message (Auto Segmentation)', 'push-notification'),// Title
+				array( $this, 'pn_key_banner_message_subsequent_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
 				'pn_key_popup_accept_btn',								// ID
 				esc_html__('Popup Banner Accept', 'push-notification'),// Title
 				array( $this, 'pn_key_banner_accept_btn_callback'),// Callback
@@ -1601,6 +1608,10 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 	public function pn_key_banner_message_callback(){		
 		PN_Field_Generator::get_input('popup_banner_message', 'popup_banner_message_id');
 	}
+	public function pn_key_banner_message_subsequent_callback(){		
+		PN_Field_Generator::get_input('popup_banner_message_subsequent', 'popup_banner_message_subsequent_id');
+		echo "<p class='description'>".esc_html__('This message will be shown on 2nd and subsequent subscription popups when auto-segmentation is enabled', 'push-notification')."</p>";
+	}
 
 	public function pn_key_popup_display_settings_title_callback(){		
 		PN_Field_Generator::get_input_color('popup_display_setings_title_color', 'popup_display_setings_title_color_id', 'my-color-field');
@@ -2245,8 +2256,8 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 			$category_name[] = $category_detail[$i]->slug;
 		}
 		$category = '';
-		if(!empty($category_name)){
-			$category = implode(',',$category_name);
+		if( !empty($category_name) && $push_notification_settings['on_category'] == 1 && is_array($category_name)){
+			$category = implode(',',$category_name);	
 		} 
 		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
@@ -2507,6 +2518,7 @@ function push_notification_settings(){
 		'posttypes'=> array("post","page"),		
 		'notification_position'=> 'bottom-left',
 		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
+		'popup_banner_message_subsequent'=> esc_html__('Subscribe to this author for notifications', 'push-notification'),
 		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
 		'popup_banner_decline_btn'=> esc_html__('No thanks', 'push-notification'),
 		'notification_popup_show_again'=>'30',

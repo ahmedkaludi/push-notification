@@ -42,7 +42,7 @@ class Push_Notification_Frontend{
 				}
 			}
 			if($addNotification){
-				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
+				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') , 5);
 
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
 				add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
@@ -134,6 +134,7 @@ class Push_Notification_Frontend{
 		add_action('wp_enqueue_scripts', array($this,'pn_enqueue_scripts'));
 		add_action('wp_footer', array($this,'pn_enqueue_ajax_pagination_script'));
 		add_shortcode('pn_campaigns', array($this,'pn_campaigns_shortcode'));
+		add_shortcode('pn_subscribe', array($this,'pn_subscribe_shortcode'));
 		add_action('wp_ajax_pn_get_compaigns_front', array( $this, 'pn_get_compaigns_front' ));
 	}
 
@@ -482,9 +483,384 @@ class Push_Notification_Frontend{
 		}         
 	}
 
-
-
-
+	function pn_subscribe_shortcode($atts) {
+		$atts = shortcode_atts(array(
+			'authors' => '',
+			'categories' => '',
+			'text' => esc_html__('Subscribe for notifications', 'push-notification'),
+		), $atts, 'pn_subscribe');
+		
+		$settings = push_notification_settings();
+		$segmentation_type = isset($settings['segmentation_type']) ? $settings['segmentation_type'] : 'manual';
+		$auto_segment_enabled = ($segmentation_type == 'auto');
+		
+		// Shortcode only works if auto-segmentation is enabled
+		if(!$auto_segment_enabled){
+			return ''; // Return empty if segmentation is not enabled
+		}
+		
+		// Get current post author if on a post/page
+		$current_author = '';
+		$current_categories = array();
+		if(is_single() || is_page()){
+			global $post;
+			if($post){
+				$current_author = $post->post_author;
+				$post_categories = get_the_category($post->ID);
+				if(!empty($post_categories)){
+					foreach($post_categories as $category){
+						$current_categories[] = $category->slug;
+					}
+				}
+			}
+		}
+		
+		// Use attributes if provided, otherwise use current post author/categories
+		$subscribe_authors = array();
+		$subscribe_categories = array();
+		
+		if(!empty($atts['authors'])){
+			// Parse authors attribute (comma-separated IDs)
+			$author_ids = array_map('trim', explode(',', $atts['authors']));
+			foreach($author_ids as $author_id){
+				if(is_numeric($author_id)){
+					$subscribe_authors[] = intval($author_id);
+				}
+			}
+		} else if($current_author){
+			// Default to current post author
+			$subscribe_authors[] = $current_author;
+		}
+		
+		if(!empty($atts['categories'])){
+			// Parse categories attribute (comma-separated slugs)
+			$cat_slugs = array_map('trim', explode(',', $atts['categories']));
+			foreach($cat_slugs as $cat_slug){
+				$subscribe_categories[] = $cat_slug;
+			}
+		} else if(!empty($current_categories)){
+			// Default to current post categories
+			$subscribe_categories = $current_categories;
+		}
+		
+		// If no authors/categories to subscribe to, return empty
+		if(empty($subscribe_authors) && empty($subscribe_categories)){
+			return '';
+		}
+		
+		// Generate unique ID for this button
+		$button_id = 'pn_subscribe_btn_' . wp_rand(1000, 9999);
+		$subscribed_text = esc_html__('Subscribed', 'push-notification');
+		
+		// Output button with JavaScript to trigger subscription
+		ob_start();
+		?>
+		<button id="<?php echo esc_attr($button_id); ?>" class="pn-subscribe-button" 
+				data-authors="<?php echo esc_attr(implode(',', $subscribe_authors)); ?>"
+				data-categories="<?php echo esc_attr(implode(',', $subscribe_categories)); ?>"
+				data-original-text="<?php echo esc_attr($atts['text']); ?>"
+				data-subscribed-text="<?php echo esc_attr($subscribed_text); ?>"
+				style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
+			<span class="pn-bell-icon" style="font-size: 16px;">🔔</span>
+			<span class="pn-button-text"><?php echo esc_html($atts['text']); ?></span>
+		</button>
+		<script>
+		(function(){
+			var button = document.getElementById('<?php echo esc_js($button_id); ?>');
+			var buttonTextEl = button ? button.querySelector('.pn-button-text') : null;
+			var isSubscribing = false;
+			
+			if(button){
+				if(buttonTextEl){
+				// Store reference to this button for subscription callback
+				if(typeof window.pnSubscribeButtons === 'undefined'){
+					window.pnSubscribeButtons = {};
+				}
+				window.pnSubscribeButtons['<?php echo esc_js($button_id); ?>'] = button;
+				
+				button.addEventListener('click', function(){
+					if(isSubscribing || this.classList.contains('pn-subscribed')){
+						return; // Already subscribed or subscribing
+					}
+					
+					// Get authors and categories from button data
+					var authors = this.getAttribute('data-authors').split(',').filter(function(a){ return a; });
+					var categories = this.getAttribute('data-categories').split(',').filter(function(c){ return c; });
+					
+					// Check if messaging is available
+					if(typeof messaging !== 'undefined'){
+						if(messaging){
+						isSubscribing = true;
+						this.disabled = true;
+						this.style.opacity = '0.7';
+						
+						// Temporarily update pnScriptSetting with authors/categories
+						if(typeof pnScriptSetting !== 'undefined'){
+							pnScriptSetting.auto_authors = authors.map(function(a){ return parseInt(a); });
+							pnScriptSetting.auto_categories = categories;
+							
+							// Store original saveToken function and create wrapper
+							var originalSaveToken = typeof window.push_notification_saveToken === 'function' ? window.push_notification_saveToken : null;
+							var buttonId = '<?php echo esc_js($button_id); ?>';
+							var buttonIsSubscribing = isSubscribing;
+							var xhrErrorHandler = null; // Declare in outer scope for cleanup
+							
+							// Temporarily override push_notification_saveToken to catch response
+							window.push_notification_saveToken = function(currentToken){
+								// Create custom XMLHttpRequest wrapper
+								var xhttp = new XMLHttpRequest();
+								xhttp.onreadystatechange = function() {
+									if (this.readyState == 4) {
+										var response = {};
+										try {
+											response = JSON.parse(this.responseText);
+										} catch(e) {
+											response = this.responseText;
+										}
+										
+										if(response.status == 200){
+											// Store all subscribed categories and authors for auto-segmentation (keep track of all)
+											var autoSegmentEnabled = pnScriptSetting.auto_segment_enabled || false;
+											if(autoSegmentEnabled){
+												// Get existing subscribed items
+												var subscribedCats = JSON.parse(localStorage.getItem('pn_subscribed_categories') || '[]');
+												var subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+												
+												// Add current categories and authors
+												var currentCats = pnScriptSetting.auto_categories || [];
+												var currentAuthors = pnScriptSetting.auto_authors || [];
+												
+												// Merge and remove duplicates
+												for(var i = 0; i < currentCats.length; i++){
+													if(subscribedCats.indexOf(currentCats[i]) === -1){
+														subscribedCats.push(currentCats[i]);
+													}
+												}
+												for(var i = 0; i < currentAuthors.length; i++){
+													var authorId = String(currentAuthors[i]);
+													if(subscribedAuthors.indexOf(authorId) === -1){
+														subscribedAuthors.push(authorId);
+													}
+												}
+												
+												// Store updated lists
+												localStorage.setItem('pn_subscribed_categories', JSON.stringify(subscribedCats));
+												localStorage.setItem('pn_subscribed_authors', JSON.stringify(subscribedAuthors));
+											}
+											if(typeof push_notification_setTokenSentToServer === 'function'){
+												push_notification_setTokenSentToServer(true);
+											}
+											
+											// Update button to subscribed state
+											var btn = window.pnSubscribeButtons[buttonId];
+											if(btn){
+												btn.classList.add('pn-subscribed');
+												btn.disabled = false;
+												btn.style.opacity = '1';
+												btn.style.backgroundColor = '#28a745';
+												var textEl = btn.querySelector('.pn-button-text');
+												var subscribedText = btn.getAttribute('data-subscribed-text');
+												if(textEl){
+													if(subscribedText){
+														textEl.textContent = subscribedText;
+													}
+												}
+												isSubscribing = false;
+											}
+										} else {
+											// Restore button state on error
+											var btn = window.pnSubscribeButtons[buttonId];
+											if(btn){
+												btn.disabled = false;
+												btn.style.opacity = '1';
+												isSubscribing = false;
+											}
+										}
+										
+										// Restore original function after response is handled
+										if(originalSaveToken){
+											window.push_notification_saveToken = originalSaveToken;
+										}
+										
+										// Clear timeout if response received
+										if(xhrErrorHandler !== null){
+											clearTimeout(xhrErrorHandler);
+											xhrErrorHandler = null;
+										}
+									}
+								};
+								
+								// Get auto-segmentation data
+								var autoSegmentEnabled = pnScriptSetting.auto_segment_enabled || false;
+								var optioArr = [];
+								var optioArrAuthor = [];
+								
+								if (autoSegmentEnabled) {
+									optioArr = pnScriptSetting.auto_categories || [];
+									optioArrAuthor = pnScriptSetting.auto_authors || [];
+								} else {
+									const optElm = document.querySelectorAll("#pn-categories-checkboxes input:checked");
+									for (var i=0; i <=  optElm.length - 1 ; i++) {
+										optioArr.push(optElm[i].value);
+									}
+									const optElmAuthor = document.querySelectorAll("#pn-author-checkboxes input:checked");
+									for (var i=0; i <=  optElmAuthor.length - 1 ; i++) {
+										optioArrAuthor.push(optElmAuthor[i].value);
+									}
+								}
+								
+								var authorArraystr = [...optioArrAuthor].join(',');
+								var catArraystr = [...optioArr].join(',');
+								var grabOs = typeof pushnotificationFCMGetOS === 'function' ? pushnotificationFCMGetOS() : '';
+								var browserClient = typeof pushnotificationFCMbrowserclientDetector === 'function' ? pushnotificationFCMbrowserclientDetector() : '';
+								var currentUrl = window.location.href;
+								
+								xhttp.onerror = function(){
+									// Handle network errors
+									var btn = window.pnSubscribeButtons[buttonId];
+									if(btn){
+										btn.disabled = false;
+										btn.style.opacity = '1';
+										isSubscribing = false;
+									}
+									if(originalSaveToken){
+										window.push_notification_saveToken = originalSaveToken;
+									}
+									if(xhrErrorHandler !== null){
+										clearTimeout(xhrErrorHandler);
+										xhrErrorHandler = null;
+									}
+								};
+								
+								xhttp.open("POST", pnScriptSetting.ajax_url, true);
+								xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+								
+								// Build form data properly to avoid HTML encoding issues
+								var ampersand = String.fromCharCode(38); // Use character code to avoid HTML encoding
+								var params = [];
+								params.push('token_id=' + encodeURIComponent(currentToken));
+								params.push('category=' + encodeURIComponent(catArraystr));
+								params.push('author=' + encodeURIComponent(authorArraystr));
+								params.push('user_agent=' + encodeURIComponent(browserClient));
+								params.push('os=' + encodeURIComponent(grabOs));
+								params.push('nonce=' + encodeURIComponent(pnScriptSetting.nonce));
+								params.push('action=pn_register_subscribers');
+								params.push('url=' + encodeURIComponent(currentUrl));
+								xhttp.send(params.join(ampersand));
+								
+								// Set timeout to restore function if no response after 30 seconds
+								xhrErrorHandler = setTimeout(function(){
+									var btn = window.pnSubscribeButtons[buttonId];
+									if(btn){
+										if(!btn.classList.contains('pn-subscribed')){
+										btn.disabled = false;
+										btn.style.opacity = '1';
+										isSubscribing = false;
+										if(originalSaveToken){
+											window.push_notification_saveToken = originalSaveToken;
+										}
+										}
+									}
+								}, 30000);
+							};
+							
+							// Directly request permission and subscribe (no popup)
+							messaging.requestPermission().then(function() {
+								console.log("Notification permission granted.");
+								if(typeof push_notification_getRegToken === 'function'){
+									push_notification_getRegToken();
+								} else {
+									// If getRegToken is not available, restore button and function
+									var btn = window.pnSubscribeButtons[buttonId];
+									if(btn){
+										btn.disabled = false;
+										btn.style.opacity = '1';
+										isSubscribing = false;
+									}
+									if(originalSaveToken){
+										window.push_notification_saveToken = originalSaveToken;
+									}
+								}
+							}).catch(function(err) {
+								console.log("Unable to get permission to notify.", err);
+								// Restore button state on error
+								var btn = window.pnSubscribeButtons[buttonId];
+								if(btn){
+									btn.disabled = false;
+									btn.style.opacity = '1';
+									isSubscribing = false;
+								}
+								// Restore original function
+								if(originalSaveToken){
+									window.push_notification_saveToken = originalSaveToken;
+								}
+							});
+						}
+						}
+					} else {
+						alert('<?php echo esc_js(__('Push notifications are not available in this browser.', 'push-notification')); ?>');
+					}
+				});
+				
+				// Check if already subscribed on page load
+				(function checkSubscriptionStatus(){
+					var authors = button.getAttribute('data-authors').split(',').filter(function(a){ return a; });
+					
+					// Check if token has been sent to server (user has subscribed before)
+					var tokenSent = localStorage.getItem('sentToServer') === '1';
+					
+					// Check if auto-segmentation is enabled and authors are in subscribed list
+					var allSubscribed = false;
+					if(typeof pnScriptSetting !== 'undefined'){
+						if(pnScriptSetting.auto_segment_enabled){
+						var subscribedAuthors = JSON.parse(localStorage.getItem('pn_subscribed_authors') || '[]');
+						if(authors.length > 0){
+							allSubscribed = true;
+							for(var i = 0; i < authors.length; i++){
+								if(subscribedAuthors.indexOf(String(authors[i])) === -1){
+									allSubscribed = false;
+									break;
+								}
+							}
+						}
+						}
+					}
+					
+					// Show subscribed state if:
+					// 1. User has subscribed before (token sent) AND
+					// 2. Either all authors in this button are subscribed, OR there are no specific authors (general subscription)
+					if(tokenSent){
+						if(authors.length === 0 || allSubscribed){
+							button.classList.add('pn-subscribed');
+							button.style.backgroundColor = '#28a745';
+							var subscribedText = button.getAttribute('data-subscribed-text');
+							if(buttonTextEl){
+								if(subscribedText){
+									buttonTextEl.textContent = subscribedText;
+								}
+							}
+						}
+					} else if(allSubscribed){
+						if(authors.length > 0){
+						// If not token sent but authors are subscribed (edge case)
+						button.classList.add('pn-subscribed');
+						button.style.backgroundColor = '#28a745';
+						var subscribedText = button.getAttribute('data-subscribed-text');
+						if(buttonTextEl){
+							if(subscribedText){
+								buttonTextEl.textContent = subscribedText;
+							}
+						}
+						}
+					}
+				})();
+				}
+			}
+		})();
+		</script>
+		<?php
+		return ob_get_clean();
+	}
 
 	public static function update_autoptimize_exclude( $values, $option ){
 		if(!stripos($values, PUSH_NOTIFICATION_PLUGIN_URL.'assets/public/application.min.js')){
@@ -654,7 +1030,8 @@ class Push_Notification_Frontend{
 					'segmentation_type' => $segmentation_type,
 					'auto_segment_enabled' => $auto_segment_enabled,
 					'auto_categories' => $auto_categories,
-					'auto_authors' => $auto_authors
+					'auto_authors' => $auto_authors,
+					'popup_banner_message_subsequent' => isset($pn_Settings['popup_banner_message_subsequent']) ? $pn_Settings['popup_banner_message_subsequent'] : esc_html__('Subscribe to this author for notifications', 'push-notification')
 					);
         return $settings;
 	}
@@ -1212,9 +1589,23 @@ class Push_Notification_Frontend{
 					// phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage
 					echo '<span style=" top: 0; vertical-align: top; "><img src="'.esc_attr($settings['notification_pop_up_icon']).'" style=" max-width: 70px;"></span>';
 				}
+			   // Check if this is a subsequent subscription (user has already subscribed before)
+			   $is_subsequent_popup = false;
+			   if($auto_segment_enabled && is_single() || is_page()){
+				   // Check if user has subscribed to any authors before
+				   // We'll use JavaScript to determine this on the frontend
+				   $is_subsequent_popup = true; // JavaScript will handle the actual check
+			   }
+			   
+			   // Determine which message to show (will be finalized by JavaScript)
+			   $popup_message = $settings['popup_banner_message'];
+			   if($auto_segment_enabled && isset($settings['popup_banner_message_subsequent'])){
+				   $popup_message = $settings['popup_banner_message_subsequent'];
+			   }
+			   
 			   echo '<span class="pn-txt-wrap pn-select-box">
 			   		<div class="pn-msg-box">
-				   		<span class="pn-msg">'.esc_html($settings['popup_banner_message']).'</span>';
+				   		<span class="pn-msg" data-first-message="'.esc_attr($settings['popup_banner_message']).'" data-subsequent-message="'.esc_attr(isset($settings['popup_banner_message_subsequent']) ? $settings['popup_banner_message_subsequent'] : $settings['popup_banner_message']).'">'.esc_html($popup_message).'</span>';
 				   		if((isset($settings['notification_botton_position']) && $settings['notification_botton_position'] != 'bottom') || !isset($settings['notification_botton_position'])){
 				   			echo '<span class="pn-btns">
 				   			<span class="btn act" id="pn-activate-permission_link" tabindex="0" role="link" aria-label="ok link">
@@ -2305,9 +2696,18 @@ class Push_Notification_Frontend{
 	
 }
 function push_notification_frontend_class(){
-	if(!is_admin() || wp_doing_ajax()){
+	if(!is_admin() || wp_doing_ajax() || (defined('REST_REQUEST') && REST_REQUEST)){
 		$notificationFrontEnd = new Push_Notification_Frontend(); 
 	}
 	add_filter( "option_autoptimize_js_exclude", array('Push_Notification_Frontend', 'update_autoptimize_exclude') , 10, 2);
 }
 push_notification_frontend_class();
+
+add_filter( 'pwaforwp_manifest', function( $manifest ) {
+	$settings = push_notification_settings();
+	if( isset($settings) && isset($settings['notification_feature']) && $settings['notification_feature'] == 1 && isset($settings['notification_options']) && $settings['notification_options']=='pushnotifications_io'){
+		$config = Push_Notification_Frontend::pn_pwa_manifest_config();
+		$manifest = array_merge($manifest, $config);
+		return $manifest;			
+	}
+} );
