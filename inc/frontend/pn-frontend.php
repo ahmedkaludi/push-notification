@@ -769,37 +769,95 @@ class Push_Notification_Frontend{
 								}, 30000);
 							};
 							
-							// Directly request permission and subscribe (no popup)
-							messaging.requestPermission().then(function() {
-								console.log("Notification permission granted.");
-								if(typeof push_notification_getRegToken === 'function'){
-									push_notification_getRegToken();
-								} else {
-									// If getRegToken is not available, restore button and function
-									var btn = window.pnSubscribeButtons[buttonId];
-									if(btn){
-										btn.disabled = false;
-										btn.style.opacity = '1';
-										isSubscribing = false;
+							// Wait for service worker to be registered, then request permission and subscribe
+							var attemptSubscription = function(){
+								if(typeof messaging !== 'undefined' && messaging){
+									// Check if service worker is registered
+									if(navigator.serviceWorker){
+										navigator.serviceWorker.ready.then(function(registration){
+											// Service worker is ready, now request permission
+											if(typeof messaging.requestPermission === 'function'){
+												messaging.requestPermission().then(function() {
+													console.log("Notification permission granted.");
+													if(typeof push_notification_getRegToken === 'function'){
+														push_notification_getRegToken();
+													} else {
+														// If getRegToken is not available, restore button and function
+														var btn = window.pnSubscribeButtons[buttonId];
+														if(btn){
+															btn.disabled = false;
+															btn.style.opacity = '1';
+															isSubscribing = false;
+														}
+														if(originalSaveToken){
+															window.push_notification_saveToken = originalSaveToken;
+														}
+													}
+												}).catch(function(err) {
+													console.log("Unable to get permission to notify.", err);
+													// Restore button state on error
+													var btn = window.pnSubscribeButtons[buttonId];
+													if(btn){
+														btn.disabled = false;
+														btn.style.opacity = '1';
+														isSubscribing = false;
+													}
+													// Restore original function
+													if(originalSaveToken){
+														window.push_notification_saveToken = originalSaveToken;
+													}
+												});
+											} else {
+												// Fallback: try getToken directly
+												if(typeof push_notification_getRegToken === 'function'){
+													push_notification_getRegToken();
+												} else {
+													var btn = window.pnSubscribeButtons[buttonId];
+													if(btn){
+														btn.disabled = false;
+														btn.style.opacity = '1';
+														isSubscribing = false;
+													}
+													if(originalSaveToken){
+														window.push_notification_saveToken = originalSaveToken;
+													}
+												}
+											}
+										}).catch(function(err){
+											console.log("Service worker not ready:", err);
+											// If service worker fails, try direct token request
+											if(typeof push_notification_getRegToken === 'function'){
+												push_notification_getRegToken();
+											} else {
+												var btn = window.pnSubscribeButtons[buttonId];
+												if(btn){
+													btn.disabled = false;
+													btn.style.opacity = '1';
+													isSubscribing = false;
+												}
+												if(originalSaveToken){
+													window.push_notification_saveToken = originalSaveToken;
+												}
+											}
+										});
+									} else {
+										// No service worker support
+										var btn = window.pnSubscribeButtons[buttonId];
+										if(btn){
+											btn.disabled = false;
+											btn.style.opacity = '1';
+											isSubscribing = false;
+										}
+										if(originalSaveToken){
+											window.push_notification_saveToken = originalSaveToken;
+										}
+										alert('<?php echo esc_js(__('Service Worker is required for push notifications.', 'push-notification')); ?>');
 									}
-									if(originalSaveToken){
-										window.push_notification_saveToken = originalSaveToken;
-									}
 								}
-							}).catch(function(err) {
-								console.log("Unable to get permission to notify.", err);
-								// Restore button state on error
-								var btn = window.pnSubscribeButtons[buttonId];
-								if(btn){
-									btn.disabled = false;
-									btn.style.opacity = '1';
-									isSubscribing = false;
-								}
-								// Restore original function
-								if(originalSaveToken){
-									window.push_notification_saveToken = originalSaveToken;
-								}
-							});
+							};
+							
+							// Wait a bit for service worker to be registered by main app.js
+							setTimeout(attemptSubscription, 500);
 						}
 						}
 					} else {
@@ -906,7 +964,7 @@ class Push_Notification_Frontend{
 					for(var btnIndex = 0; btnIndex < allButtons.length; btnIndex++){
 						var btn = allButtons[btnIndex];
 						if(btn.classList.contains('pn-subscribed')){
-							continue; // Already subscribed
+							continue; 
 						}
 						
 						var btnAuthors = btn.getAttribute('data-authors').split(',').filter(function(a){ return a; });
@@ -2812,12 +2870,3 @@ function push_notification_frontend_class(){
 	add_filter( "option_autoptimize_js_exclude", array('Push_Notification_Frontend', 'update_autoptimize_exclude') , 10, 2);
 }
 push_notification_frontend_class();
-
-add_filter( 'pwaforwp_manifest', function( $manifest ) {
-	$settings = push_notification_settings();
-	if( isset($settings) && isset($settings['notification_feature']) && $settings['notification_feature'] == 1 && isset($settings['notification_options']) && $settings['notification_options']=='pushnotifications_io'){
-		$config = Push_Notification_Frontend::pn_pwa_manifest_config();
-		$manifest = array_merge($manifest, $config);
-		return $manifest;			
-	}
-} );
