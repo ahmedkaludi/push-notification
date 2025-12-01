@@ -1,3 +1,7 @@
+= 1.46 (01 December 2025) = 
+* Added: Promotion Banner BFCM #177
+* Tested: WordPress version upto 6.9
+
 = 1.45 (23 October 2025) = 
 * Fixed: Push notification changes were not reflected in the multisite setup. #168
 * Fixed: Pushnotification is not working #170
