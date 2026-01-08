@@ -143,11 +143,10 @@ class Push_Notification_Admin{
 
 			wp_enqueue_media();						
 			wp_enqueue_style( 'wp-color-picker' );
-   		 	wp_enqueue_script( 'push_notification_script',  PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array( 'wp-color-picker' ), PUSH_NOTIFICATION_PLUGIN_VERSION, true );
-			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery', 'wp-color-picker'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-style{$min}.css", array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
 			wp_enqueue_style('push-notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all' );
-			wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array(),PUSH_NOTIFICATION_PLUGIN_VERSION, true );
+			wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array( 'jquery' ),PUSH_NOTIFICATION_PLUGIN_VERSION, true );
 			wp_enqueue_script('select2-extended-script', PUSH_NOTIFICATION_PLUGIN_URL. 'assets/select2-extended.min.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
 			wp_enqueue_script('pn-meteremoji', PUSH_NOTIFICATION_PLUGIN_URL."assets/meterEmoji.min.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);

@@ -363,31 +363,102 @@ class Push_Notification_Frontend{
 	function pn_enqueue_ajax_pagination_script() {
 		?>
 		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				$("body").on("click", ".pn_js_custom_pagination", function(e) {
-					e.preventDefault();
-					var page = $(this).attr('page');
-					var atts = $('#pn_campaings_custom_div').attr('attr');
-					var shortcode_attr = JSON.parse(atts);
-					$.ajax({
-						url: pn_setings.ajaxurl,
-						type: "post",
-						dataType: 'html',
-						data: {
-							action: 'pn_get_compaigns_front',
-							page: page,
-							nonce: pn_setings.remote_nonce,
-							attr: shortcode_attr
-						},
-						success: function(response) {
-							$("#pn_campaings_custom_div").html(response);
-						},
-						error: function() {
-							alert("Something went wrong.");
+			(function() {
+				'use strict';
+				
+				// Wait for DOM to be ready
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', initPagination);
+				} else {
+					initPagination();
+				}
+				
+				function initPagination() {
+					// Null check for pn_setings
+					if (typeof pn_setings === 'undefined' || !pn_setings) {
+						console.error('pn_setings is not defined');
+						return;
+					}
+					
+					// Null check for required pn_setings properties
+					if (!pn_setings.ajaxurl || !pn_setings.remote_nonce) {
+						console.error('pn_setings.ajaxurl or pn_setings.remote_nonce is missing');
+						return;
+					}
+					
+					// Event delegation on body
+					document.body.addEventListener('click', function(e) {
+						// Check if clicked element or its parent has the pagination class
+						var target = e.target.closest('.pn_js_custom_pagination');
+						if (!target) {
+							return;
 						}
+						
+						e.preventDefault();
+						
+						// Null check for page attribute
+						var page = target.getAttribute('page');
+						if (!page) {
+							console.error('Page attribute is missing');
+							return;
+						}
+						
+						// Null check for campaigns div
+						var campaignsDiv = document.getElementById('pn_campaings_custom_div');
+						if (!campaignsDiv) {
+							console.error('pn_campaings_custom_div element not found');
+							return;
+						}
+						
+						// Null check for attr attribute
+						var atts = campaignsDiv.getAttribute('attr');
+						if (!atts) {
+							console.error('attr attribute is missing');
+							return;
+						}
+						
+						// Parse JSON with error handling
+						var shortcode_attr;
+						try {
+							shortcode_attr = JSON.parse(atts);
+						} catch (error) {
+							console.error('Failed to parse JSON from attr attribute:', error);
+							alert('Invalid data format.');
+							return;
+						}
+						
+						// Prepare form data
+						var formData = new FormData();
+						formData.append('action', 'pn_get_compaigns_front');
+						formData.append('page', page);
+						formData.append('nonce', pn_setings.remote_nonce);
+						formData.append('attr', JSON.stringify(shortcode_attr));
+						
+						// Make AJAX request using fetch API
+						fetch(pn_setings.ajaxurl, {
+							method: 'POST',
+							body: formData
+						})
+						.then(function(response) {
+							if (!response.ok) {
+								throw new Error('Network response was not ok');
+							}
+							return response.text();
+						})
+						.then(function(html) {
+							if (html && campaignsDiv) {
+								campaignsDiv.innerHTML = html;
+							} else {
+								throw new Error('Empty response received');
+							}
+						})
+						.catch(function(error) {
+							console.error('Error fetching campaigns:', error);
+							alert('Something went wrong.');
+						});
 					});
-				});
-			});
+				}
+			})();
 		</script>
 		<?php
 	}
