@@ -3,7 +3,6 @@ var config=pnScriptSetting.pn_config;
 if (!firebase.apps.length) {
 	firebase.initializeApp(config);	
 }       
-firebase.analytics();
 if(!messaging)
 {
 	var messaging = firebase.messaging();
