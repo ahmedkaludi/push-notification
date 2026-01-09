@@ -1,3 +1,8 @@
+= 1.47 (09 January 2026) = 
+* Fixed: GA Cookies Rejected Due to Invalid Domain from Plugin’s analytics.js Script #178
+* Fixed: Push notificaion is not working when theme does not have wp_footer() #176
+* Fixed: Push notifications loads before jQuery creating error #173
+
 = 1.46 (01 December 2025) = 
 * Added: Promotion Banner BFCM #177
 * Tested: WordPress version upto 6.9

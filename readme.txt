@@ -3,7 +3,7 @@ Contributors: magazine3
 Requires at least: 3.0  
 Tested up to: 6.9 
 Requires PHP: 5.6.20 
-Stable tag: 1.46 
+Stable tag: 1.47
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
@@ -101,6 +101,15 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 * Tested: WordPress version upto 6.9
 
 == Changelog ==
+= 1.47 (09 January 2026) = 
+* Fixed: GA Cookies Rejected Due to Invalid Domain from Plugin’s analytics.js Script #178
+* Fixed: Push notificaion is not working when theme does not have wp_footer() #176
+* Fixed: Push notifications loads before jQuery creating error #173
+
+= 1.46 (01 December 2025) = 
+* Added: Promotion Banner BFCM #177
+* Tested: WordPress version upto 6.9
+
 = 1.45 (23 October 2025) = 
 * Fixed: Push notification changes were not reflected in the multisite setup. #168
 * Fixed: Pushnotification is not working #170
