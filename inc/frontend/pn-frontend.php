@@ -33,6 +33,10 @@ class Push_Notification_Frontend{
 		){
         	return false;
         }
+		// Get banner location setting
+		$settings = push_notification_settings();
+		$banner_location = isset($settings['banner_location']) ? $settings['banner_location'] : 'footer';
+		
 		if( function_exists('pwaforwp_init_plugin') ){
 			$addNotification = false;
 			if( function_exists('pwaforwp_defaultSettings') ) {
@@ -45,12 +49,12 @@ class Push_Notification_Frontend{
 				add_filter( 'pwaforwp_manifest', array($this, 'manifest_add_gcm_id') );
 
 				add_action("wp_enqueue_scripts", array($this, 'pwaforwp_enqueue_pn_scripts'), 34 );
-				add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
+				$this->pn_add_banner_hook($banner_location);
 			}
 		}elseif(function_exists('superpwa_addons_status')){
 			add_filter( 'superpwa_manifest', array($this, 'manifest_add_gcm_id') );
 			add_action("wp_enqueue_scripts", array($this, 'superpwa_enqueue_pn_scripts'), 34 );
-			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
+			$this->pn_add_banner_hook($banner_location);
 			add_filter( "superpwa_sw_template", array($this, 'superpwa_add_pn_swcode'),10,1);
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reasone: Not processing form
 		}elseif(function_exists('amp_is_enabled') && amp_is_enabled() && empty($_GET['noamp'])){			
@@ -60,7 +64,7 @@ class Push_Notification_Frontend{
 		}else{
 			//manifest
 			add_action('wp_head',array($this, 'manifest_add_homescreen'),1);
-			add_action("wp_footer", array($this, 'pn_notification_confirm_banner'), 34 );
+			$this->pn_add_banner_hook($banner_location);
 			//create manifest
 			add_action( 'rest_api_init', array( $this, 'register_manifest_rest_route' ) );
 			//ServiceWorker
@@ -1023,6 +1027,27 @@ class Push_Notification_Frontend{
 			$device = 'mobile';
 		}
 		return $device;
+	}
+
+	/**
+	 * Add banner hook based on selected location with fallback
+	 */
+	function pn_add_banner_hook($location = 'footer'){
+		switch($location){
+			case 'header':
+				// Hook to wp_head
+				add_action('wp_head', array($this, 'pn_notification_confirm_banner'), 999);
+				break;
+			case 'body':
+				// Hook to wp_body_open (WordPress 5.2+)
+				add_action('wp_body_open', array($this, 'pn_notification_confirm_banner'), 1);
+				break;
+			case 'footer':
+			default:
+				// Default: Hook to wp_footer
+				add_action('wp_footer', array($this, 'pn_notification_confirm_banner'), 34);
+				break;
+		}
 	}
 
 	function pn_notification_confirm_banner(){
