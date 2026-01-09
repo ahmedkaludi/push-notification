@@ -17,8 +17,7 @@ const messaging = firebase.messaging();
 		}else{
 			console.log('Pushnotification not supported ');
 		}
-	})
-firebase.analytics();	  
+	})  
 function pushnotification_load_messaging(reg){
   // [START refresh_token]
   // Callback fired if Instance ID token is updated.

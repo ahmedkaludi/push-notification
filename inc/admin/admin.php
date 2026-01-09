@@ -143,11 +143,10 @@ class Push_Notification_Admin{
 
 			wp_enqueue_media();						
 			wp_enqueue_style( 'wp-color-picker' );
-   		 	wp_enqueue_script( 'push_notification_script',  PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array( 'wp-color-picker' ), PUSH_NOTIFICATION_PLUGIN_VERSION, true );
-			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+			wp_enqueue_script('push_notification_script', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-script{$min}.js", array('jquery', 'wp-color-picker'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 			wp_enqueue_style('push-notification-style', PUSH_NOTIFICATION_PLUGIN_URL."assets/main-admin-style{$min}.css", array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all');
 			wp_enqueue_style('push-notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.css', array('dashboard'), PUSH_NOTIFICATION_PLUGIN_VERSION, 'all' );
-			wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array(),PUSH_NOTIFICATION_PLUGIN_VERSION, true );
+			wp_enqueue_script('push_notification_select2', PUSH_NOTIFICATION_PLUGIN_URL.'assets/select2.min.js', array( 'jquery' ),PUSH_NOTIFICATION_PLUGIN_VERSION, true );
 			wp_enqueue_script('select2-extended-script', PUSH_NOTIFICATION_PLUGIN_URL. 'assets/select2-extended.min.js', array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
 
 			wp_enqueue_script('pn-meteremoji', PUSH_NOTIFICATION_PLUGIN_URL."assets/meterEmoji.min.js", array('jquery'), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
@@ -585,6 +584,13 @@ class Push_Notification_Admin{
 				'pn_key_prompt_after_npageview',								// ID
 				esc_html__('Popup show after n pages view', 'push-notification'),// Title
 				array( $this, 'pn_key_popupshowafternpageview_callback'),// Callback
+				'push_notification_user_settings_section',	// Page slug
+				'push_notification_notification_settings_section'	// Settings Section ID
+			);
+			add_settings_field(
+				'pn_key_banner_location_select',								// ID
+				esc_html__('Popup Banner Load Location', 'push-notification'),// Title
+				array( $this, 'pn_key_banner_location_callback'),// Callback
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_notification_settings_section'	// Settings Section ID
 			);
@@ -1528,6 +1534,15 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 			'bottom-left'=> esc_html__('Bottom Left', 'push-notification'),
 		);
 		PN_Field_Generator::get_input_select('notification_position', 'bottom-left', $data, 'pn_push_on_publish', '');
+	}
+
+	public function pn_key_banner_location_callback(){		
+		$data = array(
+			'footer'=> esc_html__('Footer (Recommended)', 'push-notification'),
+			'body'=> esc_html__('Body', 'push-notification'),
+			'header'=> esc_html__('Header', 'push-notification'),
+		);
+		PN_Field_Generator::get_input_select('banner_location', 'footer', $data, 'pn_push_on_publish', '');
 	}
 
 	public function pn_display_popup_after_login_callback(){		
@@ -2506,6 +2521,7 @@ function push_notification_settings(){
 		'on_publish'=> 1,
 		'posttypes'=> array("post","page"),		
 		'notification_position'=> 'bottom-left',
+		'banner_location'=> 'footer',
 		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
 		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
 		'popup_banner_decline_btn'=> esc_html__('No thanks', 'push-notification'),
