@@ -129,7 +129,7 @@ class Push_Notification_Admin{
         $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
 					'pn_config'=> $messageConfig,
-					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
+					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1&v=".PUSH_NOTIFICATION_PLUGIN_VERSION),
 					"scope" => esc_url_raw(trailingslashit($link)),
 					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php'))
 					);

@@ -131,32 +131,37 @@ function pushnotification_load_messaging(){
 	  }
 	}
 	  messaging.onMessage(function(payload) {
-		  console.log('Message received. ', payload);
+		  console.log('Message received (foreground). ', payload);
   
 		  notificationTitle = payload.data.title;
 		  notificationOptions = {
-		  body: payload.data.body,
-		  icon: payload.data.icon,
-		  image: payload.data.image,
-		  vibrate: [100, 50, 100],
-		  data: {
-			  dateOfArrival: Date.now(),
-			  primarykey: payload.data.currentCampaign,
-			  url : payload.data.url
-			},
+			  body: payload.data.body,
+			  icon: payload.data.icon,
+			  image: payload.data.image,
+			  vibrate: [100, 50, 100],
+			  tag: 'pn-' + (payload.data.currentCampaign || Date.now()), // CRITICAL: Tag allows proper click tracking
+			  data: {
+				  dateOfArrival: Date.now(),
+				  primarykey: payload.data.currentCampaign,
+				  currentCampaign: payload.data.currentCampaign, // Store both for compatibility
+				  url: payload.data.url || payload.data.click_url // Handle both url and click_url
+			  },
 		  }
-		  var notification = new Notification(notificationTitle, notificationOptions); 
-			  notification.onclick = function(event) {
-			  event.preventDefault();
-			  window.open(payload.data.url, '_blank');
-			  
-			  var xhttp = new XMLHttpRequest();
-			  xhttp.open("POST", pnScriptSetting.ajax_url, true);
-	  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	  xhttp.send('campaign='+payload.data.currentCampaign+'&nonce='+pnScriptSetting.nonce+'&action=pn_noteclick_subscribers');
-			  
-			  notification.close();
-			  }
+		  
+		  // Use service worker's showNotification instead of new Notification()
+		  // This works in all contexts (PWA, mobile, desktop) and the service worker's
+		  // notificationclick handler will handle clicks automatically
+		  if ("serviceWorker" in navigator) {
+			  navigator.serviceWorker.ready.then(function(reg) {
+				  return reg.showNotification(notificationTitle, notificationOptions);
+			  }).then(function() {
+				  console.log("PN Success (foreground): Notification shown via service worker");
+			  }).catch(function(error) {
+				  console.error("PN Error (foreground): Failed to show notification via service worker", error);
+			  });
+		  } else {
+			  console.error("PN Error (foreground): Service Worker not supported");
+		  }
 	  });
 
 	  if (navigator.clearAppBadge) {
