@@ -3,7 +3,7 @@ Contributors: magazine3
 Requires at least: 3.0  
 Tested up to: 6.9 
 Requires PHP: 5.6.20 
-Stable tag: 1.47
+Stable tag: 1.48
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
@@ -96,11 +96,12 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 5. Compatibility section showing third-party plugin integration options.
 6. Visibility section for controlling where the subscription popup appears.
 
-= 1.46 (01 December 2025) = 
-* Added: Promotion Banner BFCM #177
-* Tested: WordPress version upto 6.9
-
 == Changelog ==
+= 1.48 (02 February 2026) = 
+Fixed : Campaign clicks are not working #157
+Fixed : Worked on Plugin Check issues
+Enhancement : Performance Improvement
+
 = 1.47 (09 January 2026) = 
 * Fixed: GA Cookies Rejected Due to Invalid Domain from Plugin’s analytics.js Script #178
 * Fixed: Push notificaion is not working when theme does not have wp_footer() #176
