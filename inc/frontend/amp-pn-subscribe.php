@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
 add_filter('pre_get_document_title', 'pn_serpage_name', 9999, 1);
 function pn_serpage_name($title){
 	$title = 'AMP Subscription';

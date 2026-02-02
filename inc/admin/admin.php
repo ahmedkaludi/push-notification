@@ -55,30 +55,59 @@ class Push_Notification_Admin{
 		}
 
 		// Validate permissions and nonce
-		if (!current_user_can('manage_network_options')) {
-			wp_die('Unauthorized request');
+		if (! current_user_can( 'manage_network_options' ) ) {
+			wp_die( 'Unauthorized request' );
 		}
 
-		if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'save_push_notification_settings_nonce')) {
-			wp_die('Nonce verification failed');
+		$nonce = '';
+		if ( filter_has_var( INPUT_POST, '_wpnonce' ) ) {
+			$nonce = wp_unslash( filter_input( INPUT_POST, '_wpnonce', FILTER_UNSAFE_RAW ) );
 		}
 
-		if (isset($_POST['push_notification_settings']) && is_array($_POST['push_notification_settings'])) {
-			$raw_data = $_POST['push_notification_settings'];
-			$sanitized = [];
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'save_push_notification_settings_nonce' ) ) {
+			wp_die( 'Nonce verification failed' );
+		}
 
-			foreach ($raw_data as $key => $value) {
-				// Sanitize arrays like posttypes, include_targeting_type etc.
-				if (is_array($value)) {
-					$sanitized[$key] = array_map('sanitize_text_field', $value);
-				} else {
-					$sanitized[$key] = sanitize_text_field($value);
+		$raw_post = filter_input( INPUT_POST, 'push_notification_settings', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY );
+		if ( null !== $raw_post ) {
+			$raw_post = wp_unslash( $raw_post );
+			if ( is_array( $raw_post ) ) {
+				$sanitized = array();
+				foreach ( $raw_post as $key => $value ) {
+					// Sanitize arrays like posttypes, include_targeting_type etc.
+					if ( is_array( $value ) ) {
+						$sanitized[ $key ] = array_map( 'sanitize_text_field', $value );
+					} else {
+						$sanitized[ $key ] = sanitize_text_field( $value );
+					}
 				}
+				update_site_option( 'push_notification_settings', $sanitized );
 			}
-			update_site_option('push_notification_settings', $sanitized);
 		}
-		wp_redirect(network_admin_url('admin.php?page=push-notification-global-setting&updated=true'));
+		wp_safe_redirect(network_admin_url('admin.php?page=push-notification-global-setting&updated=true'));
 		exit;
+	}
+
+	/**
+	 * Sanitize push_notification_settings for register_setting (single-site).
+	 * Mirrors the sanitization used in save_push_notification_settings (multisite).
+	 *
+	 * @param array|mixed $value The option value submitted via the form.
+	 * @return array Sanitized settings array.
+	 */
+	public function sanitize_push_notification_settings( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+		$sanitized = array();
+		foreach ( $value as $key => $val ) {
+			if ( is_array( $val ) ) {
+				$sanitized[ $key ] = array_map( 'sanitize_text_field', $val );
+			} else {
+				$sanitized[ $key ] = sanitize_text_field( $val );
+			}
+		}
+		return $sanitized;
 	}
 
 	/*
@@ -129,7 +158,7 @@ class Push_Notification_Admin{
         $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
 					'pn_config'=> $messageConfig,
-					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
+					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1&v=".PUSH_NOTIFICATION_PLUGIN_VERSION),
 					"scope" => esc_url_raw(trailingslashit($link)),
 					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php'))
 					);
@@ -270,7 +299,13 @@ class Push_Notification_Admin{
 	}
 	public function settings_init(){
 		if (! is_multisite() ) {
-			register_setting('push_notification_setting_dashboard_group', 'push_notification_settings');
+			register_setting(
+				'push_notification_setting_dashboard_group',
+				'push_notification_settings',
+				array(
+					'sanitize_callback' => array( $this, 'sanitize_push_notification_settings' ),
+				)
+			);
 		}
 
 		add_settings_section('push_notification_dashboard_section',
@@ -2969,7 +3004,7 @@ function pn_get_all_unique_meta() {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
 			$unique_tokens = $wpdb->get_col(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared --Reason : %i modifier is not used because of compatibility issue for WP versions
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter --Reason : %i modifier is not used because of compatibility issue for WP versions
 					"SELECT DISTINCT url FROM {$table_name} WHERE status = %s", 
 					'active'
 				)

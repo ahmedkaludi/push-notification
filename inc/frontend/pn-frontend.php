@@ -615,7 +615,11 @@ class Push_Notification_Frontend{
 
 	public function pn_get_layout_files($filePath){
 
-	    $fileContentResponse = @wp_remote_get(esc_url_raw(PUSH_NOTIFICATION_PLUGIN_URL.'assets/'.$filePath));
+		$url = esc_url_raw(PUSH_NOTIFICATION_PLUGIN_URL.'assets/'.$filePath);
+		// Add cache-busting query parameter
+		$url = add_query_arg('v', PUSH_NOTIFICATION_PLUGIN_VERSION, $url);
+    
+	    $fileContentResponse = @wp_remote_get($url);
 
 	    if ( wp_remote_retrieve_response_code( $fileContentResponse ) != 200 ) {
 
@@ -716,7 +720,7 @@ class Push_Notification_Frontend{
         $settings = array(
 					'nonce' =>  wp_create_nonce("pn_notification"),
 					'pn_config'=> $messageConfig,
-					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1"),
+					"swsource" => esc_url_raw(trailingslashit($link)."?push_notification_sw=1&v=".PUSH_NOTIFICATION_PLUGIN_VERSION),
 					"scope" => esc_url_raw(trailingslashit($link)),
 					"ajax_url"=> esc_url_raw(admin_url('admin-ajax.php')),
 					"cookie_scope"=>esc_url_raw(apply_filters('push_notification_cookies_scope', "/")),

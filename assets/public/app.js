@@ -18,7 +18,13 @@ const messaging = firebase.messaging();
 			console.log('Pushnotification not supported ');
 		}
 	})  
+// Store service worker registration globally for foreground notifications
+var pnServiceWorkerRegistration = null;
+
 function pushnotification_load_messaging(reg){
+  // Store registration for use in foreground notifications
+  pnServiceWorkerRegistration = reg;
+  
   // [START refresh_token]
   // Callback fired if Instance ID token is updated.
   messaging.onTokenRefresh(() => {
@@ -119,22 +125,50 @@ function pushnotification_load_messaging(reg){
 	})
 	
 	messaging.onMessage(function(payload) {
-		console.log('Message received. ', payload);
+		console.log('Message received (foreground). ', payload);
 
 		let notificationTitle = payload.data.title;
 		let notificationOptions = {
-		body: payload.data.body,
-		icon: payload.data.icon,
-		image: payload.data.image,
-		vibrate: [100, 50, 100],
-		data: {
-			dateOfArrival: Date.now(),
-			primarykey: payload.data.currentCampaign,
-			url : payload.data.url
-		  },
+			body: payload.data.body,
+			icon: payload.data.icon,
+			image: payload.data.image,
+			vibrate: [100, 50, 100],
+			tag: 'pn-' + (payload.data.currentCampaign || Date.now()), // CRITICAL: Tag allows proper click tracking
+			data: {
+				dateOfArrival: Date.now(),
+				primarykey: payload.data.currentCampaign,
+				currentCampaign: payload.data.currentCampaign, // Store both for compatibility
+				url: payload.data.url || payload.data.click_url // Handle both url and click_url
+			},
 		}
 
-		reg.showNotification(notificationTitle, notificationOptions);  // show notification in foreground  for pwa
+		// Use service worker's showNotification instead of new Notification()
+		// This works in all contexts (PWA, mobile, desktop) and the service worker's
+		// notificationclick handler will handle clicks automatically
+		if (pnServiceWorkerRegistration) {
+			pnServiceWorkerRegistration.showNotification(notificationTitle, notificationOptions)
+				.then(function() {
+					console.log("PN Success (foreground): Notification shown via service worker");
+				})
+				.catch(function(error) {
+					console.error("PN Error (foreground): Failed to show notification via service worker", error);
+					// Fallback: Try to get registration if not stored
+					navigator.serviceWorker.ready.then(function(reg) {
+						return reg.showNotification(notificationTitle, notificationOptions);
+					}).catch(function(fallbackError) {
+						console.error("PN Error (foreground): Fallback also failed", fallbackError);
+					});
+				});
+		} else {
+			// Fallback: Get registration if not stored
+			navigator.serviceWorker.ready.then(function(reg) {
+				return reg.showNotification(notificationTitle, notificationOptions);
+			}).then(function() {
+				console.log("PN Success (foreground): Notification shown via service worker (fallback)");
+			}).catch(function(error) {
+				console.error("PN Error (foreground): Failed to show notification", error);
+			});
+		}
 	});
 
 	if (navigator.clearAppBadge) {

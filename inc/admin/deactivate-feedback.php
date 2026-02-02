@@ -1,4 +1,5 @@
-<?php 
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit;
 $reasons = array(
     	1 => '<li><label><input type="radio" name="pn_disable_reason" value="temporary"/>' . esc_html__('It is only temporary', 'push-notification') . '</label></li>',
 		2 => '<li><label><input type="radio" name="pn_disable_reason" value="stopped"/>' . esc_html__('I stopped using Push Notification on my site', 'push-notification') . '</label></li>',
