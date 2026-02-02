@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Compatibility with  Real-time Notifications 
  * addon of Ultimate Member compatibility
