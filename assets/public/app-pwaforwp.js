@@ -9,7 +9,6 @@ if(!messaging)
 }
 	
 
-pushnotification_load_messaging();	  
 function pushnotification_load_messaging(){
 	// [START refresh_token]
 	// Callback fired if Instance ID token is updated.
@@ -30,8 +29,12 @@ function pushnotification_load_messaging(){
 		showToken('Unable to retrieve refreshed token ', err);
 	  });
 	});
-	// [END refresh_token]
-	addEventListener("load", pnMainFunctionPWA);
+	var pnSwCheck = setInterval(function(){
+		if(navigator.serviceWorker?.controller?.state == 'activated'){
+			clearInterval(pnSwCheck);
+			pnMainFunctionPWA();
+		}
+	}, 2000);
 	function pnMainFunctionPWA(){
 	function PWAforwpreadCookie(name) {
 	  var return_var = null;
