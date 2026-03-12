@@ -47,6 +47,9 @@ class Push_Notification_Admin{
 				add_filter( "pwaforwp_sw_register_template", array($this, 'add_sw_register_template') , 10, 1);
 			}
 		}
+		if(function_exists('superpwa_addons_status')){
+			add_filter( "superpwa_sw_template", array($this, 'superpwa_enqueue_pn_scripts') , 10, 1);
+		}
 	}
 
 	public function save_push_notification_settings() {
@@ -142,7 +145,13 @@ class Push_Notification_Admin{
 		$swHtmlContent .= $sw_registerContent;
 		return $swHtmlContent;
 	}
-
+  function superpwa_enqueue_pn_scripts($swJsContent){
+		$messagesw_escaped = $this->pn_get_layout_files('messaging-sw.js');
+		$settings = $this->json_settings();
+		$messagesw_escaped = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messagesw_escaped);
+		$swJsContent .= PHP_EOL.$messagesw_escaped;
+		return $swJsContent;
+	}
 	public function json_settings(){
 		if ( is_multisite() ) {
             $link = get_site_url();              

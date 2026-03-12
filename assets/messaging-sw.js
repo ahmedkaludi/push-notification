@@ -124,37 +124,18 @@ var config=pnScriptSetting.pn_config;
 
 if (!firebase.apps.length) {
 	firebase.initializeApp(config);
-	console.log("=== FIREBASE INITIALIZED ===");
-} else {
-	console.log("=== FIREBASE ALREADY INITIALIZED ===");
 }
 
 const messaging = firebase.messaging();
-console.log("=== MESSAGING OBJECT CREATED ===");
-
-console.log("=== REGISTERING BACKGROUND MESSAGE HANDLER ===");
 messaging.setBackgroundMessageHandler(function(payload) {
-	console.log("=== BACKGROUND MESSAGE HANDLER CALLED ===", {
-		timestamp: Date.now(),
-		hasPayload: !!payload,
-		payloadKeys: payload ? Object.keys(payload) : [],
-		hasData: !!(payload && payload.data),
-		dataKeys: (payload && payload.data) ? Object.keys(payload.data) : []
-	});
 	
 	try {
 		if (!payload || !payload.data) {
-			console.error("=== ERROR: Invalid payload ===", payload);
 			return Promise.reject(new Error("Invalid payload"));
 		}
 		
 		const notificationTitle = payload.data.title;
 		const campaignId = payload.data.currentCampaign;
-		
-		console.log("=== CREATING NOTIFICATION ===", {
-			title: notificationTitle,
-			campaignId: campaignId
-		});
 		
 		// CRITICAL: Add tag for proper notification tracking
 		const notificationTag = 'pn-' + (campaignId || Date.now());
@@ -175,16 +156,9 @@ messaging.setBackgroundMessageHandler(function(payload) {
 		messageCount += 1;
 		setBadge(messageCount);
 		
-		console.log("SW: Background message received", { campaignId: campaignId, tag: notificationTag });
 
-		return self.registration.showNotification(notificationTitle, notificationOptions)
-			.then(function() {
-				console.log("=== NOTIFICATION SHOWN SUCCESSFULLY ===", { title: notificationTitle, tag: notificationTag });
-			})
-			.catch(function(error) {
-				console.error("=== ERROR SHOWING NOTIFICATION ===", error);
-				throw error;
-			});
+		return self.registration.showNotification(notificationTitle, notificationOptions);
+
 	} catch (error) {
 		console.error("=== ERROR IN BACKGROUND HANDLER ===", error);
 		return Promise.reject(error);
@@ -208,7 +182,6 @@ self.addEventListener("notificationclose", function(e) {
 	}else{
 		clearBadge();
 	}
-	console.log("SW: Notification closed", primarykey);
 });  
 
 
