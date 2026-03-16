@@ -2307,6 +2307,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		if(!empty($category_name)){
 			$category = implode(',',$category_name);
 		} 
+		$author =  $post->post_author;
 		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$max_length = 100; // character count, not words
@@ -2332,7 +2333,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		}
 		$icon_url = $push_notification_settings['notification_icon'];
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category);
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category, $author);
 		}//auth token check 	
 
 	}

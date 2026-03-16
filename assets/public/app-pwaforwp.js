@@ -60,7 +60,65 @@ function pushnotification_load_messaging(){
 	  return return_var;
   }
 	  
-		if(PWAforwpreadCookie("pn_notification_block")==null){
+		// Auto-segmentation popup logic: when enabled, we show the popup
+		// for posts whose authors/categories are not yet subscribed in localStorage,
+		// instead of using the global pn_notification_block cookie.
+		var autoSegmentEnabledMain = pnScriptSetting.auto_segment_enabled || false;
+		if (autoSegmentEnabledMain) {
+			try {
+				var currentAuthors = pnScriptSetting.auto_authors || [];
+				var currentCats    = pnScriptSetting.auto_categories || [];
+
+				var storedAuthors  = [];
+				var storedCats     = [];
+
+				var rawAuthors = window.localStorage.getItem('pn_subscribed_authors');
+				if (rawAuthors) {
+					storedAuthors = JSON.parse(rawAuthors);
+					if (!Array.isArray(storedAuthors)) {
+						storedAuthors = [];
+					}
+				}
+				var rawCats = window.localStorage.getItem('pn_subscribed_cats');
+				if (rawCats) {
+					storedCats = JSON.parse(rawCats);
+					if (!Array.isArray(storedCats)) {
+						storedCats = [];
+					}
+				}
+
+				// Normalize everything to strings for safe comparison
+				storedAuthors = storedAuthors.map(function(a){ return String(a); });
+				storedCats    = storedCats.map(function(c){ return String(c); });
+				currentAuthors = currentAuthors.map(function(a){ return String(a); });
+				currentCats    = currentCats.map(function(c){ return String(c); });
+
+				var hasUnsubscribedAuthor = currentAuthors.some(function(a){
+					return storedAuthors.indexOf(a) === -1;
+				});
+				var hasUnsubscribedCat = currentCats.some(function(c){
+					return storedCats.indexOf(c) === -1;
+				});
+
+				// If all authors and cats for this post are already subscribed
+				// then we do not show the popup on this page.
+				if (!hasUnsubscribedAuthor && !hasUnsubscribedCat) {
+					return false;
+				}
+			} catch (e) {
+				if (console && console.log) {
+					console.log('PN auto-segment localStorage parse error', e);
+				}
+			}
+		}
+
+		// Default / fallback behaviour (and for non-auto-segmentation)
+		// still respects the global pn_notification_block cookie.
+		if(!autoSegmentEnabledMain && PWAforwpreadCookie("pn_notification_block")!=null){
+			return false;
+		}
+
+		{
 			const pageAccessedByReload = window.history.length;
 			if(pageAccessedByReload < pnScriptSetting.popup_show_afternpageview){
 				return false;
@@ -71,7 +129,7 @@ function pushnotification_load_messaging(){
 				return false;
 			}
 		}
-
+	
 		if(pnScriptSetting.pwaforwp_apk_only == '1'){
 			let pwaforwp_apk = sessionStorage.getItem('pwaforwp_mode');
 			if(pwaforwp_apk != 'apk'){
@@ -113,8 +171,65 @@ function pushnotification_load_messaging(){
 				  localStorage.setItem('pn_notification_block',true);
 				  localStorage.setItem('pn_notification_block_expiry',date.getTime());
 				  localStorage.getItem('notification_permission','granted');
+
+				  // When auto-segmentation is enabled, mark current post
+				  // authors/categories as subscribed in localStorage so that
+				  // we don't show the popup again for the same ones.
+				  try{
+					  if (pnScriptSetting.auto_segment_enabled) {
+						  var currentAuthorsAllow = pnScriptSetting.auto_authors || [];
+						  var currentCatsAllow    = pnScriptSetting.auto_categories || [];
+
+						  var storedAuthorsAllow = [];
+						  var storedCatsAllow    = [];
+
+						  var rawAuthorsAllow = window.localStorage.getItem('pn_subscribed_authors');
+						  if (rawAuthorsAllow) {
+							  storedAuthorsAllow = JSON.parse(rawAuthorsAllow);
+							  if (!Array.isArray(storedAuthorsAllow)) {
+								  storedAuthorsAllow = [];
+							  }
+						  }
+						  var rawCatsAllow = window.localStorage.getItem('pn_subscribed_cats');
+						  if (rawCatsAllow) {
+							  storedCatsAllow = JSON.parse(rawCatsAllow);
+							  if (!Array.isArray(storedCatsAllow)) {
+								  storedCatsAllow = [];
+							  }
+						  }
+
+						  // Merge and de-duplicate
+						  var authorSet = {};
+						  storedAuthorsAllow.concat(currentAuthorsAllow).forEach(function(a){
+							  authorSet[String(a)] = true;
+						  });
+						  var catSet = {};
+						  storedCatsAllow.concat(currentCatsAllow).forEach(function(c){
+							  catSet[String(c)] = true;
+						  });
+
+						  var mergedAuthors = Object.keys(authorSet);
+						  var mergedCats    = Object.keys(catSet);
+
+						  window.localStorage.setItem('pn_subscribed_authors', JSON.stringify(mergedAuthors));
+						  window.localStorage.setItem('pn_subscribed_cats', JSON.stringify(mergedCats));
+					  }
+				  }catch(e){
+					  if (console && console.log) {
+						  console.log('PN auto-segment localStorage write error', e);
+					  }
+				  }
+
 				  if(push_notification_isTokenSentToServer()){
-					  console.log('Token already saved');
+					  if (pnScriptSetting.auto_segment_enabled) {
+						  messaging.getToken().then(function(currentToken) {
+							  if (currentToken) {
+								  push_notification_saveToken(currentToken);
+							  }
+						  }).catch(function(err) { if (console && console.log) console.log('PN getToken error', err); });
+					  } else {
+						  console.log('Token already saved');
+					  }
 				  }else{
 					  push_notification_getRegToken();
 				  }                                   
@@ -242,9 +357,28 @@ function pushnotification_load_messaging(){
 	  console.log('Auto authors:', pnScriptSetting.auto_authors);
 	  
 	  if (autoSegmentEnabled) {
-		  // Use auto-determined category and author data
-		  optioArr = pnScriptSetting.auto_categories || [];
-		  optioArrAuthor = pnScriptSetting.auto_authors || [];
+		  // Use full subscribed list from localStorage so server has all authors/cats
+		  try {
+			  var rawA = window.localStorage.getItem('pn_subscribed_authors');
+			  var rawC = window.localStorage.getItem('pn_subscribed_cats');
+			  if (rawA) {
+				  var parsed = JSON.parse(rawA);
+				  optioArrAuthor = Array.isArray(parsed) ? parsed : [];
+			  }
+			  if (rawC) {
+				  var parsedC = JSON.parse(rawC);
+				  optioArr = Array.isArray(parsedC) ? parsedC : [];
+			  }
+			  if (optioArr.length === 0 && (pnScriptSetting.auto_categories || []).length) {
+				  optioArr = pnScriptSetting.auto_categories || [];
+			  }
+			  if (optioArrAuthor.length === 0 && (pnScriptSetting.auto_authors || []).length) {
+				  optioArrAuthor = pnScriptSetting.auto_authors || [];
+			  }
+		  } catch (e) {
+			  optioArr = pnScriptSetting.auto_categories || [];
+			  optioArrAuthor = pnScriptSetting.auto_authors || [];
+		  }
 		  console.log('Using auto data - categories:', optioArr, 'authors:', optioArrAuthor);
 	  } else {
 		  // Use user-selected categories and authors
