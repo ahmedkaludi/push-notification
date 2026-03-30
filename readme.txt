@@ -1,9 +1,9 @@
 === Push Notifications for WP - Self Hosted Web Push Notifications ===
 Contributors: magazine3  
 Requires at least: 3.0  
-Tested up to: 6.9 
+Tested up to: 7.0
 Requires PHP: 5.6.20 
-Stable tag: 1.48
+Stable tag: 1.49
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
@@ -97,10 +97,16 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 6. Visibility section for controlling where the subscription popup appears.
 
 == Changelog ==
+= 1.49 (30 March 2026) = 
+* Fixed : Push notification not recieved when using superpwa on nginx server #188
+* Fixed : Auto segementation not working for authors / categories #190
+* Fixed: Push notification not recieved when using PWAforWP #189
+* Tested: WordPress version upto 6.9
+
 = 1.48 (02 February 2026) = 
-Fixed : Campaign clicks are not working #157
-Fixed : Worked on Plugin Check issues
-Enhancement : Performance Improvement
+* Fixed : Campaign clicks are not working #157
+* Fixed : Worked on Plugin Check issues
+* Enhancement : Performance Improvement
 
 = 1.47 (09 January 2026) = 
 * Fixed: GA Cookies Rejected Due to Invalid Domain from Plugin’s analytics.js Script #178
@@ -171,10 +177,6 @@ Enhancement : Performance Improvement
 * Fixed: CSV file not working properly #114  
 * Added: Feature to clean logs in the Campaign tab in dashboard #117  
 * Enhancement: General improvements #122  
-* Enhancement: Tested with WordPress 6.6  
-
-= 1.35 (06 June 2024) =
-* Fixed: Install banner — Yes or No option not showing #112  
-* Fixed: PHP errors on user end #111  
+* Enhancement: Tested with WordPress 6.6 
 
 Full changelog available at: [changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)

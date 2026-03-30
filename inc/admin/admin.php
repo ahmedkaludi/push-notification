@@ -47,6 +47,9 @@ class Push_Notification_Admin{
 				add_filter( "pwaforwp_sw_register_template", array($this, 'add_sw_register_template') , 10, 1);
 			}
 		}
+		if(function_exists('superpwa_addons_status')){
+			add_filter( "superpwa_sw_template", array($this, 'superpwa_sw_pn_scripts') , 10, 1);
+		}
 	}
 
 	public function save_push_notification_settings() {
@@ -142,7 +145,13 @@ class Push_Notification_Admin{
 		$swHtmlContent .= $sw_registerContent;
 		return $swHtmlContent;
 	}
-
+  function superpwa_sw_pn_scripts($swJsContent){
+		$messagesw_escaped = $this->pn_get_layout_files('messaging-sw.js');
+		$settings = $this->json_settings();
+		$messagesw_escaped = str_replace('{{pnScriptSetting}}', wp_json_encode($settings), $messagesw_escaped);
+		$swJsContent .= PHP_EOL.$messagesw_escaped;
+		return $swJsContent;
+	}
 	public function json_settings(){
 		if ( is_multisite() ) {
             $link = get_site_url();              
@@ -2298,6 +2307,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		if(!empty($category_name)){
 			$category = implode(',',$category_name);
 		} 
+		$author =  $post->post_author;
 		$post_content= preg_replace('#\[[^\]]+\]#', '',$post_content);
 		$message = wp_trim_words(wp_strip_all_tags(sanitize_text_field($post_content), true), 20);
 		$max_length = 100; // character count, not words
@@ -2323,7 +2333,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		}
 		$icon_url = $push_notification_settings['notification_icon'];
 		if( isset( $auth_settings['user_token'] ) && !empty($auth_settings['user_token']) ){
-			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category);
+			$response = PN_Server_Request::sendPushNotificatioData( $auth_settings['user_token'], $title, $message, $link_url, $icon_url, $image_url, $category, $author);
 		}//auth token check 	
 
 	}

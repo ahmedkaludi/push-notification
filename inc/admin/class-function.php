@@ -97,6 +97,10 @@ class PN_Server_Request{
 			$lang_compatibility = 'yes';
 			$language_code = pll_current_language();
         }
+		$is_segmentation_enabled = false;
+		if(isset($notification_settings['on_category']) && $notification_settings['on_category'] ==1 ){
+			$is_segmentation_enabled = true;
+		}
 
 		if ( is_multisite() ) {
 			$is_multisite = 'yes';
@@ -128,6 +132,7 @@ class PN_Server_Request{
 					'is_multisite'=> $is_multisite,
 					'language_code'=> $language_code,
 					'lang_compatibility'=> $lang_compatibility,
+					'is_segmentation_enabled'=> $is_segmentation_enabled,
 				);
 
 		$response = self::sendRequest($verifyUrl, $data, 'post');
@@ -210,7 +215,7 @@ class PN_Server_Request{
 	}
 
 
-	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url, $category){
+	public static function sendPushNotificatioData($user_token, $title, $message, $link_url, $icon_url, $image_url, $category, $author){
 
 		$verifyUrl = 'campaign/create';
 
@@ -236,6 +241,11 @@ class PN_Server_Request{
 			$language_code = pll_current_language();
         }
 
+		$is_segmentation_enabled = false;
+		if(isset($notification_settings['on_category']) && $notification_settings['on_category'] ==1 ){
+			$is_segmentation_enabled = true;
+		}
+
 		$data = array("user_token"=>$user_token, "website"=>   $weblink, 
 
 					'title'=>$title, 
@@ -249,9 +259,11 @@ class PN_Server_Request{
 					'image_url'=>$image_url,
 
 					'category'=>$category,
+					'author'=>$author,
 					'language_code'=>$language_code,
 					'lang_compatibility'=>$lang_compatibility,
-					'is_multisite'=>$is_multisite
+					'is_multisite'=>$is_multisite,
+					'is_segmentation_enabled'=> $is_segmentation_enabled,
 
 				);
 
