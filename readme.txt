@@ -101,7 +101,7 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 * Fixed : Push notification not recieved when using superpwa on nginx server #188
 * Fixed : Auto segementation not working for authors / categories #190
 * Fixed: Push notification not recieved when using PWAforWP #189
-* Tested: WordPress version upto 6.9
+* Tested: WordPress version upto 7.0
 
 = 1.48 (02 February 2026) = 
 * Fixed : Campaign clicks are not working #157
