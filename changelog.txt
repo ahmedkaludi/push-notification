@@ -1,7 +1,14 @@
+= 1.49 (30 March 2026) = 
+* Fixed : Push notification not recieved when using superpwa on nginx server #188
+* Fixed : Auto segementation not working for authors / categories #190
+* Fixed: Push notification not recieved when using PWAforWP #189
+* Tested: WordPress version upto 6.9
+
+
 = 1.48 (02 February 2026) = 
-Fixed : Campaign clicks are not working #157
-Fixed : Worked on Plugin Check issues
-Enhancement : Performance Improvement
+* Fixed : Campaign clicks are not working #157
+* Fixed : Worked on Plugin Check issues
+* Enhancement : Performance Improvement
 
 = 1.47 (09 January 2026) = 
 * Fixed: GA Cookies Rejected Due to Invalid Domain from Plugin’s analytics.js Script #178
