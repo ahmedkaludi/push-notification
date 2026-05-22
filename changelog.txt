@@ -1,3 +1,6 @@
+= 1.50 (22 May 2026) = 
+* Enhancement : Plugin Check (PCP) code improvements
+
 = 1.49 (30 March 2026) = 
 * Fixed : Push notification not recieved when using superpwa on nginx server #188
 * Fixed : Auto segementation not working for authors / categories #190

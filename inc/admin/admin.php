@@ -3010,12 +3010,10 @@ function pn_get_all_unique_meta() {
         $unique_tokens = wp_cache_get( $cache_key );
 
 		if ( false === $unique_tokens ) {
-			$table_name = $wpdb->prefix.'pn_token_urls';
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Reason : Custom table
 			$unique_tokens = $wpdb->get_col(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter --Reason : %i modifier is not used because of compatibility issue for WP versions
-					"SELECT DISTINCT url FROM {$table_name} WHERE status = %s", 
+					"SELECT DISTINCT url FROM {$wpdb->prefix}pn_token_urls WHERE status = %s",
 					'active'
 				)
 			);
