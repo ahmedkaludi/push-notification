@@ -211,10 +211,11 @@ class Push_Notification_Admin{
 	}
 
 	public function add_menu_links(){
+		$capability = pn_current_user_can();
 		// Main menu page
 		add_menu_page( esc_html__( 'Push Notification', 'push-notification' ), 
 	                esc_html__( 'Push Notifications', 'push-notification' ), 
-	                'manage_options',
+	                $capability,
 	                'push-notification',
 	                array($this, 'admin_interface_render'),
 	                '', 100 );
@@ -223,7 +224,7 @@ class Push_Notification_Admin{
 		add_submenu_page( 'push-notification',
 	                esc_html__( 'Push Notifications Options', 'push-notification' ),
 	                esc_html__( 'Settings', 'push-notification' ),
-	                'manage_options',
+	                $capability,
 	                'push-notification',
 	                array($this, 'admin_interface_render')
 	            );
@@ -235,7 +236,7 @@ class Push_Notification_Admin{
 			}
 	}
 	function admin_interface_render(){
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( pn_current_user_can() ) ) {
 			return;
 		}
 		?>
@@ -516,6 +517,17 @@ class Push_Notification_Admin{
 				'push_notification_user_settings_section',	// Page slug
 				'push_notification_user_settings_section'	// Settings Section ID
 			);
+
+			// Role Based Access - only visible to super admins
+			if( function_exists('is_super_admin') && is_super_admin() ){
+				add_settings_field(
+					'pn_role_based_access',									// ID
+					'<label for="pn_role_based_access"><b>'.esc_html__('Role Based Access', 'push-notification').'</b></label>',
+					array( $this, 'pn_role_based_access_callback'),			// Callback
+					'push_notification_user_settings_section',				// Page slug
+					'push_notification_user_settings_section'				// Settings Section ID
+				);
+			}
 
 		add_settings_section('push_notification_utm_tracking_settings_section',
 					 esc_html__('UTM Tracking','push-notification'), 
@@ -1321,6 +1333,32 @@ class Push_Notification_Admin{
 		
 		echo "<p class='description'>".esc_html__('Set the maximum number of push notifications that can be sent within selected limit.
 Keep empty or 0 to disable the limit',"push-notification")."</p>";
+	}
+
+	/**
+	 * Role Based Access callback - renders multi-select dropdown of WordPress roles
+	 */
+	public function pn_role_based_access_callback(){
+		if( function_exists('is_super_admin') && is_super_admin() ){
+			$settings = push_notification_settings();
+			$user_roles = pn_get_user_roles();
+			?>
+			<label>
+				<select id="pn_role_based_access" class="regular-text" name="push_notification_settings[pn_role_based_access][]" multiple="multiple">
+					<?php
+						foreach ($user_roles as $key => $opval) {
+							$selected = "";
+							if (isset($settings['pn_role_based_access']) && in_array($key, $settings['pn_role_based_access']) || $key == 'administrator') {
+								$selected = "selected";
+							}
+							?>
+							<option value="<?php echo esc_attr($key);?>" <?php echo esc_attr($selected);?>><?php echo esc_html($opval); ?></option>
+						<?php } ?>
+				</select>
+			</label>
+			<p><?php echo esc_html__('Choose the users whom you want to allow full access of this plugin', 'push-notification'); ?></p>
+			<?php
+		}
 	}
 
 	public function pn_key_posttype_select_callback(){		
@@ -2567,9 +2605,9 @@ function push_notification_settings(){
 		'posttypes'=> array("post","page"),		
 		'notification_position'=> 'bottom-left',
 		'banner_location'=> 'footer',
-		'popup_banner_message'=> esc_html__('Enable Notifications', 'push-notification'),
-		'popup_banner_accept_btn'=> esc_html__('OK', 'push-notification'),
-		'popup_banner_decline_btn'=> esc_html__('No thanks', 'push-notification'),
+		'popup_banner_message'=> 'Enable Notifications',
+		'popup_banner_accept_btn'=> 'OK',
+		'popup_banner_decline_btn'=> 'No thanks',
 		'notification_popup_show_again'=>'30',
 		'notification_popup_show_afternseconds'=>'3',
 		'notification_popup_show_afternpageview'=>'1',
@@ -3405,5 +3443,139 @@ add_action( 'wp_ajax_update_pn_meta' , 'pn_update_meta_ajax_callback' );
 	}
 }
 add_action( 'admin_enqueue_scripts', 'pn_enqueue_admin_meta_script' );
+
+/**
+ * Role Based Access - Helper Functions
+ *
+ * @since 1.51
+ */
+
+/**
+ * Get all WordPress user roles
+ *
+ * @return array Associative array of role_key => role_name
+ */
+function pn_get_user_roles(){
+	global $wp_roles;
+	$allroles = array();
+	if ( isset( $wp_roles ) && is_object( $wp_roles ) ) {
+		foreach ( $wp_roles->roles as $key => $value ){
+			$allroles[ esc_attr($key) ] = esc_html($value['name']);
+		}
+	}
+	return $allroles;
+}
+
+/**
+ * Map a WordPress role to its primary capability
+ *
+ * @param string $role The role slug
+ * @return string The capability string
+ */
+function pn_get_capability_by_role( $role ){
+	$cap = apply_filters( 'pn_default_manage_option_capability', 'manage_options' );
+	switch ( $role ) {
+		case 'wpseo_editor':
+			$cap = 'edit_pages';
+			break;
+		case 'editor':
+			$cap = 'edit_pages';
+			break;
+		case 'author':
+			$cap = 'publish_posts';
+			break;
+		case 'contributor':
+			$cap = 'edit_posts';
+			break;
+		case 'wpseo_manager':
+			$cap = 'edit_posts';
+			break;
+		case 'subscriber':
+			$cap = 'read';
+			break;
+		default:
+			break;
+	}
+	return $cap;
+}
+
+/**
+ * Check if current user is allowed based on role-based access settings
+ *
+ * @return string|false The user's allowed role slug, or false if not allowed
+ */
+function pn_current_user_allowed(){
+	$currentuserrole = array();
+	if ( ( function_exists('is_user_logged_in') && is_user_logged_in() ) && function_exists('wp_get_current_user') ) {
+		$settings       = push_notification_settings();
+		$currentUser    = wp_get_current_user();
+		$pn_roles       = isset($settings['pn_role_based_access']) ? $settings['pn_role_based_access'] : array('administrator');
+		if ( $currentUser ) {
+			if ( $currentUser->roles ) {
+				$currentuserrole = (array) $currentUser->roles;
+			} else {
+				if ( isset($currentUser->caps['administrator']) ) {
+					$currentuserrole = array('administrator');
+				}
+			}
+			if ( is_array($currentuserrole) ) {
+				$hasrole = array_intersect( $currentuserrole, $pn_roles );
+				if ( !empty($hasrole) ) {
+					return reset($hasrole);
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/**
+ * Get the capability required for accessing the push notification admin
+ *
+ * @return string The capability string
+ */
+function pn_current_user_can(){
+	$allowed = pn_current_user_allowed();
+	$capability = $allowed ? pn_get_capability_by_role( $allowed ) : 'manage_options';
+	return $capability;
+}
+
+/**
+ * Filter the capability required to save push notification settings
+ * This allows non-administrator roles (e.g., editor) to save settings when granted access
+ */
+add_filter(
+	'option_page_capability_push_notification_setting_dashboard_group',
+	function( $capability ) {
+		return pn_current_user_can();
+	}
+);
+
+/**
+ * Protect role-based access setting on save
+ * - Non-super-admins cannot modify the pn_role_based_access value
+ * - Administrator role is always enforced
+ */
+function pn_pre_update_settings( $value, $old_value, $option ) {
+	if ( function_exists('is_super_admin') && function_exists('wp_get_current_user') ) {
+		if ( !is_super_admin() ) {
+			// Non-super-admins cannot change the role-based access setting
+			if ( isset($old_value['pn_role_based_access']) ) {
+				$value['pn_role_based_access'] = $old_value['pn_role_based_access'];
+			}
+		} else {
+			// Super admin: ensure administrator is always included
+			if ( isset($value['pn_role_based_access']) && !empty($value['pn_role_based_access']) ) {
+				if ( !in_array('administrator', $value['pn_role_based_access']) ) {
+					array_push($value['pn_role_based_access'], 'administrator');
+				}
+			} else {
+				$value['pn_role_based_access'] = array('administrator');
+			}
+		}
+	}
+	return $value;
+}
+add_filter( 'pre_update_option_push_notification_settings', 'pn_pre_update_settings', 10, 3 );
 
 
