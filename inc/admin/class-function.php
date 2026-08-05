@@ -47,7 +47,7 @@ class PN_Server_Request{
 
 			$push_notification_auth_settings['messageManager'] = $response['response']['messageManager'];
 
-			if ( is_multisite() && is_network_admin() ) {
+			if ( is_multisite() ) {
 				update_site_option('push_notification_auth_settings', $push_notification_auth_settings,false);
 			}else{
 				update_option('push_notification_auth_settings', $push_notification_auth_settings,false);
@@ -102,7 +102,7 @@ class PN_Server_Request{
 			$is_segmentation_enabled = true;
 		}
 
-		if ( is_multisite() && is_network_admin() ) {
+		if ( is_multisite() ) {
 			$is_multisite = 'yes';
             $weblink = get_site_url();
 			$push_notification_auth_settings = get_site_option( 'push_notification_auth_settings', array() ); 

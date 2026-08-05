@@ -211,6 +211,9 @@ class Push_Notification_Admin{
 	}
 
 	public function add_menu_links(){
+		if ( ! push_notification_current_user_allowed() ) {
+			return;
+		}
 		$capability = push_notification_current_user_can();
 		// Main menu page
 		add_menu_page( esc_html__( 'Push Notification', 'push-notification' ), 
@@ -308,7 +311,7 @@ class Push_Notification_Admin{
 		</div><?php
 	}
 	public function settings_init(){
-		if (! is_multisite() ) {
+		if (! is_network_admin() ) {
 			register_setting(
 				'push_notification_setting_dashboard_group',
 				'push_notification_settings',
@@ -2589,7 +2592,7 @@ if ( is_admin() || wp_doing_ajax() ) {
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 function push_notification_settings(){
 	$push_notification_settings = array();
-	if ( is_multisite() && is_network_admin() ) {
+	if ( is_multisite() ) {
 		$push_notification_settings = get_site_option( 'push_notification_settings', $push_notification_settings );
 	}else{
 		$push_notification_settings = get_option( 'push_notification_settings', $push_notification_settings );
@@ -2633,7 +2636,7 @@ function push_notification_settings(){
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
-	if ( is_multisite() && is_network_admin() ) {
+	if ( is_multisite() ) {
 		$push_notification_auth_settings = get_site_option( 'push_notification_auth_settings', array() );
 	}else{
 		$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() );
@@ -3536,7 +3539,7 @@ function push_notification_current_user_allowed(){
  */
 function push_notification_current_user_can(){
 	$allowed = push_notification_current_user_allowed();
-	$capability = $allowed ? push_notification_get_capability_by_role( $allowed ) : 'manage_options';
+	$capability = $allowed ? push_notification_get_capability_by_role( $allowed ) : 'do_not_allow';
 	return $capability;
 }
 

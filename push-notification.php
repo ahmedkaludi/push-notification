@@ -186,7 +186,7 @@ function push_notification_send_push_notificatioin_filter( $user_id = null, $tit
 			$weblink = home_url();
 		}
 
-		if ( is_multisite() && is_network_admin() ) {
+		if ( is_multisite() ) {
 			$auth_settings = get_site_option( 'push_notification_auth_settings', array() );
 		}else{
 			$auth_settings = get_option( 'push_notification_auth_settings', array() );
