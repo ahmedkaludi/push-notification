@@ -2589,7 +2589,7 @@ if ( is_admin() || wp_doing_ajax() ) {
 add_action( 'transition_post_status', array( $push_Notification_Admin_Obj, 'send_notification_on_update' ), 10, 3 );
 function push_notification_settings(){
 	$push_notification_settings = array();
-	if ( is_multisite() ) {
+	if ( is_multisite() && is_network_admin() ) {
 		$push_notification_settings = get_site_option( 'push_notification_settings', $push_notification_settings );
 	}else{
 		$push_notification_settings = get_option( 'push_notification_settings', $push_notification_settings );
@@ -2633,7 +2633,7 @@ function push_notification_settings(){
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
-	if ( is_multisite() ) {
+	if ( is_multisite() && is_network_admin() ) {
 		$push_notification_auth_settings = get_site_option( 'push_notification_auth_settings', array() );
 	}else{
 		$push_notification_auth_settings = get_option( 'push_notification_auth_settings', array() );
