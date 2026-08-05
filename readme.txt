@@ -99,7 +99,7 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 == Changelog ==
 = 1.51 (05 August 2026) = 
 * Added Allow different user role to send notification #194
-* Enhancement : Plugin Check (PCP) code improvements
+* Enhancement : PCP Improvement #195
 
 = 1.50 (22 May 2026) = 
 * Enhancement : Plugin Check (PCP) code improvements
@@ -178,12 +178,5 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 
 = 1.37 (30 August 2024) =
 * Fixed: No active subscriber found when sending push notification #124  
-
-= 1.36 (24 August 2024) =
-* Fixed: Conflict with SuperPWA #121  
-* Fixed: CSV file not working properly #114  
-* Added: Feature to clean logs in the Campaign tab in dashboard #117  
-* Enhancement: General improvements #122  
-* Enhancement: Tested with WordPress 6.6 
 
 Full changelog available at: [changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)
