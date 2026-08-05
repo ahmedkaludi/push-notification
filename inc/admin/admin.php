@@ -25,7 +25,7 @@ class Push_Notification_Admin{
 		add_action( 'wp_ajax_pn_revoke_keys', array( $this, 'pn_revoke_keys' ) ); 
 		add_action( 'wp_ajax_pn_subscribers_data', array( $this, 'pn_subscribers_data' ) ); 
 		add_action( 'wp_ajax_pn_send_notification', array( $this, 'pn_send_notification' ) ); 		
-		add_action('wp_ajax_pn_send_query_message', 'pn_send_query_message');
+		add_action('wp_ajax_pn_send_query_message', 'push_notification_send_query_message');
 		add_action('wp_ajax_pn_get_compaigns', array( $this, 'pn_get_compaigns' ));
 		add_action( 'wp_ajax_pn_delete_campaign', array( $this, 'pn_delete_campaigns' ) ); 
 		add_action( 'wp_ajax_pn_delete_subscribers', array( $this, 'pn_delete_subscribers' ) ); 
@@ -204,14 +204,14 @@ class Push_Notification_Admin{
             				'uploader_button'   => esc_html__('Select Icon', 'push-notification'),
 						);
 
-	        $object = apply_filters('pushnotification_localize_filter',$object, 'pn_setings');
+	        $object = apply_filters('push_notification_localize_filter',$object, 'pn_setings');
 			wp_localize_script("push_notification_script", 'pn_setings', $object);
 						
 		}
 	}
 
 	public function add_menu_links(){
-		$capability = pn_current_user_can();
+		$capability = push_notification_current_user_can();
 		// Main menu page
 		add_menu_page( esc_html__( 'Push Notification', 'push-notification' ), 
 	                esc_html__( 'Push Notifications', 'push-notification' ), 
@@ -236,7 +236,7 @@ class Push_Notification_Admin{
 			}
 	}
 	function admin_interface_render(){
-		if ( ! current_user_can( pn_current_user_can() ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 			return;
 		}
 		?>
@@ -897,8 +897,8 @@ class Push_Notification_Admin{
                                     }
 									echo '<input type="hidden" name="push_notification_settings[include_targeting_type][]" value="' . esc_attr($expo_include_type[$i]) . '">
 									<input type="hidden" name="push_notification_settings[include_targeting_data][]" value="' . esc_attr($expo_include_data[$i]) . '">';
-                                    $expo_include_type_test = pn_RemoveExtraValue($expo_include_type[$i]);
-                                    $expo_include_data_test = pn_RemoveExtraValue($expo_include_data[$i]);
+                                    $expo_include_type_test = push_notification_RemoveExtraValue($expo_include_type[$i]);
+                                    $expo_include_data_test = push_notification_RemoveExtraValue($expo_include_data[$i]);
                                     echo '<span class="pn-visibility-target-item"><span class="visibility-include-target-label">' . esc_html($expo_include_type_test . ' - ' . $expo_include_data_test) . '</span>
                             		<span class="pn-visibility-target-icon" data-index="0"><span class="dashicons dashicons-no-alt " aria-hidden="true" onclick="pn_removeIncluded_visibility(' . esc_js($rand) . ')"></span></span></span></span>';
                                     $rand++;
@@ -1341,7 +1341,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 	public function pn_role_based_access_callback(){
 		if( function_exists('is_super_admin') && is_super_admin() ){
 			$settings = push_notification_settings();
-			$user_roles = pn_get_user_roles();
+			$user_roles = push_notification_get_user_roles();
 			?>
 			<label>
 				<select id="pn_role_based_access" class="regular-text" name="push_notification_settings[pn_role_based_access][]" multiple="multiple">
@@ -2077,7 +2077,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 						if($send_type=='custom-page-subscribed'){
 							$authData = push_notification_auth_settings();
 							if(!empty($page_subscribed) && isset($authData['token_details']) && $authData['token_details']['validated'] ==1){
-								$push_notify_token =pn_get_tokens_by_url($page_subscribed);
+								$push_notify_token =push_notification_get_tokens_by_url($page_subscribed);
 							}
 						}
 						if(empty($push_notify_token)){
@@ -2629,7 +2629,7 @@ function push_notification_settings(){
 		'segmentation_type' => 'manual'
 	);
 	$push_notification_settings = wp_parse_args($push_notification_settings, $default);
-	$push_notification_settings = apply_filters("pn_settings_options_array", $push_notification_settings);
+	$push_notification_settings = apply_filters("push_notification_settings_options_array", $push_notification_settings);
 	return $push_notification_settings;
 }
 function push_notification_auth_settings(){
@@ -2758,7 +2758,7 @@ class PN_Field_Generator{
 	<?php
 	}  
 }
-function pn_send_query_message(){   
+function push_notification_send_query_message(){   
 	if(empty( $_POST['nonce'])){
 		return;	
 	}
@@ -2875,7 +2875,7 @@ function push_notification_pro_notifyform_before(){
 		echo' </select>
 		  </div>';
 
-		$pn_token_urls = pn_get_all_unique_meta();
+		$pn_token_urls = push_notification_get_all_unique_meta();
 
 		  echo '<div class="form-group" style="display:none">
 		  <label for="notification-custom-page-subscribed">'.esc_html__('Select Page Subscribed','push-notification').'</label>
@@ -2884,7 +2884,7 @@ function push_notification_pro_notifyform_before(){
 		  if ( ! empty( $pn_token_urls ) ) {
 
 			  	foreach( $pn_token_urls as $url ) {
-					echo '<option value="'.esc_url($url).'" data-url="'.esc_url(basename($url)).'">'.esc_attr(pn_get_page_title_by_url($url)).'('.esc_url($url).')</option>';
+					echo '<option value="'.esc_url($url).'" data-url="'.esc_url(basename($url)).'">'.esc_attr(push_notification_get_page_title_by_url($url)).'('.esc_url($url).')</option>';
 
 			  	}
 
@@ -2969,7 +2969,7 @@ function push_notification_category( $search, $saved_data ) {
 
 }
 
-function pn_select2_category_data(){
+function push_notification_select2_category_data(){
 
 	if ( ! isset( $_GET['nonce'] ) ) {
 		return;
@@ -2991,8 +2991,8 @@ function pn_select2_category_data(){
 
 }
 
-add_action( 'wp_ajax_pn_select2_author_data', 'pn_select2_author_data' );
-function pn_select2_author_data() {
+add_action( 'wp_ajax_pn_select2_author_data', 'push_notification_select2_author_data' );
+function push_notification_select2_author_data() {
 
 	if ( ! isset( $_GET['nonce'] ) ) {
 		return;
@@ -3035,11 +3035,11 @@ function pn_select2_author_data() {
 }
 
 
-add_action( 'wp_ajax_pn_select2_category_data', 'pn_select2_category_data' );
+add_action( 'wp_ajax_pn_select2_category_data', 'push_notification_select2_category_data' );
 
 // Query to get all unique values of user meta key "pnwoo_notification_token"
 
-function pn_get_all_unique_meta() {
+function push_notification_get_all_unique_meta() {
 
 		global $wpdb;		
 		$unique_urls   = [];
@@ -3080,7 +3080,7 @@ function pn_get_all_unique_meta() {
 
 	}
 	
-	function pn_get_page_title_by_url( $page_url = null ) {
+	function push_notification_get_page_title_by_url( $page_url = null ) {
 
 		$page_id = url_to_postid( $page_url );
 
@@ -3101,7 +3101,7 @@ function pn_get_all_unique_meta() {
 
 	}
 	
-	function pn_get_tokens_by_url( $url ) {
+	function push_notification_get_tokens_by_url( $url ) {
 
 		global $wpdb; 
 
@@ -3120,9 +3120,9 @@ function pn_get_all_unique_meta() {
 
 	}
 
-	add_action("wp_ajax_pn_include_visibility_condition_callback", 'pn_include_visibility_condition_callback');
+	add_action("wp_ajax_pn_include_visibility_condition_callback", 'push_notification_include_visibility_condition_callback');
 
-	function pn_include_visibility_condition_callback() {
+	function push_notification_include_visibility_condition_callback() {
 		if(empty( $_POST['nonce'])){
 			return;	
 		}
@@ -3150,8 +3150,8 @@ function pn_get_all_unique_meta() {
 		$option .= '<span class="pn-visibility-target-icon-' . esc_attr($rand) . '">
 		<input type="hidden" name="push_notification_settings[include_targeting_type][]" value="' . esc_attr($include_targeting_type) . '">
 		<input type="hidden" name="push_notification_settings[include_targeting_data][]" value="' . esc_attr($include_targeting_data) . '">';
-		$include_targeting_type = pn_RemoveExtraValue($include_targeting_type);
-		$include_targeting_data = pn_RemoveExtraValue($include_targeting_data);
+		$include_targeting_type = push_notification_RemoveExtraValue($include_targeting_type);
+		$include_targeting_data = push_notification_RemoveExtraValue($include_targeting_data);
 		$option .= '<span class="pn-visibility-target-item"><span class="visibility-include-target-label">' . esc_html($include_targeting_type . ' - ' . $include_targeting_data) . '</span>
 			<span class="pn-visibility-target-icon" data-index="0"><span class="dashicons dashicons-no-alt " aria-hidden="true" onclick="pn_removeIncluded_visibility(' . esc_attr($rand) . ')"></span></span></span></span>';
 
@@ -3160,8 +3160,8 @@ function pn_get_all_unique_meta() {
 		exit;
 	}
 
-	add_action("wp_ajax_pn_include_visibility_setting_callback", 'pn_include_visibility_setting_callback');
-	function pn_include_visibility_setting_callback() {
+	add_action("wp_ajax_pn_include_visibility_setting_callback", 'push_notification_include_visibility_setting_callback');
+	function push_notification_include_visibility_setting_callback() {
 		if(empty( $_POST['nonce'])){
 			return;
 		}
@@ -3266,7 +3266,7 @@ function pn_get_all_unique_meta() {
 
 	}
 
-	function pn_get_data_by_type($include_type='post',$search=null){
+	function push_notification_get_data_by_type($include_type='post',$search=null){
 		$result = array();
 		$posts_per_page = 50;
 		
@@ -3377,8 +3377,8 @@ function pn_get_all_unique_meta() {
 		return $result;
 	}
 
-	add_action( 'wp_ajax_pn_get_select2_data_by_cat', 'pn_get_select2_data_by_cat');
-	function pn_get_select2_data_by_cat(){
+	add_action( 'wp_ajax_pn_get_select2_data_by_cat', 'push_notification_get_select2_data_by_cat');
+	function push_notification_get_select2_data_by_cat(){
 		if(empty( $_POST['nonce'])){
 			return;	
 		}
@@ -3390,13 +3390,13 @@ function pn_get_all_unique_meta() {
 		}
 		$search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 		$type = isset( $_GET['type'] ) ? sanitize_text_field( wp_unslash( $_GET['type'] ) ) : '';
-		$result = pn_get_data_by_type($type,$search);
+		$result = push_notification_get_data_by_type($type,$search);
 		wp_send_json(['results' => $result] );
 		
 		wp_die();
 	}
 
-	function pn_RemoveExtraValue($val) {
+	function push_notification_RemoveExtraValue($val) {
 		$val = str_replace("_", " ", $val);
 		$val = str_replace(".php", "", $val);
 		$val = ucwords($val);
@@ -3404,7 +3404,7 @@ function pn_get_all_unique_meta() {
 	}
 	
 // AJAX callback to update the meta value.
-function pn_update_meta_ajax_callback()
+function push_notification_update_meta_ajax_callback()
 {
 	check_ajax_referer( 'set_send_push_notification_data', 'set_send_push_notification_nonce' );
 
@@ -3429,8 +3429,8 @@ function pn_update_meta_ajax_callback()
 		wp_send_json_error( esc_html__( 'Failed to update meta.', 'push-notification') );
 	}
 }
-add_action( 'wp_ajax_update_pn_meta' , 'pn_update_meta_ajax_callback' );
-	function pn_enqueue_admin_meta_script( $hook ) {
+add_action( 'wp_ajax_update_pn_meta' , 'push_notification_update_meta_ajax_callback' );
+	function push_notification_enqueue_admin_meta_script( $hook ) {
     if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
         return;
     }
@@ -3442,7 +3442,7 @@ add_action( 'wp_ajax_update_pn_meta' , 'pn_update_meta_ajax_callback' );
 		) );
 	}
 }
-add_action( 'admin_enqueue_scripts', 'pn_enqueue_admin_meta_script' );
+add_action( 'admin_enqueue_scripts', 'push_notification_enqueue_admin_meta_script' );
 
 /**
  * Role Based Access - Helper Functions
@@ -3455,7 +3455,7 @@ add_action( 'admin_enqueue_scripts', 'pn_enqueue_admin_meta_script' );
  *
  * @return array Associative array of role_key => role_name
  */
-function pn_get_user_roles(){
+function push_notification_get_user_roles(){
 	global $wp_roles;
 	$allroles = array();
 	if ( isset( $wp_roles ) && is_object( $wp_roles ) ) {
@@ -3472,8 +3472,8 @@ function pn_get_user_roles(){
  * @param string $role The role slug
  * @return string The capability string
  */
-function pn_get_capability_by_role( $role ){
-	$cap = apply_filters( 'pn_default_manage_option_capability', 'manage_options' );
+function push_notification_get_capability_by_role( $role ){
+	$cap = apply_filters( 'push_notification_default_manage_option_capability', 'manage_options' );
 	switch ( $role ) {
 		case 'wpseo_editor':
 			$cap = 'edit_pages';
@@ -3504,7 +3504,7 @@ function pn_get_capability_by_role( $role ){
  *
  * @return string|false The user's allowed role slug, or false if not allowed
  */
-function pn_current_user_allowed(){
+function push_notification_current_user_allowed(){
 	$currentuserrole = array();
 	if ( ( function_exists('is_user_logged_in') && is_user_logged_in() ) && function_exists('wp_get_current_user') ) {
 		$settings       = push_notification_settings();
@@ -3534,9 +3534,9 @@ function pn_current_user_allowed(){
  *
  * @return string The capability string
  */
-function pn_current_user_can(){
-	$allowed = pn_current_user_allowed();
-	$capability = $allowed ? pn_get_capability_by_role( $allowed ) : 'manage_options';
+function push_notification_current_user_can(){
+	$allowed = push_notification_current_user_allowed();
+	$capability = $allowed ? push_notification_get_capability_by_role( $allowed ) : 'manage_options';
 	return $capability;
 }
 
@@ -3547,7 +3547,7 @@ function pn_current_user_can(){
 add_filter(
 	'option_page_capability_push_notification_setting_dashboard_group',
 	function( $capability ) {
-		return pn_current_user_can();
+		return push_notification_current_user_can();
 	}
 );
 
@@ -3556,7 +3556,7 @@ add_filter(
  * - Non-super-admins cannot modify the pn_role_based_access value
  * - Administrator role is always enforced
  */
-function pn_pre_update_settings( $value, $old_value, $option ) {
+function push_notification_pre_update_settings( $value, $old_value, $option ) {
 	if ( function_exists('is_super_admin') && function_exists('wp_get_current_user') ) {
 		if ( !is_super_admin() ) {
 			// Non-super-admins cannot change the role-based access setting
@@ -3576,6 +3576,6 @@ function pn_pre_update_settings( $value, $old_value, $option ) {
 	}
 	return $value;
 }
-add_filter( 'pre_update_option_push_notification_settings', 'pn_pre_update_settings', 10, 3 );
+add_filter( 'pre_update_option_push_notification_settings', 'push_notification_pre_update_settings', 10, 3 );
 
 

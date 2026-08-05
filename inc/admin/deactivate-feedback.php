@@ -1,6 +1,6 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
-$pn_reasons = array(
+$push_notification_reasons = array(
     	1 => '<li><label><input type="radio" name="pn_disable_reason" value="temporary"/>' . esc_html__('It is only temporary', 'push-notification') . '</label></li>',
 		2 => '<li><label><input type="radio" name="pn_disable_reason" value="stopped"/>' . esc_html__('I stopped using Push Notification on my site', 'push-notification') . '</label></li>',
 		3 => '<li><label><input type="radio" name="pn_disable_reason" value="missing"/>' . esc_html__('I miss a feature', 'push-notification') . '</label></li>
@@ -12,7 +12,7 @@ $pn_reasons = array(
 		6 => '<li><label><input type="radio" name="pn_disable_reason" value="other"/>' . esc_html__('Other reason', 'push-notification') . '</label></li>
 		<li><textarea  class="mb-box other" name="pn_disable_text[]" placeholder="' . esc_attr__('Please specify, if possible', 'push-notification') . '"></textarea></li>',
     );
-shuffle( $pn_reasons );
+shuffle( $push_notification_reasons );
 ?>
 
 
@@ -22,11 +22,11 @@ shuffle( $pn_reasons );
 	    <h3><strong><?php echo esc_html__('If you have a moment, please let us know why you are deactivating:', 'push-notification'); ?></strong></h3>
 	    <ul>
                 <?php 
-				if ( ! empty( $pn_reasons ) ) {
+				if ( ! empty( $push_notification_reasons ) ) {
 
-					foreach ( $pn_reasons as $pn_reason_escaped ) {
+					foreach ( $push_notification_reasons as $push_notification_reason_escaped ) {
 						/* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped  */
-						echo $pn_reason_escaped;
+						echo $push_notification_reason_escaped;
 
 					}
 

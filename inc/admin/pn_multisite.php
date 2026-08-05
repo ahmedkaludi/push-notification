@@ -3,7 +3,7 @@
 // Ensure it's executed in WordPress environment
 defined('ABSPATH') || exit;
 
-class pn_multisite extends Push_Notification_Admin {
+class Push_Notification_Multisite extends Push_Notification_Admin {
 
     public function __construct() {
 		parent::__construct(); // Call parent constructor to inherit any initialization logic
@@ -35,7 +35,7 @@ class pn_multisite extends Push_Notification_Admin {
 }
 
 if (is_multisite()) {
-	$push_notification = new pn_multisite();
+	$push_notification = new Push_Notification_Multisite();
     $push_notification->init();
 }
 

@@ -13,7 +13,7 @@ if( !defined( 'ABSPATH' ) )
  *
  * @return bool
  */
-function pn_is_plugins_page() {
+function push_notification_is_plugins_page() {
 
     if ( function_exists( 'get_current_screen' ) ) {
 
@@ -38,9 +38,9 @@ function pn_is_plugins_page() {
  */
 
 
-function pn_add_deactivation_feedback_modal() {
+function push_notification_add_deactivation_feedback_modal() {
 
-    if ( is_admin() && pn_is_plugins_page() ) {
+    if ( is_admin() && push_notification_is_plugins_page() ) {
 
         $current_user = wp_get_current_user();
         if ( ! ( $current_user instanceof WP_User ) ) {
@@ -60,7 +60,7 @@ function pn_add_deactivation_feedback_modal() {
  * 
  * @since 1.4.0
  */
-function pn_send_feedback() {
+function push_notification_send_feedback() {
     
 
     if( isset( $_POST['data'] ) ) {
@@ -112,13 +112,13 @@ function pn_send_feedback() {
     wp_die();
 }
 
-add_action( 'wp_ajax_pn_send_feedback', 'pn_send_feedback' );
+add_action( 'wp_ajax_pn_send_feedback', 'push_notification_send_feedback' );
 
-add_action( 'admin_enqueue_scripts', 'pn_enqueue_makebetter_email_js' );
+add_action( 'admin_enqueue_scripts', 'push_notification_enqueue_makebetter_email_js' );
 
-function pn_enqueue_makebetter_email_js() {
+function push_notification_enqueue_makebetter_email_js() {
  
-    if ( is_admin() && pn_is_plugins_page() ) {
+    if ( is_admin() && push_notification_is_plugins_page() ) {
 
         $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
 
@@ -129,4 +129,4 @@ function pn_enqueue_makebetter_email_js() {
     
 }
 
-add_filter( 'admin_footer', 'pn_add_deactivation_feedback_modal' );
+add_filter( 'admin_footer', 'push_notification_add_deactivation_feedback_modal' );

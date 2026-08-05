@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * 
  * Added in version 1.20
  */
-class PN_Ultimate_Member{
+class push_notification_ultimate_member{
 	public function __construct(){}
 	/**
 	 * Send the push notification when orders will change
@@ -262,6 +262,6 @@ class PN_Ultimate_Member{
 
 }
 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API') && ( !is_admin() || wp_doing_ajax() ) ){
-	$PN_Ultimate_Member = new PN_Ultimate_Member();
-	$PN_Ultimate_Member->init();
+	$push_notification_ultimate_member = new push_notification_ultimate_member();
+	$push_notification_ultimate_member->init();
 }

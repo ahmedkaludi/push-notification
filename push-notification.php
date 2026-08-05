@@ -162,7 +162,7 @@ add_action( 'admin_init', 'push_notification_pro_checker', 0);
 
 
 /* 
-Globlal function to send push notification from anywhere pn_send_push_notificatioin_filter
+Globlal function to send push notification from anywhere push_notification_send_push_notificatioin_filter
  
 $user_id => your meta_user_id required
 $title => Message title required
@@ -174,7 +174,7 @@ $icon_url => icon link url optional
 */
 
 
-function pn_send_push_notificatioin_filter( $user_id = null, $title = "", $message = "", $link_url = "", $icon_url = "", $image_url = "" ) {
+function push_notification_send_push_notificatioin_filter( $user_id = null, $title = "", $message = "", $link_url = "", $icon_url = "", $image_url = "" ) {
 	$response = array('status' => false,'message' => esc_html__('Invalid Request','push-notification'));
 	if ( ! empty( $user_id) && !empty($title) && !empty($message) && !empty($link_url)) {
 
@@ -275,9 +275,9 @@ function push_notification_on_install(){
 
 }
 
-add_action('upgrader_process_complete', 'pn_plugin_upgrade_function', 10, 2);
+add_action('upgrader_process_complete', 'push_notification_plugin_upgrade_function', 10, 2);
 
-function pn_plugin_upgrade_function($upgrader_object, $options) {
+function push_notification_plugin_upgrade_function($upgrader_object, $options) {
     // Check if it's a plugin update
     if ( $options['type'] === 'plugin' && isset( $options['action'] ) && $options['action'] === 'update' ) {
         // Check if the updated plugin is your plugin
@@ -288,9 +288,9 @@ function pn_plugin_upgrade_function($upgrader_object, $options) {
     }
 }
 
-add_action('admin_footer', 'pn_add_footer_text');
+add_action('admin_footer', 'push_notification_add_footer_text');
 
-function pn_add_footer_text()
+function push_notification_add_footer_text()
 {
 	$screen = get_current_screen();
 	if ($screen->id !== 'toplevel_page_push-notification') {
