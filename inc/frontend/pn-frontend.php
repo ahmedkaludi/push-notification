@@ -474,7 +474,7 @@ class Push_Notification_Frontend{
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_remote_nonce') ){
 			return;	
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 			return;	
 		}
 		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated

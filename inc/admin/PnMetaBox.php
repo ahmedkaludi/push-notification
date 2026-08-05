@@ -93,7 +93,7 @@ class PnMetaBox {
 			return $post_id;
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 			return $post_id;
-        if ( current_user_can( 'manage_options' ) ) {
+        if ( current_user_can( push_notification_current_user_can() ) ) {
             $post_meta = array();                    
             $post_meta = $_POST;  // Sanitized below before saving 
 			if(!empty($this->meta_fields)){            

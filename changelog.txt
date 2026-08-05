@@ -1,6 +1,6 @@
 = 1.51 (05 August 2026) = 
 * Added Allow different user role to send notification #194
-* Enhancement : Plugin Check (PCP) code improvements
+* Enhancement : PCP Improvement #195
 
 = 1.50 (22 May 2026) = 
 * Enhancement : Plugin Check (PCP) code improvements

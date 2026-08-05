@@ -1764,7 +1764,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
-			if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! current_user_can( push_notification_current_user_can() ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 
@@ -1791,7 +1791,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
-			if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! current_user_can( push_notification_current_user_can() ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			$authData = push_notification_auth_settings();
@@ -1815,7 +1815,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json($request_response);
 		}else{
-			if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! current_user_can( push_notification_current_user_can() ) ) {
 				wp_send_json($request_response);
 			}
 			$auth_settings = push_notification_auth_settings();
@@ -1847,7 +1847,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
-			if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! current_user_can( push_notification_current_user_can() ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			$auth_settings = push_notification_auth_settings();
@@ -1867,7 +1867,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		else if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
-			if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! current_user_can( push_notification_current_user_can() ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			
@@ -1892,7 +1892,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 			wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 		}else{
 			
-			if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! current_user_can( push_notification_current_user_can() ) ) {
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}
 			
@@ -1992,7 +1992,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 			else if( isset( $_POST['nonce']) &&  !wp_verify_nonce(  sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 				wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 			}else{
-				if ( ! current_user_can( 'manage_options' ) ) {
+				if ( ! current_user_can( push_notification_current_user_can() ) ) {
 					wp_send_json(array("status"=> 503, 'message'=>esc_html__('Request not authorized', 'push-notification')));
 				}
 				global $wpdb;
@@ -2198,7 +2198,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			return;	
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 			return;	
 		}
 		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
@@ -2539,7 +2539,7 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 
 		}
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 
 			wp_send_json( array( "status" => 503, "message" => esc_html__( 'Request not authorized', 'push-notification' ) ) );
 
@@ -2765,7 +2765,7 @@ function push_notification_send_query_message(){
 	if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash(  $_POST['nonce'] ) ), 'pn_notification') ){
 		return;	
 	}
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( push_notification_current_user_can() ) ) {
 		return;	
 	}
         $authData = push_notification_auth_settings();
@@ -2979,7 +2979,7 @@ function push_notification_select2_category_data(){
 		return;
 	}
 
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( push_notification_current_user_can() ) ) {
 		return;
 	}
 	
@@ -3002,7 +3002,7 @@ function push_notification_select2_author_data() {
 		return;
 	}
 
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( push_notification_current_user_can() ) ) {
 		return;
 	}
 
@@ -3129,7 +3129,7 @@ function push_notification_get_all_unique_meta() {
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			return;	
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 			return;	
 		}
 
@@ -3168,7 +3168,7 @@ function push_notification_get_all_unique_meta() {
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			return;
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 			return;
 		}
 		$include_type = "";
@@ -3385,7 +3385,7 @@ function push_notification_get_all_unique_meta() {
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_notification') ){
 			return;	
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 			return;	
 		}
 		$search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
