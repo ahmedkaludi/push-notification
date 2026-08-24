@@ -5,7 +5,7 @@ if ( ! defined('ABSPATH') ) exit;
 class Push_Notification_Newsletter {
         
 	function __construct () {
-		add_filter( 'pushnotification_localize_filter',array($this,'add_localize_footer_data'),10,2);
+		add_filter( 'push_notification_localize_filter',array($this,'add_localize_footer_data'),10,2);
 	}
 	        
     function add_localize_footer_data($object, $object_name){

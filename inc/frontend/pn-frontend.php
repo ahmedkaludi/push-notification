@@ -77,7 +77,7 @@ class Push_Notification_Frontend{
 
 		
 		add_action( 'init', array($this, 'sw_template_query_var') );
-		add_action( 'pn_tokenid_registration_id', array($this, 'peepso_pn_tokenid_registration_id') ,10,5);
+		add_action( 'push_notification_tokenid_registration_id', array($this, 'peepso_pn_tokenid_registration_id') ,10,5);
 		
 
 		add_action( 'peepso_action_group_user_invitation_send', array($this, 'pn_peepso_action_group_user_invitation_send'),10,1 );
@@ -92,7 +92,7 @@ class Push_Notification_Frontend{
 		add_action( 'wp_ajax_nopriv_pn_register_subscribers', array( $this, 'pn_register_subscribers' ) );
 
 		// Buddyboss
-		add_action( 'pn_tokenid_registration_id', array($this, 'buddyboss_pn_tokenid_registration_id') ,10,5);
+		add_action( 'push_notification_tokenid_registration_id', array($this, 'buddyboss_pn_tokenid_registration_id') ,10,5);
 		add_action( 'bp_activity_comment_posted', array( $this,'buddyboss_pn_activity_comment_action'), 10, 2);
 		add_action( 'messages_message_sent', array( $this,'buddyboss_pn_message_notifications'), 10 ,1);
 		add_action( 'bp_invitations_send_invitation_by_id_before_send', array( $this,'buddyboss_pn_invitation_notifications'));
@@ -103,13 +103,13 @@ class Push_Notification_Frontend{
 		// Buddyboss end
 
 		// Gravity Form Start
-		add_action( 'pn_tokenid_registration_id', array($this, 'gravity_pn_tokenid_registration_id') ,10,5);
+		add_action( 'push_notification_tokenid_registration_id', array($this, 'gravity_pn_tokenid_registration_id') ,10,5);
 		add_action( 'gform_after_save_form', array($this, 'send_pn_on_gravity_form_saved'), 10, 2 );
 		//  Gravity Form End
 		
 		
 		// Fluent Community Start
-		add_action( 'pn_tokenid_registration_id', array($this, 'fluent_community_pn_tokenid_registration_id') ,10,5);
+		add_action( 'push_notification_tokenid_registration_id', array($this, 'fluent_community_pn_tokenid_registration_id') ,10,5);
 		add_action( 'fluent_community/feed/created', array($this, 'pn_notify_on_fc_feed_created'), 10, 1 );
 		add_action('fluent_community/comment_added', array($this, 'pn_notify_on_fc_new_comment'), 10, 2);
 		add_action('fluent_community/feed/react_added', array($this, 'pn_notify_on_fc_react_added'), 10, 2);
@@ -129,12 +129,12 @@ class Push_Notification_Frontend{
 
 		//Woocommerce order status Compatibility
 		//Store token ID
-		add_action('pn_tokenid_registration_id', array($this, 'store_user_registered_tokens'), 10, 6);
+		add_action('push_notification_tokenid_registration_id', array($this, 'store_user_registered_tokens'), 10, 6);
 
 		//set transient to detect user login so that we can update the token id
 		add_action('wp_login', array($this, 'after_login_transient'), 10, 2); 
 		 // force token update if login is detected
-		add_filter('pn_token_exists', array($this, 'pn_token_exists'), 10, 1);
+		add_filter('push_notification_token_exists', array($this, 'pn_token_exists'), 10, 1);
 		add_action('wp_enqueue_scripts', array($this,'pn_enqueue_scripts'));
 		add_action('wp_footer', array($this,'pn_enqueue_ajax_pagination_script'));
 		add_shortcode('pn_campaigns', array($this,'pn_campaigns_shortcode'));
@@ -474,7 +474,7 @@ class Push_Notification_Frontend{
 		if( isset( $_POST['nonce']) &&  !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'pn_remote_nonce') ){
 			return;	
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( push_notification_current_user_can() ) ) {
 			return;	
 		}
 		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
@@ -727,7 +727,7 @@ class Push_Notification_Frontend{
 					'notification_popup_show_again'=>$pn_Settings['notification_popup_show_again'],
 					'popup_show_afternseconds'=> $pn_Settings['notification_popup_show_afternseconds'],
 					'popup_show_afternpageview'=> $pn_Settings['notification_popup_show_afternpageview'],
-					'pn_token_exists' =>apply_filters('pn_token_exists',$pn_token_exists),
+					'pn_token_exists' =>apply_filters('push_notification_token_exists',$pn_token_exists),
 					'superpwa_apk_only' => $superpwa_apk_only,
 					'pwaforwp_apk_only' => $pwaforwp_apk_only,
 					'segmentation_type' => $segmentation_type,
@@ -852,7 +852,7 @@ class Push_Notification_Frontend{
 					update_option('pn_website_token_ids', $role_wise_web_token_ids);
 				}
 			}
-			do_action("pn_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address, $url);
+			do_action("push_notification_tokenid_registration_id", $token_id, $response, $user_agent, $os, $ip_address, $url);
 			wp_send_json($response);
 		
 	}
@@ -1508,7 +1508,7 @@ class Push_Notification_Frontend{
 
 	public function pn_standardize_url($url) {
 
-		$parsedUrl = parse_url($url);
+		$parsedUrl = wp_parse_url($url);
 
 		$standardUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
 
