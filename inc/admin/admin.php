@@ -483,6 +483,13 @@ class Push_Notification_Admin{
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_wise_chat_compatibale',								// ID
+				'<label for="pn_wise_chat_compatibale"><b>'.esc_html__('Wise Chat Plugin', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_wise_chat_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
+			);
 
 		add_settings_section('push_notification_user_settings_section',
 					 ' ', 
@@ -1450,6 +1457,17 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_fluent_community_compatibale" name="push_notification_settings[pn_fluent_community_compatibale]"  value="1" '.esc_attr($pn_fluent_community_compatibale).'/>
 					<p class="help">'.esc_html__('It allows you to send notification based on fulent community events. Such as posting in feed, like, comment and more.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+	}
+	public function pn_wise_chat_callback(){		
+		$notification = push_notification_settings();
+		$pn_wise_chat_compatibale = "";
+		if (isset($notification['pn_wise_chat_compatibale']) && $notification['pn_wise_chat_compatibale']) {
+			$pn_wise_chat_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_wise_chat_compatibale" name="push_notification_settings[pn_wise_chat_compatibale]"  value="1" '.esc_attr($pn_wise_chat_compatibale).'/>
+					<p class="help">'.esc_html__('It allows you to send notification when someone posts a message on Wise Chat.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	
