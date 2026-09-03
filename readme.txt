@@ -97,7 +97,7 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 6. Visibility section for controlling where the subscription popup appears.
 
 == Changelog ==
-= 1.52 (05 August 2026) = 
+= 1.52 (03 September 2026) = 
 * Added User need notification when we get someone posts a message on the wise chat page #44
 * Tested: WordPress version upto 7.1
 
