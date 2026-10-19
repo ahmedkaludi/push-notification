@@ -30,6 +30,7 @@ function push_notification_initialize(){
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/newsletter.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/ultimate-member.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/wise-chat.php"; 
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/classified-listing.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/feedback-helper-functions.php";
 	if(is_admin()){
 		if ( is_multisite()) {

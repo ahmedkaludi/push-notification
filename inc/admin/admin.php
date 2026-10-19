@@ -490,6 +490,13 @@ class Push_Notification_Admin{
 				'push_notification_compatibility_settings_section',	// Page slug
 				'push_notification_compatibility_settings_section'	// Settings Section ID
 			);
+			add_settings_field(
+				'pn_classified_listing_compatibale',								// ID
+				'<label for="pn_classified_listing_compatibale"><b>'.esc_html__('Classified Listing Pro (RTCL Chat)', 'push-notification').'</b></label>',// Title
+				array( $this, 'pn_classified_listing_callback'),// Callback
+				'push_notification_compatibility_settings_section',	// Page slug
+				'push_notification_compatibility_settings_section'	// Settings Section ID
+			);
 
 		add_settings_section('push_notification_user_settings_section',
 					 ' ', 
@@ -1468,6 +1475,17 @@ Keep empty or 0 to disable the limit',"push-notification")."</p>";
 			echo'<div class="checkbox_wrapper">
 					<input type="checkbox" class="regular-text checkbox_operator" id="pn_wise_chat_compatibale" name="push_notification_settings[pn_wise_chat_compatibale]"  value="1" '.esc_attr($pn_wise_chat_compatibale).'/>
 					<p class="help">'.esc_html__('It allows you to send notification when someone posts a message on Wise Chat.', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
+	}
+	public function pn_classified_listing_callback(){		
+		$notification = push_notification_settings();
+		$pn_classified_listing_compatibale = "";
+		if (isset($notification['pn_classified_listing_compatibale']) && $notification['pn_classified_listing_compatibale']) {
+			$pn_classified_listing_compatibale = "checked";
+		}
+		echo '<div class="pn-field_wrap">';
+			echo'<div class="checkbox_wrapper">
+					<input type="checkbox" class="regular-text checkbox_operator" id="pn_classified_listing_compatibale" name="push_notification_settings[pn_classified_listing_compatibale]"  value="1" '.esc_attr($pn_classified_listing_compatibale).'/>
+					<p class="help">'.esc_html__('It allows you to send push notifications to the recipient when a chat message is sent in Classified Listing Pro (RTCL Chat).', 'push-notification').'<a href="https://pushnotifications.io/docs/" target="_blank"> '.esc_html__('Learn More', 'push-notification').'</a></p></div></div>';
 	}
 
 	
