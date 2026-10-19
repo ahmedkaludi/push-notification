@@ -112,11 +112,21 @@ class push_notification_classified_listing {
 
 		// 4. Query message database table if details missing
 		if ( $message_id && ( empty( $message_text ) || ! $con_id || ! $source_id ) ) {
-			$msg_table = $wpdb->prefix . 'rtcl_chat_messages';
-			$msg_row   = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$msg_table} WHERE message_id = %d LIMIT 1", $message_id ) );
-			if ( ! $msg_row ) {
-				$msg_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$msg_table} WHERE id = %d LIMIT 1", $message_id ) );
+			$msg_cache_key = 'pn_rtcl_msg_' . $message_id;
+			$msg_row       = wp_cache_get( $msg_cache_key, 'push_notification' );
+
+			if ( false === $msg_row ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Reason: Classified Listing Pro custom table.
+				$msg_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}rtcl_chat_messages WHERE message_id = %d LIMIT 1", $message_id ) );
+				if ( ! $msg_row ) {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Reason: Classified Listing Pro custom table.
+					$msg_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}rtcl_chat_messages WHERE id = %d LIMIT 1", $message_id ) );
+				}
+				if ( $msg_row ) {
+					wp_cache_set( $msg_cache_key, $msg_row, 'push_notification', 300 );
+				}
 			}
+
 			if ( $msg_row ) {
 				if ( ! $con_id && ! empty( $msg_row->con_id ) ) {
 					$con_id = (int) $msg_row->con_id;
@@ -132,11 +142,21 @@ class push_notification_classified_listing {
 
 		// 5. Query conversation table to determine recipient
 		if ( ! $recipient_id && $con_id ) {
-			$con_table = $wpdb->prefix . 'rtcl_conversations';
-			$con_row   = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$con_table} WHERE con_id = %d LIMIT 1", $con_id ) );
-			if ( ! $con_row ) {
-				$con_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$con_table} WHERE id = %d LIMIT 1", $con_id ) );
+			$con_cache_key = 'pn_rtcl_con_' . $con_id;
+			$con_row       = wp_cache_get( $con_cache_key, 'push_notification' );
+
+			if ( false === $con_row ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Reason: Classified Listing Pro custom table.
+				$con_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}rtcl_conversations WHERE con_id = %d LIMIT 1", $con_id ) );
+				if ( ! $con_row ) {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Reason: Classified Listing Pro custom table.
+					$con_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}rtcl_conversations WHERE id = %d LIMIT 1", $con_id ) );
+				}
+				if ( $con_row ) {
+					wp_cache_set( $con_cache_key, $con_row, 'push_notification', 300 );
+				}
 			}
+
 			if ( $con_row ) {
 				if ( ! $listing_id && ! empty( $con_row->listing_id ) ) {
 					$listing_id = (int) $con_row->listing_id;

@@ -263,15 +263,21 @@ class push_notification_ultimate_member{
 	}
 
 	public function pn_um_friend_request( $user_id1, $user_id2 ) {
-		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'New Friend Request', 'push-notification' ), __( '%s sent you a friend request', 'push-notification' ) );
+		/* translators: %s: User display name */
+		$message = __( '%s sent you a friend request', 'push-notification' );
+		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'New Friend Request', 'push-notification' ), $message );
 	}
 
 	public function pn_um_friend_accept( $user_id1, $user_id2 ) {
-		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'Friend Request Accepted', 'push-notification' ), __( '%s accepted your friend request', 'push-notification' ) );
+		/* translators: %s: User display name */
+		$message = __( '%s accepted your friend request', 'push-notification' );
+		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'Friend Request Accepted', 'push-notification' ), $message );
 	}
 
 	public function pn_um_user_follow( $user_id1, $user_id2 ) {
-		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'New Follower', 'push-notification' ), __( '%s started following you', 'push-notification' ) );
+		/* translators: %s: User display name */
+		$message = __( '%s started following you', 'push-notification' );
+		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'New Follower', 'push-notification' ), $message );
 	}
 
 	private function pn_um_send_user_notice( $receiver_id, $sender_id, $title, $msg_template ) {
