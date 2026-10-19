@@ -4,7 +4,7 @@ Plugin Name: Push Notifications for WP - Self Hosted Web Push Notifications
 Plugin URI: https://wordpress.org/plugins/push-notification/
 Description: Push Notifications allow admins to automatically notify their audience whenever new content or custom notices are published on the site.
 Author: Magazine3
-Version: 1.51
+Version: 1.52
 Author URI: http://pushnotifications.io/
 Text Domain: push-notification
 Domain Path: /languages
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define('PUSH_NOTIFICATION_PLUGIN_FILE',  __FILE__ );
 define('PUSH_NOTIFICATION_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('PUSH_NOTIFICATION_PLUGIN_URL', plugin_dir_url( __FILE__ ));
-define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.51');
+define('PUSH_NOTIFICATION_PLUGIN_VERSION', '1.52');
 define('PUSH_NOTIFICATION_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 /**
@@ -29,6 +29,7 @@ function push_notification_initialize(){
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/PnMetaBox.php";
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/newsletter.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/ultimate-member.php"; 
+	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/wise-chat.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/feedback-helper-functions.php";
 	if(is_admin()){
 		if ( is_multisite()) {

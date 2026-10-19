@@ -77,6 +77,7 @@ class Push_Notification_Frontend{
 
 		
 		add_action( 'init', array($this, 'sw_template_query_var') );
+		add_action( 'push_notification_tokenid_registration_id', array($this, 'user_pn_tokenid_registration_id') ,10,5);
 		add_action( 'push_notification_tokenid_registration_id', array($this, 'peepso_pn_tokenid_registration_id') ,10,5);
 		
 
@@ -84,6 +85,7 @@ class Push_Notification_Frontend{
 
 		add_action( 'peepso_friends_requests_after_add', array($this, 'pn_peepso_friends_requests_after_add'),10,2);
 		add_action( 'peepso_friends_requests_after_accept', array($this, 'pn_peepso_friends_requests_after_accept'),10,2);
+		add_action( 'peepso_action_user_follow', array($this, 'pn_peepso_user_follow'), 10, 2 );
 
 		add_action( 'peepso_activity_after_add_post', array($this, 'pn_peepso_activity_after_add_post'),10,2);
 		add_action( 'peepso_after_add_comment', array($this, 'pn_peepso_after_add_comment'),10,4);
@@ -98,7 +100,9 @@ class Push_Notification_Frontend{
 		add_action( 'bp_invitations_send_invitation_by_id_before_send', array( $this,'buddyboss_pn_invitation_notifications'));
 		add_filter( 'friends_friendship_requested', array( $this,'buddyboss_pn_friend_request'), 10, 4);
 		add_filter( 'friends_friendship_accepted', array( $this,'buddyboss_pn_friend_request_accepted'), 10, 4);
-		add_action('bp_activity_after_save', array($this, 'buddyboss_pn_group_activity_notification'), 10, 1);
+		add_action( 'bp_activity_after_save', array($this, 'buddyboss_pn_group_activity_notification'), 10, 1);
+		add_action( 'bp_follow_start_following', array($this, 'buddyboss_pn_user_followed'), 10, 1 );
+		add_action( 'bp_follow_user_followed', array($this, 'buddyboss_pn_user_followed_args'), 10, 2 );
 
 		// Buddyboss end
 
@@ -1961,10 +1965,13 @@ class Push_Notification_Frontend{
 	}
 	public function buddyboss_pn_friend_request($friendship_id, $friendship_initiator_user_id, $friendship_friend_user_id, $friendship){
 		$settings = push_notification_settings();
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
 			
 			$receiver_id = 	$friendship_friend_user_id;
 			$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
+			if (empty($notification)) {
+				$notification = get_user_meta($receiver_id, 'pnwoo_notification_token', true);
+			}
 
 			if(! empty( $notification ) ) {
 
@@ -1979,10 +1986,13 @@ class Push_Notification_Frontend{
 	}
 	public function buddyboss_pn_friend_request_accepted($friendship_id, $friendship_initiator_user_id, $friendship_friend_user_id, $friendship){
 		$settings = push_notification_settings();
-		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && is_plugin_active('buddyboss-platform/bp-loader.php') ) {
+		if (isset($settings['pn_buddyboss_compatibale']) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
 			
 			$receiver_id = 	$friendship_initiator_user_id;
 			$notification = get_user_meta($receiver_id, 'buddyboss_pn_notification_token_id', true);
+			if (empty($notification)) {
+				$notification = get_user_meta($receiver_id, 'pnwoo_notification_token', true);
+			}
 
 			if(! empty( $notification ) ) {
 
@@ -1992,6 +2002,74 @@ class Push_Notification_Frontend{
 				$message	 	= $sender_info->display_name .esc_html__(' accepted friend request', 'push-notification' );
 
 				$this->pn_buddyboss_send_notification($notification,$sender_info,$title,$message);
+			}
+		}
+	}
+	public function buddyboss_pn_user_followed( $follow ) {
+		$settings = push_notification_settings();
+		if ( isset( $settings['pn_buddyboss_compatibale'] ) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
+			$leader_id = 0;
+			$follower_id = 0;
+			if ( is_object( $follow ) ) {
+				$leader_id = isset( $follow->leader_id ) ? $follow->leader_id : 0;
+				$follower_id = isset( $follow->follower_id ) ? $follow->follower_id : 0;
+			}
+			if ( $leader_id && $follower_id ) {
+				$this->buddyboss_pn_user_followed_args( $leader_id, $follower_id );
+			}
+		}
+	}
+	public function buddyboss_pn_user_followed_args( $leader_id, $follower_id ) {
+		$settings = push_notification_settings();
+		if ( isset( $settings['pn_buddyboss_compatibale'] ) && $settings['pn_buddyboss_compatibale'] && ( is_plugin_active('buddyboss-platform/bp-loader.php') || is_plugin_active('buddypress/bp-loader.php') ) ) {
+			$receiver_id = $leader_id;
+			$notification = get_user_meta( $receiver_id, 'buddyboss_pn_notification_token_id', true );
+			if ( empty( $notification ) ) {
+				$notification = get_user_meta( $receiver_id, 'pnwoo_notification_token', true );
+			}
+			if ( ! empty( $notification ) ) {
+				$sender_info = get_userdata( $follower_id );
+				if ( $sender_info ) {
+					$title = esc_html__( 'New Follower', 'push-notification' );
+					$message = $sender_info->display_name . esc_html__( ' started following you', 'push-notification' );
+					$this->pn_buddyboss_send_notification( $notification, $sender_info, $title, $message );
+				}
+			}
+		}
+	}
+	public function pn_peepso_user_follow( $user_id, $follower_id ) {
+		$settings = push_notification_settings();
+		if ( isset( $settings['pn_peepso_compatibale'] ) && $settings['pn_peepso_compatibale'] && is_plugin_active( 'peepso/peepso.php' ) ) {
+			$receiver_id = $user_id;
+			$notification = get_user_meta( $receiver_id, 'peepso_pn_notification_token_id', true );
+			if ( empty( $notification ) ) {
+				$notification = get_user_meta( $receiver_id, 'pnwoo_notification_token', true );
+			}
+			if ( ! empty( $notification ) ) {
+				$sender_info = get_userdata( $follower_id );
+				if ( $sender_info ) {
+					$title = esc_html__( 'New Follower', 'push-notification' );
+					$message = $sender_info->display_name . esc_html__( ' started following you', 'push-notification' );
+					$this->pn_peepso_send_notification( $notification, $sender_info, $title, $message );
+				}
+			}
+		}
+	}
+	public function user_pn_tokenid_registration_id( $token_id, $response, $user_agent, $os, $ip_address ) {
+		if ( is_user_logged_in() ) {
+			$user = wp_get_current_user();
+			if ( isset( $user->ID ) && isset( $response['data']['id'] ) && ! empty( $response['data']['id'] ) ) {
+				$userid = $user->ID;
+				$device_tokens = get_user_meta( $userid, 'pnwoo_notification_token', true );
+				if ( ! is_array( $device_tokens ) ) {
+					$device_tokens = array();
+				}
+				$new_token = $response['data']['id'];
+				if ( ! in_array( $new_token, $device_tokens, true ) ) {
+					$device_tokens[] = $new_token;
+				}
+				$device_tokens = array_slice( array_unique( array_filter( $device_tokens ) ), -5 );
+				update_user_meta( $userid, 'pnwoo_notification_token', $device_tokens );
 			}
 		}
 	}

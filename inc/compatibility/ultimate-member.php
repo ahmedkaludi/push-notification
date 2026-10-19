@@ -22,6 +22,9 @@ class push_notification_ultimate_member{
 		add_action( 'um_after_new_message',array($this, 'pn_um_notification_messaging'), 50, 4 );  // send push for new personal message
 		add_action('um_activity_after_wall_post_published',array($this, 'pn_um_notification_activity_post_published'), 90, 3 ); // send push for new wall post
 		add_action( 'um_groups_after_wall_post_published',array($this, 'pn_um_groups_notify_new_post'), 50, 3 ); // send push for group post
+		add_action( 'um_friends_after_user_friend_request', array( $this, 'pn_um_friend_request' ), 10, 2 );
+		add_action( 'um_friends_after_user_friend_accept', array( $this, 'pn_um_friend_accept' ), 10, 2 );
+		add_action( 'um_followers_after_user_follow', array( $this, 'pn_um_user_follow' ), 10, 2 );
 	}
 
 	/**
@@ -259,6 +262,53 @@ class push_notification_ultimate_member{
 		}
 	}
 
+	public function pn_um_friend_request( $user_id1, $user_id2 ) {
+		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'New Friend Request', 'push-notification' ), __( '%s sent you a friend request', 'push-notification' ) );
+	}
+
+	public function pn_um_friend_accept( $user_id1, $user_id2 ) {
+		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'Friend Request Accepted', 'push-notification' ), __( '%s accepted your friend request', 'push-notification' ) );
+	}
+
+	public function pn_um_user_follow( $user_id1, $user_id2 ) {
+		$this->pn_um_send_user_notice( $user_id1, $user_id2, __( 'New Follower', 'push-notification' ), __( '%s started following you', 'push-notification' ) );
+	}
+
+	private function pn_um_send_user_notice( $receiver_id, $sender_id, $title, $msg_template ) {
+		$auth_settings = push_notification_auth_settings();
+		if ( ! isset( $auth_settings['user_token'] ) || empty( $auth_settings['user_token'] ) ) {
+			return;
+		}
+		$token_ids = get_user_meta( $receiver_id, 'pnwoo_notification_token', true );
+		if ( empty( $token_ids ) ) {
+			$token_ids = get_user_meta( $receiver_id, 'buddyboss_pn_notification_token_id', true );
+		}
+		if ( empty( $token_ids ) ) {
+			return;
+		}
+		$sender_info = get_userdata( $sender_id );
+		if ( ! $sender_info ) {
+			return;
+		}
+
+		$message = sprintf( $msg_template, $sender_info->display_name );
+		$icon_url = get_avatar_url( $sender_info->user_email, array( 'size' => 96 ) );
+		$link_url = is_multisite() ? get_site_url() : home_url();
+
+		$verifyUrl = PN_Server_Request::$notificationServerUrl . 'campaign/single';
+		$data = array(
+			"user_token"        => $auth_settings['user_token'],
+			"audience_token_id" => $token_ids,
+			"title"             => $title,
+			"message"           => $message,
+			"link_url"          => $link_url,
+			"icon_url"          => $icon_url,
+			"image_url"         => null,
+			"website"           => $link_url,
+		);
+		$postdata = array( 'body' => $data );
+		wp_remote_post( $verifyUrl, $postdata );
+	}
 
 }
 if(class_exists('um_ext\um_notifications\core\Notifications_Main_API') && ( !is_admin() || wp_doing_ajax() ) ){
