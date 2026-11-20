@@ -1,3 +1,7 @@
+= 1.53 (19 October 2026) = 
+* Added RTCL Chat Messages with Push Notifications for Specific Users #198
+* Code Improvement #200
+
 = 1.52 (03 September 2026) = 
 * Added User need notification when we get someone posts a message on the wise chat page #44
 * Tested: WordPress version upto 7.1

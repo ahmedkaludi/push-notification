@@ -3,7 +3,7 @@ Contributors: magazine3
 Requires at least: 5.0  
 Tested up to: 7.1
 Requires PHP: 5.6.20 
-Stable tag: 1.52
+Stable tag: 1.53
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
@@ -97,6 +97,10 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 6. Visibility section for controlling where the subscription popup appears.
 
 == Changelog ==
+= 1.53 (19 October 2026) = 
+* Added RTCL Chat Messages with Push Notifications for Specific Users #198
+* Code Improvement #200
+
 = 1.52 (03 September 2026) = 
 * Added User need notification when we get someone posts a message on the wise chat page #44
 * Tested: WordPress version upto 7.1
@@ -174,10 +178,6 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 * Added: Compatibility with Community by PeepSo plugin #138  
 * Added: Compatibility with Polylang #135  
 * Added: Feature to send notification from one place to all network sites on multisite #134  
-* Added: Integration tab to help people integrate with other platforms beyond WordPress #30  
-
-= 1.38 (17 September 2024) =
-* Enhancement: Minor improvements #129  
-* Added: Feature to resend/reuse campaigns already created #127
+* Added: Integration tab to help people integrate with other platforms beyond WordPress #30 
 
 Full changelog available at: [changelog.txt](https://plugins.svn.wordpress.org/push-notification/trunk/changelog.txt)
