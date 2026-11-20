@@ -74,8 +74,17 @@ function push_notification_send_feedback() {
         }
 
         $text = '';
-        if( isset( $form['pn_disable_text'] ) ) {
+        if( isset( $form['pn_disable_text'] ) && is_array( $form['pn_disable_text'] ) ) {
             $text = implode( "\n\r", $form['pn_disable_text'] );
+        }
+
+        $reason = isset( $form['pn_disable_reason'] ) ? $form['pn_disable_reason'] : '';
+        $send_reasons = array( 'technical', 'other', 'missing' );
+        $words = preg_split( '/\s+/', trim( $text ), -1, PREG_SPLIT_NO_EMPTY );
+        $word_count = is_array( $words ) ? count( $words ) : 0;
+
+        if ( ! in_array( $reason, $send_reasons, true ) || $word_count < 3 ) {
+            wp_die();
         }
 
         $headers = array();
@@ -86,7 +95,7 @@ function push_notification_send_feedback() {
             $headers[] = "Reply-To: $from";
         }
 
-        $subject = isset( $form['pn_disable_reason'] ) ? $form['pn_disable_reason'] : '(no reason given)';
+        $subject = $reason;
 
         $subject = $subject.' - Push Notifications';
 
@@ -120,9 +129,10 @@ function push_notification_enqueue_makebetter_email_js() {
  
     if ( is_admin() && push_notification_is_plugins_page() ) {
 
-        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';	
+        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+        $script_min = ( '' === $min || file_exists( PUSH_NOTIFICATION_PLUGIN_DIR . 'assets/feedback-admin.min.js' ) ) ? $min : '';
 
-        wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$min}.js", array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
+        wp_enqueue_script( 'pn-make-better-js', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$script_min}.js", array( 'jquery' ), PUSH_NOTIFICATION_PLUGIN_VERSION, true);
         wp_enqueue_style( 'pn-make-better-css', PUSH_NOTIFICATION_PLUGIN_URL . "assets/feedback-admin{$min}.css", false , PUSH_NOTIFICATION_PLUGIN_VERSION);
 
     }

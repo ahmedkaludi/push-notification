@@ -59,6 +59,28 @@ function pushnotification_load_messaging(){
 	  }
 	  return return_var;
   }
+
+		function pnIsInstalledPwa() {
+			var isDisplayModePWA = window.matchMedia('(display-mode: standalone)').matches ||
+				window.matchMedia('(display-mode: fullscreen)').matches ||
+				window.matchMedia('(display-mode: minimal-ui)').matches;
+			var reffer = document.referrer;
+			var isAndroidApp = reffer && reffer.indexOf('android-app://') !== -1;
+			var isAndroid = /Android/.test(navigator.userAgent);
+			var isAndroidPWA = isAndroid && (isDisplayModePWA || isAndroidApp);
+			var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+			var isIOSApp = isIOS && (navigator.userAgent.indexOf('PWABuilder-iOS') !== -1 || (window.webkit && window.webkit.messageHandlers));
+			var isIOSPWA = isIOS && (window.navigator.standalone === true || isIOSApp);
+			return isDisplayModePWA || isIOSPWA || isAndroidPWA;
+		}
+		if (pnScriptSetting.pn_show_pwa_only == '1') {
+			var pnBell = document.querySelector('.pn-bell-container');
+			if (!pnIsInstalledPwa()) {
+				if (pnBell) { pnBell.style.display = 'none'; }
+				return false;
+			}
+			if (pnBell) { pnBell.style.display = 'flex'; }
+		}
 	  
 		// Auto-segmentation popup logic: when enabled, we show the popup
 		// for posts whose authors/categories are not yet subscribed in localStorage,
