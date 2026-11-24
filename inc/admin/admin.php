@@ -244,6 +244,11 @@ class Push_Notification_Admin{
 		}
 		?>
 		<div class="wrap push_notification-settings-wrap">
+			<?php
+			if ( function_exists( 'pn_render_bfcm_banner' ) ) {
+				pn_render_bfcm_banner();
+			}
+			?>
 			<h1 class="page-title"><?php echo esc_html__('Push Notifications Options', 'push-notification'); ?></h1>
 			<div class="push-notification-main-wrapper">
 				<h2 class="nav-tab-wrapper push-notification-tabs">

@@ -97,9 +97,10 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 6. Visibility section for controlling where the subscription popup appears.
 
 == Changelog ==
-= 1.54 (20 November 2026) = 
+= 1.54 (24 November 2026) = 
 * Added :Option to show notification for PWAforWP users only #202
 * Enhancement :Feedback form improvement #203
+* Added: Promotion Banner BFCM
 
 = 1.53 (19 October 2026) = 
 * Added RTCL Chat Messages with Push Notifications for Specific Users #198

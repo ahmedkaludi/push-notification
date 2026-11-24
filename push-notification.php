@@ -33,6 +33,7 @@ function push_notification_initialize(){
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/compatibility/classified-listing.php"; 
 	require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/feedback-helper-functions.php";
 	if(is_admin()){
+		require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/bfcm-banner.php";
 		if ( is_multisite()) {
 			require_once PUSH_NOTIFICATION_PLUGIN_DIR."inc/admin/pn_multisite.php";
 		}
