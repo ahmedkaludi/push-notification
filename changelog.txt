@@ -1,3 +1,8 @@
+= 1.54 (24 November 2026) = 
+* Added :Option to show notification for PWAforWP users only #202
+* Enhancement :Feedback form improvement #203
+* Added: Promotion Banner BFCM
+
 = 1.53 (19 October 2026) = 
 * Added RTCL Chat Messages with Push Notifications for Specific Users #198
 * Code Improvement #200

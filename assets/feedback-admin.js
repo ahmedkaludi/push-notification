@@ -39,6 +39,22 @@ jQuery(document).ready(function ($) {
 
         $('#pn-reloaded-feedback-overlay').hide();
         if ('pn-reloaded-feedback-submit' === this.id) {
+            var reason = $('#pn-reloaded-feedback-content input[name="pn_disable_reason"]:checked').val();
+            var send_reasons = ['technical', 'other', 'missing'];
+            var feedback_text = '';
+            if (reason && send_reasons.indexOf(reason) !== -1) {
+                feedback_text = $.trim($('#pn-reloaded-feedback-content .' + reason).val() || '');
+            }
+            var words = feedback_text ? feedback_text.split(/\s+/).filter(function (word) {
+                return word.length > 0;
+            }) : [];
+
+            if (send_reasons.indexOf(reason) === -1 || words.length < 3) {
+                $('#pn-reloaded-feedback-overlay').remove();
+                window.location.href = pn_deactivate_link_url;
+                return;
+            }
+
             // Send form data
             $.ajax({
                 type: 'POST',

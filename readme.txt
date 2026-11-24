@@ -3,7 +3,7 @@ Contributors: magazine3
 Requires at least: 5.0  
 Tested up to: 7.1
 Requires PHP: 5.6.20 
-Stable tag: 1.53
+Stable tag: 1.54
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Tags: Push, Web Push, Push Notification, Mobile Notification, Desktop Notifications  
@@ -97,6 +97,11 @@ We’re actively improving Push Notifications for WP and prioritize user feedbac
 6. Visibility section for controlling where the subscription popup appears.
 
 == Changelog ==
+= 1.54 (24 November 2026) = 
+* Added :Option to show notification for PWAforWP users only #202
+* Enhancement :Feedback form improvement #203
+* Added: Promotion Banner BFCM
+
 = 1.53 (19 October 2026) = 
 * Added RTCL Chat Messages with Push Notifications for Specific Users #198
 * Code Improvement #200

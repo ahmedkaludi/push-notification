@@ -687,6 +687,7 @@ class Push_Notification_Frontend{
 			}
 		}
 		$superpwa_apk_only = $pwaforwp_apk_only = false;
+		$pn_show_pwa_only = false;
 		if(isset($pn_Settings['pn_key_showon_apk_only']) && $pn_Settings['pn_key_showon_apk_only'] == 1){
 			
 			if(function_exists('superpwa_addons_status')){
@@ -697,6 +698,12 @@ class Push_Notification_Frontend{
 				if( $pwaSettings['notification_feature']==1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
 					$pwaforwp_apk_only = true;
 				}
+			}
+		}
+		if(function_exists('pwaforwp_defaultSettings')){
+			$pwaSettings = pwaforwp_defaultSettings();
+			if( isset($pwaSettings['push_show_only_pwa']) && $pwaSettings['push_show_only_pwa'] == 1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+				$pn_show_pwa_only = true;
 			}
 		}
         // Auto-segmentation data
@@ -734,6 +741,7 @@ class Push_Notification_Frontend{
 					'pn_token_exists' =>apply_filters('push_notification_token_exists',$pn_token_exists),
 					'superpwa_apk_only' => $superpwa_apk_only,
 					'pwaforwp_apk_only' => $pwaforwp_apk_only,
+					'pn_show_pwa_only' => $pn_show_pwa_only,
 					'segmentation_type' => $segmentation_type,
 					'auto_segment_enabled' => $auto_segment_enabled,
 					'auto_categories' => $auto_categories,
@@ -1086,6 +1094,14 @@ class Push_Notification_Frontend{
 		}
 		//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		if ( isset($settings['pn_revoke_subscription_popup']) && $settings['pn_revoke_subscription_popup'] && isset($_COOKIE['pn_notification_block']) && $_COOKIE['pn_notification_block'] && !isset($_COOKIE['notification_permission'])) {
+			$pn_show_pwa_only = false;
+			if(function_exists('pwaforwp_defaultSettings')){
+				$pwaSettings = pwaforwp_defaultSettings();
+				if( isset($pwaSettings['push_show_only_pwa']) && $pwaSettings['push_show_only_pwa'] == 1 && isset($pwaSettings['notification_options']) && $pwaSettings['notification_options']=='pushnotifications_io'){
+					$pn_show_pwa_only = true;
+				}
+			}
+			$pn_bell_style = $pn_show_pwa_only ? ' style="display:none;"' : '';
 			?>
 			<style>
 				.pn-bell-container {
@@ -1121,7 +1137,7 @@ class Push_Notification_Frontend{
 					color: #333;
 				}
 			</style>
-			<div class="pn-bell-container">
+			<div class="pn-bell-container"<?php echo $pn_bell_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static style attribute ?>>
 				<button class="pn-bell-button" title="Enable Popup">
 					<span class="dashicons dashicons-bell"></span>
 				</button>
